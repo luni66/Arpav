@@ -14,6 +14,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,20 +78,20 @@ public class XmlActivity extends AppCompatActivity {
         return networkInfo != null && networkInfo.isConnected();
     }
 
-    // Given a string representation of a URL, sets up a connection and gets
+/*    // Given a string representation of a URL, sets up a connection and gets
     // an input stream.
     private InputStream downloadUrl(String urlString) throws IOException {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(10000 /* milliseconds */);
-        conn.setConnectTimeout(15000 /* milliseconds */);
+        conn.setReadTimeout(10000 *//* milliseconds *//*);
+        conn.setConnectTimeout(15000 *//* milliseconds *//*);
         conn.setRequestMethod("GET");
         conn.setDoInput(true);
         // Starts the query
         conn.connect();
         InputStream stream = conn.getInputStream();
         return stream;
-    }
+    }*/
 
     @DebugLog
     private void save(BufferedInputStream stream) {
@@ -116,7 +118,7 @@ public class XmlActivity extends AppCompatActivity {
 // the web page content as a InputStream, which it returns as
 // a string.
     @DebugLog
-    private BufferedInputStream load(String myurl) {
+    private BufferedInputStream download(String myurl) {
         InputStream is = null;
         BufferedInputStream bis = null;
 
@@ -191,7 +193,7 @@ public class XmlActivity extends AppCompatActivity {
                             if (bollettinoId.equalsIgnoreCase(Previsione.Bollettino.METEO_VENETO)) {
                                 insideMeteoVeneto = true;
                                 meteoVeneto = previsione.newMeteoVeneto();
-                                Timber.d("creato bollettino meteo veneto");
+//                                Timber.d("creato bollettino meteo veneto");
 
                                 meteoVeneto.setBollettinoId(bollettinoId);
 
@@ -204,7 +206,7 @@ public class XmlActivity extends AppCompatActivity {
                             giorno = meteoVeneto.newGiorno();
                             if (giorno != null) {
                                 giorno.setData(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DATA));
-                                Timber.d("new Giorno %s", giorno.getData());
+//                                Timber.d("new Giorno %s", giorno.getData());
                             }
                         } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.Giorno.TAG_IMMAGINE) && insideMeteoVeneto && giorno != null && insideGiorno) {
                             giorno.setSorgente(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_SORGENTE));
@@ -217,14 +219,14 @@ public class XmlActivity extends AppCompatActivity {
                         if (insideMeteoVeneto) {
                             if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_EVOLUZIONE_GENERALE)) {
                                 meteoVeneto.setEvoluzioneGenerale(parser.getText());
-                                Timber.d("evoluzione generale %s", meteoVeneto.getEvoluzioneGenerale());
+//                                Timber.d("evoluzione generale %s", meteoVeneto.getEvoluzioneGenerale());
                             } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_AVVISO)) {
                                 meteoVeneto.setAvviso(parser.getText());
                             } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_FENOMENI_PARTICOLARI)) {
                                 meteoVeneto.setFenomeniParticolari(parser.getText());
                             } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.Giorno.TAG_TESTO)) {
                                 giorno.setTesto(parser.getText());
-                                Timber.d("testo giorno %s %s", giorno.getData(), giorno.getTesto());
+//                                Timber.d("testo giorno %s %s", giorno.getData(), giorno.getTesto());
                             }
                         }
                         break;
@@ -234,7 +236,7 @@ public class XmlActivity extends AppCompatActivity {
                         if (tagName.equalsIgnoreCase(Previsione.TAG_BOLLETTINO)) {
                             bollettinoId = null;
                             insideMeteoVeneto = false;
-                            Timber.d("fine bollettino");
+//                            Timber.d("fine bollettino");
                         } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_GIORNO)) {
                             insideGiorno = false;
                         }
@@ -262,6 +264,29 @@ public class XmlActivity extends AppCompatActivity {
 
     }
 
+    @DebugLog
+    private BufferedInputStream load(String myFile) {
+        BufferedInputStream bis = null;
+        try {
+            FileInputStream fis = openFileInput(myFile);
+            bis = new BufferedInputStream(fis);
+        } catch (FileNotFoundException e) {
+            Timber.e("error loading file %s" + e.toString());
+        } finally {
+            return bis;
+        }
+    }
+
+    private boolean checkFile(String myFile) {
+        String[] fileList = fileList();
+        for (String s : fileList) {
+            if (s.equals(myFile)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Implementation of AsyncTask used to download XML feed from stackoverflow.com.
     private class DownloadXmlTask extends AsyncTask<String, Void, Void> {
 
@@ -270,19 +295,27 @@ public class XmlActivity extends AppCompatActivity {
             BufferedInputStream bis = null;
 
             try {
-                bis = load(urls[0]);
-                if (bis != null) {
-                    if (bis.markSupported()) {
-                        bis.mark(150000);
-                    }
+
+                if (checkFile(PREVISIONE_IT)) {
+                    Timber.d("loading from the internal storage");
+                    bis = load(PREVISIONE_IT);
                     Previsione previsione = parse(bis);
-                    if (previsione != null) {
-                        try {
-                            bis.reset();
-                        } catch (IOException e) {
-                            bis = load(urls[0]);
-                        } finally {
-                            save(bis);
+                } else {
+                    Timber.d("loading from the net");
+                    bis = download(urls[0]);
+                    if (bis != null) {
+                        if (bis.markSupported()) {
+                            bis.mark(150000);
+                        }
+                        Previsione previsione = parse(bis);
+                        if (previsione != null) {
+                            try {
+                                bis.reset();
+                            } catch (IOException e) {
+                                bis = download(urls[0]);
+                            } finally {
+                                save(bis);
+                            }
                         }
                     }
                 }
@@ -291,7 +324,7 @@ public class XmlActivity extends AppCompatActivity {
                     try {
                         bis.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Timber.e("error closing buffer %s" + e.toString());
                     }
                 }
                 return null;

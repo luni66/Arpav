@@ -1,5 +1,14 @@
 package eu.lucazanini.arpav.xml;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
+
 public class Previsione {
 
     public final static String TAG_DATA_EMISSIONE = "data_emissione";
@@ -10,6 +19,7 @@ public class Previsione {
 
     private String dataEmissione, dataAggiornamento;
     private Bollettino meteoVeneto;
+    private Calendar releaseDate, updateDate;
 
     public String getDataAggiornamento() {
         return dataAggiornamento;
@@ -17,14 +27,47 @@ public class Previsione {
 
     public void setDataAggiornamento(String dataAggiornamento) {
         this.dataAggiornamento = dataAggiornamento;
+
+        try {
+            updateDate = null;
+            DateFormat df = new SimpleDateFormat("dd/MM 'alle' hh.mm");
+
+            Date date = df.parse(dataAggiornamento);
+
+            updateDate = Calendar.getInstance();
+            updateDate.setTime(date);
+            updateDate.set(Calendar.YEAR, releaseDate.get(Calendar.YEAR));
+            if (updateDate.before(releaseDate)) {
+                updateDate.set(Calendar.YEAR, releaseDate.get(Calendar.YEAR) + 1);
+            }
+            Timber.d("update date %s", updateDate.getTime());
+        } catch (ParseException e) {
+            Timber.e(e.toString());
+            updateDate = null;
+        }
     }
 
     public String getDataEmissione() {
         return dataEmissione;
     }
 
+    @DebugLog
     public void setDataEmissione(String dataEmissione) {
         this.dataEmissione = dataEmissione;
+
+        try {
+            releaseDate = null;
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy 'alle' hh:mm");
+
+            Date date = df.parse(dataEmissione);
+
+            releaseDate = Calendar.getInstance();
+            releaseDate.setTime(date);
+            Timber.d("release date %s", releaseDate.getTime());
+        } catch (ParseException e) {
+            Timber.e(e.toString());
+            releaseDate = null;
+        }
     }
 
     public void setMeteoVeneto() {
@@ -34,6 +77,14 @@ public class Previsione {
     public Bollettino newMeteoVeneto() {
         meteoVeneto = new Bollettino();
         return meteoVeneto;
+    }
+
+    public Calendar getReleaseDate() {
+        return releaseDate;
+    }
+
+    public Calendar getUpdateDate() {
+        return updateDate;
     }
 
     public Bollettino getMeteoVeneto() {
