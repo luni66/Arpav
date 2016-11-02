@@ -1,15 +1,26 @@
 package eu.lucazanini.arpav.xml;
 
+import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 public class Previsione {
+
+    public final static OrarioAggiornamento[] AGGIORNAMENTI = new OrarioAggiornamento[3];
 
     public final static String TAG_DATA_EMISSIONE = "data_emissione";
     public final static String TAG_DATA_AGGIORNAMENTO = "data_aggiornamento";
@@ -21,49 +32,201 @@ public class Previsione {
     private Bollettino meteoVeneto;
     private Calendar releaseDate, updateDate;
 
+    public Previsione() {
+        AGGIORNAMENTI[0] = new OrarioAggiornamento("13:00");
+        AGGIORNAMENTI[1] = new OrarioAggiornamento("16:00");
+        AGGIORNAMENTI[2] = new OrarioAggiornamento("09:00");
+    }
+
+    @DebugLog
+    public void parse(BufferedInputStream bis) {
+
+        final String ns = null;
+//        Previsione previsione = null;
+        String tagName = null;
+        Previsione.Bollettino meteoVeneto = null;
+        Previsione.Bollettino.Giorno giorno = null;
+        boolean insideMeteoVeneto = false;
+        boolean insideGiorno = false;
+        String bollettinoId = null;
+
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(bis, null);
+
+            // get event type
+            int eventType = parser.getEventType();
+            // process tag while not reaching the end of document
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    // at start of document: START_DOCUMENT
+                    case XmlPullParser.START_DOCUMENT:
+//                        previsione = new Previsione();
+                        break;
+
+                    // at start of a tag: START_TAG
+                    case XmlPullParser.START_TAG:
+                        tagName = parser.getName();
+
+                        if (tagName.equalsIgnoreCase(Previsione.TAG_DATA_EMISSIONE)) {
+                            setDataEmissione(parser.getAttributeValue(null, Previsione.ATTR_DATA));
+                        } else if (tagName.equalsIgnoreCase(Previsione.TAG_DATA_AGGIORNAMENTO)) {
+                            setDataAggiornamento(parser.getAttributeValue(null, Previsione.ATTR_DATA));
+                        } else if (tagName.equalsIgnoreCase(Previsione.TAG_BOLLETTINO)) {
+                            bollettinoId = parser.getAttributeValue(null, Previsione.Bollettino.ATTR_BOLLETTINO_ID);
+                            if (bollettinoId.equalsIgnoreCase(Previsione.Bollettino.METEO_VENETO)) {
+                                insideMeteoVeneto = true;
+                                meteoVeneto = newMeteoVeneto();
+
+                                meteoVeneto.setBollettinoId(bollettinoId);
+
+                                meteoVeneto.setNome(parser.getAttributeValue(null, Previsione.Bollettino.ATTR_NOME));
+                                meteoVeneto.setTitolo(parser.getAttributeValue(null, Previsione.Bollettino.ATTR_TITOLO));
+
+                            }
+                        } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_GIORNO) && insideMeteoVeneto) {
+                            insideGiorno = true;
+                            giorno = meteoVeneto.newGiorno();
+                            if (giorno != null) {
+                                giorno.setData(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DATA));
+                            }
+                        } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.Giorno.TAG_IMMAGINE) && insideMeteoVeneto && giorno != null && insideGiorno) {
+                            giorno.setSorgente(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_SORGENTE));
+                            giorno.setDidascalia(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DIDASCALIA));
+                        }
+
+                        break;
+
+                    case XmlPullParser.TEXT:
+                        if (insideMeteoVeneto) {
+                            if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_EVOLUZIONE_GENERALE)) {
+                                meteoVeneto.setEvoluzioneGenerale(parser.getText());
+                            } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_AVVISO)) {
+                                meteoVeneto.setAvviso(parser.getText());
+                            } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_FENOMENI_PARTICOLARI)) {
+                                meteoVeneto.setFenomeniParticolari(parser.getText());
+                            } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.Giorno.TAG_TESTO)) {
+                                giorno.setTesto(parser.getText());
+                            }
+                        }
+                        break;
+
+                    case XmlPullParser.END_TAG:
+                        tagName = parser.getName();
+                        if (tagName.equalsIgnoreCase(Previsione.TAG_BOLLETTINO)) {
+                            bollettinoId = null;
+                            insideMeteoVeneto = false;
+                        } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.TAG_GIORNO)) {
+                            insideGiorno = false;
+                        }
+                        tagName = "";
+                        break;
+
+                    default:
+                        break;
+                }
+
+                // jump to next event
+                eventType = parser.next();
+            }
+
+            // exception stuffs
+        } catch (XmlPullParserException e) {
+            Timber.e("error parsing xml %s", e.toString());
+//            previsione = null;
+        } catch (IOException e) {
+            Timber.e("error parsing xml %s", e.toString());
+//            previsione = null;
+//        } finally {
+//            return previsione;
+        }
+
+    }
+
+    @DebugLog
+    public boolean isUpdate() {
+        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+        Calendar lastTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+
+        double currentHour = currentTime.get(Calendar.HOUR_OF_DAY) + currentTime.get(Calendar.MINUTE) / 60D;
+
+        Timber.d("current hour %s", currentHour);
+
+        if (currentHour >= 0 && currentHour < 9) {
+            lastTime.add(Calendar.DAY_OF_YEAR, -1);
+            lastTime.set(Calendar.HOUR_OF_DAY, AGGIORNAMENTI[1].getHours());
+            lastTime.set(Calendar.MINUTE, AGGIORNAMENTI[1].getMinutes());
+            lastTime.set(Calendar.SECOND, AGGIORNAMENTI[1].getSeconds());
+            lastTime.set(Calendar.MILLISECOND, AGGIORNAMENTI[1].getMilliSeconds());
+        } else if (currentHour >= 9 && currentHour < 13) {
+            lastTime.set(Calendar.HOUR_OF_DAY, AGGIORNAMENTI[2].getHours());
+            lastTime.set(Calendar.MINUTE, AGGIORNAMENTI[2].getMinutes());
+            lastTime.set(Calendar.SECOND, AGGIORNAMENTI[2].getSeconds());
+            lastTime.set(Calendar.MILLISECOND, AGGIORNAMENTI[2].getMilliSeconds());
+        } else if (currentHour >= 13 && currentHour < 16) {
+            lastTime.set(Calendar.HOUR_OF_DAY, AGGIORNAMENTI[0].getHours());
+            lastTime.set(Calendar.MINUTE, AGGIORNAMENTI[0].getMinutes());
+            lastTime.set(Calendar.SECOND, AGGIORNAMENTI[0].getSeconds());
+            lastTime.set(Calendar.MILLISECOND, AGGIORNAMENTI[0].getMilliSeconds());
+        } else if (currentHour >= 16 && currentHour < 24) {
+            lastTime.set(Calendar.HOUR_OF_DAY, AGGIORNAMENTI[1].getHours());
+            lastTime.set(Calendar.MINUTE, AGGIORNAMENTI[1].getMinutes());
+            lastTime.set(Calendar.SECOND, AGGIORNAMENTI[1].getSeconds());
+            lastTime.set(Calendar.MILLISECOND, AGGIORNAMENTI[1].getMilliSeconds());
+        } else {
+            throw new ArrayIndexOutOfBoundsException("hour time not in range 0-24");
+        }
+
+        lastTime.getTimeInMillis();
+
+        return updateDate.compareTo(lastTime) >= 0;
+    }
+
     public String getDataAggiornamento() {
         return dataAggiornamento;
     }
-
+    
     public void setDataAggiornamento(String dataAggiornamento) {
         this.dataAggiornamento = dataAggiornamento;
 
         try {
-            updateDate = null;
-            DateFormat df = new SimpleDateFormat("dd/MM 'alle' hh.mm");
+//            updateDate = null;
+            DateFormat df = new SimpleDateFormat("dd/MM 'alle' HH.mm");
 
             Date date = df.parse(dataAggiornamento);
 
-            updateDate = Calendar.getInstance();
+            updateDate = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
             updateDate.setTime(date);
             updateDate.set(Calendar.YEAR, releaseDate.get(Calendar.YEAR));
             if (updateDate.before(releaseDate)) {
                 updateDate.set(Calendar.YEAR, releaseDate.get(Calendar.YEAR) + 1);
             }
-            Timber.d("update date %s", updateDate.getTime());
+            updateDate.getTimeInMillis();
         } catch (ParseException e) {
             Timber.e(e.toString());
             updateDate = null;
         }
+        Timber.d("data aggiornamento %s", updateDate);
     }
 
     public String getDataEmissione() {
         return dataEmissione;
     }
 
-    @DebugLog
     public void setDataEmissione(String dataEmissione) {
         this.dataEmissione = dataEmissione;
 
         try {
-            releaseDate = null;
-            DateFormat df = new SimpleDateFormat("dd/MM/yyyy 'alle' hh:mm");
+//            releaseDate = null;
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy 'alle' HH:mm");
 
             Date date = df.parse(dataEmissione);
 
-            releaseDate = Calendar.getInstance();
+            releaseDate = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
             releaseDate.setTime(date);
-            Timber.d("release date %s", releaseDate.getTime());
+            releaseDate.getTimeInMillis();
         } catch (ParseException e) {
             Timber.e(e.toString());
             releaseDate = null;
@@ -89,6 +252,42 @@ public class Previsione {
 
     public Bollettino getMeteoVeneto() {
         return meteoVeneto;
+    }
+
+    public class OrarioAggiornamento {
+
+        private Calendar time;
+
+        public OrarioAggiornamento(String time) {
+            try {
+                DateFormat df = new SimpleDateFormat("HH:mm");
+                Date date = df.parse(time);
+                this.time = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+                this.time.setTime(date);
+            } catch (ParseException e) {
+                Timber.e(e.toString());
+            }
+        }
+
+        public int getHours() {
+            int hours = time.get(Calendar.HOUR_OF_DAY);
+            return hours;
+        }
+
+        public int getMinutes() {
+            int minutes = time.get(Calendar.MINUTE);
+            return minutes;
+        }
+
+        public int getSeconds() {
+            return 0;
+        }
+
+        public int getMilliSeconds() {
+            return 0;
+        }
+
+
     }
 
     public class Bollettino {
@@ -218,3 +417,4 @@ public class Previsione {
     }
 
 }
+
