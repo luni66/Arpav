@@ -170,7 +170,7 @@ public class XmlActivity extends AppCompatActivity {
                                 giorno.setData(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DATA));
                             }
                         } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.Giorno.TAG_IMMAGINE) && insideMeteoVeneto && giorno != null && insideGiorno) {
-                            giorno.setSorgente(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_SORGENTE));
+                            giorno.setSorgente(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_IMMAGINE));
                             giorno.setDidascalia(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DIDASCALIA));
                         }
 

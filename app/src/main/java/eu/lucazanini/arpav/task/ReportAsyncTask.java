@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -37,9 +38,7 @@ public class ReportAsyncTask extends AsyncTask<String, Void, Void> {
         String url = params[0];
         String file = params[1];
 
-//        try {
         Previsione previsione = new Previsione();
-
 
         if (checkFile(file)) {
             Timber.d("loading from the internal storage");
@@ -61,6 +60,7 @@ public class ReportAsyncTask extends AsyncTask<String, Void, Void> {
                             bis = download(url);
                         } finally {
                             save(bis, file);
+                            saveImages(previsione);
                         }
                     }
                 }
@@ -82,11 +82,11 @@ public class ReportAsyncTask extends AsyncTask<String, Void, Void> {
                         bis = download(params[0]);
                     } finally {
                         save(bis, file);
+                        saveImages(previsione);
                     }
                 }
             }
         }
-//        } finally {
         if (bis != null) {
             try {
                 bis.close();
@@ -95,7 +95,6 @@ public class ReportAsyncTask extends AsyncTask<String, Void, Void> {
             }
         }
         return null;
-//        }
     }
 
     private boolean checkFile(String myFile) {
@@ -151,6 +150,66 @@ public class ReportAsyncTask extends AsyncTask<String, Void, Void> {
             Timber.e("error loading url %s", e.toString());
         } finally {
             return bis;
+        }
+    }
+
+    @DebugLog
+    private void prepareImageFolder() {
+        String folder = context.getFilesDir().getAbsolutePath() + File.separator + "images";
+        Timber.d("image folder %s", folder);
+        File imageFolder = new File(folder);
+        if (imageFolder.exists()) {
+            Timber.d("image folder exists");
+            for (File file : imageFolder.listFiles()) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                }
+            }
+        } else {
+            Timber.d("image folder doesn't exist");
+            imageFolder.mkdirs();
+        }
+    }
+
+    @DebugLog
+    private void saveImages(Previsione previsione) {
+        prepareImageFolder();
+        String imageDir = "images";
+        for (int i = 0; i < Previsione.Bollettino.DAYS; i++) {
+            Previsione.Bollettino.Giorno giorno = previsione.getMeteoVeneto().getGiorni()[i];
+            for (int j = 0; j < giorno.getImgIndex(); j++) {
+                String imageUrl = giorno.getImageUrl(j);
+                BufferedInputStream imageBuf = download(imageUrl);
+                save(imageBuf, imageDir, previsione.getMeteoVeneto().getGiorni()[i].getImageFile(j));
+                try {
+                    imageBuf.close();
+                } catch (IOException e) {
+                    Timber.e(e.toString());
+                }
+            }
+        }
+    }
+
+    @DebugLog
+    private void save(BufferedInputStream stream, String folder, String file) {
+        FileOutputStream outputStream;
+
+        try {
+            File rootDir = new File(context.getFilesDir(), folder);
+            outputStream = new FileOutputStream(new File(rootDir, file));
+//            outputStream = context.openFileOutput(file, Context.MODE_PRIVATE);
+
+            int read = 0;
+            byte[] bytes = new byte[1024];
+
+            while ((read = stream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            Timber.e("error saving file %s", e.toString());
         }
     }
 

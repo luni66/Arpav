@@ -93,8 +93,7 @@ public class Previsione {
                                 giorno.setData(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DATA));
                             }
                         } else if (tagName.equalsIgnoreCase(Previsione.Bollettino.Giorno.TAG_IMMAGINE) && insideMeteoVeneto && giorno != null && insideGiorno) {
-                            giorno.setSorgente(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_SORGENTE));
-                            giorno.setDidascalia(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DIDASCALIA));
+                            giorno.addImmagine(parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_IMMAGINE), parser.getAttributeValue(null, Previsione.Bollettino.Giorno.ATTR_DIDASCALIA));
                         }
 
                         break;
@@ -181,13 +180,13 @@ public class Previsione {
 
         lastTime.getTimeInMillis();
 
-        return updateDate.compareTo(lastTime) >= 0;
+        return getUpdateDate().compareTo(lastTime) >= 0;
     }
 
     public String getDataAggiornamento() {
         return dataAggiornamento;
     }
-    
+
     public void setDataAggiornamento(String dataAggiornamento) {
         this.dataAggiornamento = dataAggiornamento;
 
@@ -231,6 +230,7 @@ public class Previsione {
             Timber.e(e.toString());
             releaseDate = null;
         }
+        Timber.d("data emissione %s", releaseDate);
     }
 
     public void setMeteoVeneto() {
@@ -247,7 +247,10 @@ public class Previsione {
     }
 
     public Calendar getUpdateDate() {
-        return updateDate;
+        if (updateDate != null)
+            return updateDate;
+        else
+            return releaseDate;
     }
 
     public Bollettino getMeteoVeneto() {
@@ -299,11 +302,12 @@ public class Previsione {
         public final static String TAG_AVVISO = "avviso";
         public final static String TAG_FENOMENI_PARTICOLARI = "fenomeniparticolari";
         public final static String TAG_GIORNO = "giorno";
+        public final static int DAYS = 5;
 
         public final static String METEO_VENETO = "MV";
 
         private String bollettinoId, nome, titolo, evoluzioneGenerale, avviso, fenomeniParticolari;
-        private Giorno[] giorni = new Giorno[5];
+        private Giorno[] giorni = new Giorno[DAYS];
 
         public String getBollettinoId() {
             return bollettinoId;
@@ -375,11 +379,18 @@ public class Previsione {
 
             public final static String ATTR_DATA = "data";
             public final static String TAG_IMMAGINE = "img";
-            public final static String ATTR_SORGENTE = "src";
+            public final static String ATTR_IMMAGINE = "src";
             public final static String ATTR_DIDASCALIA = "caption";
             public final static String TAG_TESTO = "text";
 
-            private String data, sorgente, didascalia, testo;
+            private String data, testo;
+            private String[] sorgente, didascalia;
+            private int imgIndex;
+
+            public Giorno() {
+                sorgente = new String[2];
+                didascalia = new String[2];
+            }
 
             public String getData() {
                 return data;
@@ -389,19 +400,46 @@ public class Previsione {
                 this.data = data;
             }
 
-            public String getSorgente() {
+            @DebugLog
+            public void addImmagine(String sorgente, String didascalia) {
+                switch (imgIndex) {
+                    case 0:
+                        this.sorgente[0] = sorgente;
+                        this.didascalia[0] = didascalia;
+                        imgIndex++;
+                        break;
+                    case 1:
+                        this.sorgente[1] = sorgente;
+                        this.didascalia[1] = didascalia;
+                        imgIndex++;
+                        break;
+                    default:
+                        Timber.e("immagini out of index");
+                }
+            }
+
+            public String getImageUrl(int index) {
+                return sorgente[index];
+            }
+
+            public String getImageFile(int index) {
+                String fileName = sorgente[index].substring(sorgente[index].lastIndexOf('/') + 1, sorgente[index].length());
+                return fileName;
+            }
+
+            public String[] getSorgente() {
                 return sorgente;
             }
 
-            public void setSorgente(String sorgente) {
+            public void setSorgente(String[] sorgente) {
                 this.sorgente = sorgente;
             }
 
-            public String getDidascalia() {
+            public String[] getDidascalia() {
                 return didascalia;
             }
 
-            public void setDidascalia(String didascalia) {
+            public void setDidascalia(String[] didascalia) {
                 this.didascalia = didascalia;
             }
 
@@ -412,8 +450,11 @@ public class Previsione {
             public void setTesto(String testo) {
                 this.testo = testo;
             }
-        }
 
+            public int getImgIndex() {
+                return imgIndex;
+            }
+        }
     }
 
 }
