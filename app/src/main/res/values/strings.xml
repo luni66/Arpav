@@ -2,4 +2,7 @@
     <string name="app_name">Arpav</string>
     <string name="connection_error">Unable to load content. Check your network connection.</string>
     <string name="xml_error">Error parsing XML.</string>
+    <string name="release_time">13:00</string>
+    <string name="first_update_time">16:00</string>
+    <string name="second_update_time">09:00</string>
 </resources>

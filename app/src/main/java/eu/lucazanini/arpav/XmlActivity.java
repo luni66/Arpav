@@ -12,7 +12,7 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import eu.lucazanini.arpav.task.ReportAsyncTask;
+import eu.lucazanini.arpav.task.ReportTask;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
@@ -42,8 +42,8 @@ public class XmlActivity extends AppCompatActivity {
 
             // AsyncTask subclass
 //            new DownloadXmlTask().execute(URL);
-            ReportAsyncTask downloadXmlTask = new ReportAsyncTask(this);
-            downloadXmlTask.execute(URL, PREVISIONE_IT);
+            ReportTask reportTask = new ReportTask(this);
+            reportTask.execute(URL, PREVISIONE_IT);
 
         } else {
             Toast.makeText(this, "Not connected", LENGTH_SHORT).show();
@@ -57,7 +57,7 @@ public class XmlActivity extends AppCompatActivity {
         return networkInfo != null && networkInfo.isConnected();
     }
 
-/*    @DebugLog
+/*
     private void save(BufferedInputStream stream) {
         FileOutputStream outputStream;
 
@@ -81,7 +81,7 @@ public class XmlActivity extends AppCompatActivity {
     // Given a URL, establishes an HttpUrlConnection and retrieves
 // the web page content as a InputStream, which it returns as
 // a string.
-/*    @DebugLog
+/*
     private BufferedInputStream download(String myurl) {
         InputStream is = null;
         BufferedInputStream bis = null;
@@ -115,7 +115,7 @@ public class XmlActivity extends AppCompatActivity {
     }*/
 
  /*   @Deprecated
-    @DebugLog
+
     private Previsione parse(BufferedInputStream bis) {
 
         final String ns = null;
@@ -222,7 +222,7 @@ public class XmlActivity extends AppCompatActivity {
 
     }*/
 
- /*   @DebugLog
+ /*
     private BufferedInputStream load(String myFile) {
         BufferedInputStream bis = null;
         try {
