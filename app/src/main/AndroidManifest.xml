@@ -17,12 +17,15 @@
         <activity android:name=".XmlActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <receiver android:name=".schedule.AlarmReceiver">
+        <receiver android:name=".schedule.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true">
+            //TODO remove comment below and see https://developer.android.com/training/scheduling/alarms.html#boot
+            <!--android:enabled="false">-->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <!--TODO only for test-->

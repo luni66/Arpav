@@ -1,14 +1,15 @@
 package eu.lucazanini.arpav.task;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+
+import eu.lucazanini.arpav.xml.Previsione;
+import hugo.weaving.DebugLog;
 
 public class ReportService extends IntentService {
 
     private final static String TAG = "Download Service";
-
-    private static final String URL = "http://www.arpa.veneto.it/previsioni/it/xml/bollettino_utenti.xml";
-    private static final String PREVISIONE_IT = "previsione_it.xml";
 
     public ReportService() {
         super(TAG);
@@ -18,9 +19,16 @@ public class ReportService extends IntentService {
         super(name);
     }
 
+    @DebugLog
     @Override
     protected void onHandleIntent(Intent intent) {
         ReportTask reportTask = new ReportTask(this);
-        reportTask.doTask(URL, PREVISIONE_IT);
+        //TODO custom language
+        reportTask.doTask(Previsione.Language.IT);
+    }
+
+    public static Intent getIntent(Context context) {
+        Intent intent = new Intent(context, ReportService.class);
+        return intent;
     }
 }

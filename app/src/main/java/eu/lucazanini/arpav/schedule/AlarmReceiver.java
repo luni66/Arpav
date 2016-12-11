@@ -22,15 +22,28 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     public final static String RECEIVER_ACTION = "eu.lucazanini.arpav.UPDATE_TIME";
 
-    public void setAlarm(Context context) {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        Timber.i("Received broadcast intent: %s", action);
+        if (action.equals("android.intent.action.BOOT_COMPLETED")) {
+            setAlarm(context);
+        } else if (action.equals(RECEIVER_ACTION)) {
+            context.startService(ReportService.getIntent(context));
+        }
+    }
+
+    private void setAlarm(Context context) {
 
         AlarmManager[] alarmMgr = new AlarmManager[3];
         PendingIntent alarmIntent;
         Calendar[] alarmTimes = new Calendar[3];
 
-        Intent intent = new Intent(context, ReportService.class);
+        //TODO why ReportService .class here and in onReceive?
+//        Intent intent = new Intent(context, ReportService.class);
+        Intent intent = new Intent(context, AlarmReceiver.class);
         intent.setAction(RECEIVER_ACTION);
-        intent.setPackage(context.getPackageName());
+//        intent.setPackage(context.getPackageName());
         alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         for (int i = 0; i < alarmTimes.length; i++) {
@@ -41,26 +54,15 @@ public class AlarmReceiver extends BroadcastReceiver {
             alarmTimes[i].set(Calendar.MINUTE, Previsione.UPDATE_TIMES[i].getMinutes());
 
             alarmMgr[i] = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//            alarmMgr[i].setRepeating(AlarmManager.RTC_WAKEUP,
-//                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, alarmIntent);
-            alarmMgr[i].setInexactRepeating(AlarmManager.RTC_WAKEUP,
-                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
+            //only to test
+            alarmMgr[i].setRepeating(AlarmManager.RTC_WAKEUP,
+                    alarmTimes[i].getTimeInMillis(), 1000*60, alarmIntent);
+//            alarmMgr[i].setInexactRepeating(AlarmManager.RTC_WAKEUP,
+//                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
 
         }
 
 
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        Timber.i("Received broadcast intent: %s", action);
-        if (action.equals("android.intent.action.BOOT_COMPLETED")) {
-            setAlarm(context);
-        } else if (action.equals(RECEIVER_ACTION)) {
-            Intent intent1 = new Intent(context, ReportService.class);
-            context.startService(intent1);
-        }
     }
 
 }

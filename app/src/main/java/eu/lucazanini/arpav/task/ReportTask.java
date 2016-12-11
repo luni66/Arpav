@@ -1,6 +1,7 @@
 package eu.lucazanini.arpav.task;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 
@@ -19,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import eu.lucazanini.arpav.xml.Previsione;
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 public class ReportTask {
@@ -33,6 +35,17 @@ public class ReportTask {
         this.context = context;
     }
 
+    @DebugLog
+    private void sendBroadcast(Previsione previsione) {
+        Timber.d("SENDING BROADCAST");
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction("eu.lucazanini.arpav.TEST");
+        broadcastIntent.setPackage(context.getPackageName());
+        broadcastIntent.putExtra("Previsione", previsione);
+        context.sendBroadcast(broadcastIntent);
+    }
+
+    @DebugLog
     /**
      * Loads the bulletin as BufferedInputStream depending on the format of argument {@code text}
      * if the argument is or not is an url belonging to the Arpav site
@@ -41,6 +54,7 @@ public class ReportTask {
      * @return the BufferedInputStream associated to the {@code text}
      */
     public BufferedInputStream getBulletin(String text) {
+        Timber.d("GETTING BULLETIN");
         if (isFromArpav(text)) {
             return download(text);
         } else {
@@ -67,20 +81,23 @@ public class ReportTask {
         }
     }
 
+    @DebugLog
     /**
      * Load the bulletin saved in Assets test folder; use only for test
      *
-     * @param uri
+     * @param file
      * @return
      */
-    public BufferedInputStream loadFromAssets(String uri) {
+    public BufferedInputStream loadFromAssets(String file) {
+        Timber.d("LOADING FROM ASSETS");
+
         AssetManager assManager = context.getAssets();
 
         InputStream is = null;
         BufferedInputStream bis = null;
 
         try {
-            is = assManager.open(uri);
+            is = assManager.open(file);
         } catch (IOException e) {
             Timber.e(e.toString());
         }
@@ -89,6 +106,7 @@ public class ReportTask {
         return bis;
     }
 
+    @DebugLog
     /**
      * Download the resource located at the url passed as argument and returns it as the BufferedInputStream
      *
@@ -157,6 +175,7 @@ public class ReportTask {
         }
     }
 
+    @DebugLog
     /**
      * Saves the file in the device storage using the argument as the path file
      *
@@ -195,6 +214,7 @@ public class ReportTask {
             for (int i = 0; i < Previsione.Bollettino.DAYS; i++) {
                 Previsione.Bollettino.Giorno giorno = previsione.getMeteoVeneto().getGiorni()[i];
                 for (int j = 0; j < giorno.getImgIndex(); j++) {
+                    Timber.d("SAVING IMAGE %s", j);
                     String imageUrl = giorno.getImageUrl(j);
                     BufferedInputStream imageBuf = download(imageUrl);
                     save(imageBuf, IMAGES_FOLDER, giorno.getImageFile(j));
@@ -336,16 +356,63 @@ public class ReportTask {
         return matches;
     }
 
-    /**
-     * Does all the job, download the bulletin and images and saves them in the device storage
-     *
-     * @param url
-     * @param file
-     */
-    public void doTask(String url, String file) {
+    @DebugLog
+    public void doTask(Previsione.Language language, String asset) {
+        Timber.d("DO TASK TEST");
+
         BufferedInputStream bis = null;
 
-        Previsione previsione = new Previsione();
+        Previsione previsione = new Previsione(language, asset);
+
+        String url = previsione.getUrl();
+        String file = previsione.getUri();
+
+        bis = getBulletin(url);
+        if (bis != null) {
+            if (bis.markSupported()) {
+                bis.mark(150000);
+            }
+            previsione.parse(bis);
+            if (previsione != null) {
+                try {
+                    bis.reset();
+                } catch (IOException e) {
+                    bis = getBulletin(url);
+                } finally {
+                    save(bis, file);
+                    saveImages(previsione);
+                }
+            }
+        }
+
+        if (bis != null) {
+            try {
+                bis.close();
+            } catch (IOException e) {
+                Timber.e("error closing buffer %s", e.toString());
+            }
+        }
+
+        Timber.d("CALLING BROADCAST TEST");
+        sendBroadcast(previsione);
+
+    }
+
+    /**
+     * Does all the job, download the bulletin and images and saves them in the device storage
+     */
+    public void doTask(Previsione.Language language) {
+
+        Timber.d("DO TASK");
+
+        BufferedInputStream bis = null;
+
+//        Previsione previsione = new Previsione();
+
+        Previsione previsione = new Previsione(language);
+
+        String url = previsione.getUrl();
+        String file = previsione.getUri();
 
         if (checkFile(file)) {
             Timber.i("loading bulletin from the internal storage");
@@ -402,36 +469,59 @@ public class ReportTask {
                 Timber.e("error closing buffer %s", e.toString());
             }
         }
+
+        Timber.d("CALLING BROADCAST");
+        sendBroadcast(previsione);
     }
 
     /**
      * Executes the inner class AsyncTask
-     *
-     * @param url  the url of the bulletin
-     * @param file the path to local copy of the bulletin
      */
-    public void execute(String url, String file) {
+    public void execute() {
         ReportAsyncTask reportAsyncTask = new ReportAsyncTask();
-        reportAsyncTask.execute(url, file);
+        reportAsyncTask.execute(Previsione.Language.IT);
     }
 
     /**
-     * The AsyncTask class that executes the {@link #doTask(String, String)} method
+     * Executes the inner class AsyncTask for test
      */
-    public class ReportAsyncTask extends AsyncTask<String, Void, Void> {
+    public void test(String asset) {
+        ReportAsyncTask reportAsyncTask = new ReportAsyncTask(asset);
+        reportAsyncTask.execute(Previsione.Language.IT);
+    }
+
+    /**
+     * The AsyncTask class that executes the {@link #doTask(Previsione.Language language)} method
+     */
+    public class ReportAsyncTask extends AsyncTask<Previsione.Language, Void, Void> {
+
+        private boolean isTest;
+        private String asset;
+
+        public ReportAsyncTask() {
+            isTest = false;
+        }
+
+        // only for test
+        public ReportAsyncTask(String asset) {
+            isTest = true;
+            this.asset = asset;
+        }
+
 
         @Override
-        protected Void doInBackground(String... params) {
-            BufferedInputStream bis = null;
+        protected Void doInBackground(Previsione.Language... params) {
 
-            String url = params[0];
-            String file = params[1];
+            Previsione.Language language = params[0];
 
-            doTask(url, file);
+            if (isTest) {
+                doTask(language, asset);
+            } else {
+                doTask(language);
+            }
 
             return null;
         }
-
     }
 
 }
