@@ -16,8 +16,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import eu.lucazanini.arpav.task.ReportTask;
-import eu.lucazanini.arpav.xml.Previsione;
-import timber.log.Timber;
+import eu.lucazanini.arpav.model.Previsione;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
@@ -80,9 +79,7 @@ public class XmlActivity extends AppCompatActivity {
     private BroadcastReceiver testReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Timber.d("test");
             Previsione previsione = intent.getExtras().getParcelable("Previsione");
-            Timber.d("data %s", previsione.getDataAggiornamento());
         }
     };
 

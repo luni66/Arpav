@@ -5,6 +5,13 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.StringRequest;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +26,10 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import eu.lucazanini.arpav.xml.Previsione;
+import eu.lucazanini.arpav.network.BulletinRequest;
+import eu.lucazanini.arpav.network.VolleySingleton;
+import eu.lucazanini.arpav.model.Bollettino;
+import eu.lucazanini.arpav.model.Previsione;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
@@ -35,9 +45,7 @@ public class ReportTask {
         this.context = context;
     }
 
-    @DebugLog
     private void sendBroadcast(Previsione previsione) {
-        Timber.d("SENDING BROADCAST");
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("eu.lucazanini.arpav.TEST");
         broadcastIntent.setPackage(context.getPackageName());
@@ -45,7 +53,13 @@ public class ReportTask {
         context.sendBroadcast(broadcastIntent);
     }
 
-    @DebugLog
+    private void sendTestBroadcast(Previsione previsione) {
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction("eu.lucazanini.arpav.TEST");
+        broadcastIntent.putExtra("Previsione", previsione);
+        context.sendBroadcast(broadcastIntent);
+    }
+
     /**
      * Loads the bulletin as BufferedInputStream depending on the format of argument {@code text}
      * if the argument is or not is an url belonging to the Arpav site
@@ -54,7 +68,6 @@ public class ReportTask {
      * @return the BufferedInputStream associated to the {@code text}
      */
     public BufferedInputStream getBulletin(String text) {
-        Timber.d("GETTING BULLETIN");
         if (isFromArpav(text)) {
             return download(text);
         } else {
@@ -81,7 +94,54 @@ public class ReportTask {
         }
     }
 
-    @DebugLog
+    public void doRequest() {
+        // Instantiate the RequestQueue.
+//        RequestQueue queue = Volley.newRequestQueue(context);
+
+        RequestQueue queue = VolleySingleton.getInstance(context).getRequestQueue();
+
+//        final Previsione previsione = new Previsione(Previsione.Language.IT);
+
+        // Request a string response from the provided URL.
+/*        StringRequest stringRequest = new StringRequest(Request.Method.GET, file,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        previsione.parse(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Timber.e(error);
+            }
+        });*/
+
+        BulletinRequest bulletinRequest = new BulletinRequest(Request.Method.GET, Previsione.URL_IT,
+                new Response.Listener<Previsione>() {
+                    @Override
+                    public void onResponse(Previsione response) {
+
+                        Timber.d("found previsione for %s", response.getDataAggiornamento());
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Timber.e(error);
+            }
+        });
+
+
+        // Add the request to the RequestQueue.
+        queue.add(bulletinRequest);
+
+    }
+
+    public void doImageRequest(){
+        ImageLoader imageLoader = VolleySingleton.getInstance(context).getImageLoader();
+
+    }
+
     /**
      * Load the bulletin saved in Assets test folder; use only for test
      *
@@ -89,7 +149,6 @@ public class ReportTask {
      * @return
      */
     public BufferedInputStream loadFromAssets(String file) {
-        Timber.d("LOADING FROM ASSETS");
 
         AssetManager assManager = context.getAssets();
 
@@ -113,12 +172,12 @@ public class ReportTask {
      * @param uri
      * @return
      */
-    public BufferedInputStream download(String uri) {
+    public BufferedInputStream download(String url) {
         InputStream is = null;
         BufferedInputStream bis = null;
 
         try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(uri).openConnection();
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setReadTimeout(10000);
             conn.setConnectTimeout(15000);
             conn.setRequestMethod("GET");
@@ -132,7 +191,7 @@ public class ReportTask {
                 is = conn.getInputStream();
                 bis = new BufferedInputStream(is);
             } else {
-                Timber.i("Not connected to %s", uri);
+                Timber.i("Not connected to %s", url);
             }
         } catch (ProtocolException e) {
             Timber.e("error loading url %s", e.toString());
@@ -145,6 +204,25 @@ public class ReportTask {
         } finally {
             return bis;
         }
+    }
+
+    //TODO
+    public String download2(String url) {
+        StringRequest request = new StringRequest(url, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                // we got the response, now our job is to handle it
+//                parseXmlResponse(response);
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //something happened, treat the error.
+            }
+        });
+        return request.toString();
     }
 
     /**
@@ -175,7 +253,6 @@ public class ReportTask {
         }
     }
 
-    @DebugLog
     /**
      * Saves the file in the device storage using the argument as the path file
      *
@@ -208,20 +285,23 @@ public class ReportTask {
      * @param previsione
      */
     public void saveImages(Previsione previsione) {
-        Previsione.Bollettino meteoVeneto = previsione.getMeteoVeneto();
+        Bollettino meteoVeneto = previsione.getMeteoVeneto();
         if (meteoVeneto != null) {
             prepareImageFolder();
-            for (int i = 0; i < Previsione.Bollettino.DAYS; i++) {
-                Previsione.Bollettino.Giorno giorno = previsione.getMeteoVeneto().getGiorni()[i];
+            for (int i = 0; i < Bollettino.DAYS; i++) {
+                Bollettino.Giorno giorno = previsione.getMeteoVeneto().getGiorni()[i];
                 for (int j = 0; j < giorno.getImgIndex(); j++) {
-                    Timber.d("SAVING IMAGE %s", j);
                     String imageUrl = giorno.getImageUrl(j);
                     BufferedInputStream imageBuf = download(imageUrl);
-                    save(imageBuf, IMAGES_FOLDER, giorno.getImageFile(j));
-                    try {
-                        imageBuf.close();
-                    } catch (IOException e) {
-                        Timber.e(e.toString());
+                    if (imageBuf != null) {
+                        save(imageBuf, IMAGES_FOLDER, giorno.getImageFile(j));
+                        try {
+                            imageBuf.close();
+                        } catch (IOException e) {
+                            Timber.e(e.toString());
+                        }
+                    } else {
+                        Timber.e("image not downloaded %s", imageUrl);
                     }
                 }
             }
@@ -236,8 +316,8 @@ public class ReportTask {
      */
     public void saveImages(Previsione previsione, int mode) {
         prepareImageFolder(mode);
-        for (int i = 0; i < Previsione.Bollettino.DAYS; i++) {
-            Previsione.Bollettino.Giorno giorno = previsione.getMeteoVeneto().getGiorni()[i];
+        for (int i = 0; i < Bollettino.DAYS; i++) {
+            Bollettino.Giorno giorno = previsione.getMeteoVeneto().getGiorni()[i];
             for (int j = 0; j < giorno.getImgIndex(); j++) {
                 String imageUrl = giorno.getImageUrl(j);
                 switch (mode) {
@@ -248,11 +328,15 @@ public class ReportTask {
                     case MODE_OVERWRITE:
                     default:
                         BufferedInputStream imageBuf = download(imageUrl);
-                        save(imageBuf, IMAGES_FOLDER, giorno.getImageFile(j));
-                        try {
-                            imageBuf.close();
-                        } catch (IOException e) {
-                            Timber.e(e.toString());
+                        if (imageBuf != null) {
+                            save(imageBuf, IMAGES_FOLDER, giorno.getImageFile(j));
+                            try {
+                                imageBuf.close();
+                            } catch (IOException e) {
+                                Timber.e(e.toString());
+                            }
+                        } else {
+                            Timber.e("image not downloaded %s", imageUrl);
                         }
                 }
             }
@@ -356,9 +440,57 @@ public class ReportTask {
         return matches;
     }
 
-    @DebugLog
+    /**
+     * ony for test
+     *
+     * @param language
+     * @param asset
+     * @return
+     */
+    public Previsione getPrevisione(Previsione.Language language, String asset) {
+        BufferedInputStream bis = null;
+
+        Previsione previsione = new Previsione(language, asset);
+
+        String url = previsione.getUrl();
+        String file = previsione.getUri();
+
+        bis = getBulletin(url);
+        if (bis != null) {
+            if (bis.markSupported()) {
+                bis.mark(150000);
+            }
+            previsione.parse(bis);
+            if (previsione != null) {
+                try {
+                    bis.reset();
+                } catch (IOException e) {
+                    bis = getBulletin(url);
+//                } finally {
+//                    save(bis, file);
+//                    saveImages(previsione);
+                }
+            }
+        }
+
+        if (bis != null) {
+            try {
+                bis.close();
+            } catch (IOException e) {
+                Timber.e("error closing buffer %s", e.toString());
+            }
+        }
+
+        return previsione;
+    }
+
+    /**
+     * only for test
+     *
+     * @param language
+     * @param asset
+     */
     public void doTask(Previsione.Language language, String asset) {
-        Timber.d("DO TASK TEST");
 
         BufferedInputStream bis = null;
 
@@ -393,8 +525,7 @@ public class ReportTask {
             }
         }
 
-        Timber.d("CALLING BROADCAST TEST");
-        sendBroadcast(previsione);
+        sendTestBroadcast(previsione);
 
     }
 
@@ -402,8 +533,6 @@ public class ReportTask {
      * Does all the job, download the bulletin and images and saves them in the device storage
      */
     public void doTask(Previsione.Language language) {
-
-        Timber.d("DO TASK");
 
         BufferedInputStream bis = null;
 
@@ -470,7 +599,6 @@ public class ReportTask {
             }
         }
 
-        Timber.d("CALLING BROADCAST");
         sendBroadcast(previsione);
     }
 

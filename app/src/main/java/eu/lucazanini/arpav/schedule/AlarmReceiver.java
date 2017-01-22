@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import eu.lucazanini.arpav.task.ReportService;
-import eu.lucazanini.arpav.xml.Previsione;
+import eu.lucazanini.arpav.model.Previsione;
 import timber.log.Timber;
 
 /**

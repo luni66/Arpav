@@ -4,8 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
-import eu.lucazanini.arpav.xml.Previsione;
-import hugo.weaving.DebugLog;
+import eu.lucazanini.arpav.model.Previsione;
 
 public class ReportService extends IntentService {
 
@@ -19,7 +18,6 @@ public class ReportService extends IntentService {
         super(name);
     }
 
-    @DebugLog
     @Override
     protected void onHandleIntent(Intent intent) {
         ReportTask reportTask = new ReportTask(this);
