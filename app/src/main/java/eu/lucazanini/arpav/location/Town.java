@@ -114,6 +114,18 @@ public class Town implements TownLocation {
         this.province = province;
     }
 
+    public static String[] getNames(Context context) {
+        List<Town> towns = loadTowns(context);
+        String[] names = new String[towns.size()];
+
+        int i=0;
+        for (Town town: towns) {
+            names[i++]=town.getName();
+        }
+
+        return names;
+    }
+
     public static List<Town> loadTowns(Context context){
 
         List towns = new ArrayList();
