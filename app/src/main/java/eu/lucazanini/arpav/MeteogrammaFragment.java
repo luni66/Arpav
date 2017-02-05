@@ -1,16 +1,16 @@
 package eu.lucazanini.arpav;
 
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerTitleStrip;
-import android.support.v4.widget.TextViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -18,6 +18,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.jakewharton.rxbinding.widget.RxAutoCompleteTextView;
 
 import java.util.List;
 
@@ -30,10 +31,13 @@ import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.task.ReportTask;
+import rx.Subscription;
 import timber.log.Timber;
 
 import static eu.lucazanini.arpav.model.Meteogramma.SCADENZA_IDX;
 import static eu.lucazanini.arpav.model.Previsione.MG_IDX;
+
+;
 
 /**
  * Created by luke on 23/01/17.
@@ -41,11 +45,14 @@ import static eu.lucazanini.arpav.model.Previsione.MG_IDX;
 
 public class MeteogrammaFragment extends Fragment {
 
+    @BindView(R.id.networkImageView)
     NetworkImageView mNetworkImageView;
-    @BindView(R.id.txtCielo) TextView cielo;
+    @BindView(R.id.txtCielo)
+    TextView cielo;
     @BindView(R.id.autoCompleteTextView1)
     AutoCompleteTextView actv;
-//TextView cielo;
+    //TextView cielo;
+    Subscription actvSub;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,7 +68,7 @@ public class MeteogrammaFragment extends Fragment {
 
         ButterKnife.bind(this, v);
 
-        mNetworkImageView = (NetworkImageView)v.findViewById(R.id.networkImageView);
+//        mNetworkImageView = (NetworkImageView)v.findViewById(R.id.networkImageView);
 //        cielo=(TextView)v.findViewById(R.id.txtCielo);
 
 //        List<Town> towns = loadTowns();
@@ -71,19 +78,35 @@ public class MeteogrammaFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, names);
         actv.setAdapter(adapter);
 
+//        actv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                Timber.d("TEXT CHANGED");
+//            }
+//        });
+
+//        Subscription actvSub = RxAutoCompleteTextView.itemClickEvents(actv).subscribe(new Action1<AdapterViewItemClickEvent>() {
+//            @Override
+//            public void call(AdapterViewItemClickEvent adapterViewItemClickEvent) {
+//                Timber.d("TEXT CHANGED");
+//            }
+//        });
+
+        actvSub = RxAutoCompleteTextView.itemClickEvents(actv).subscribe(e -> Timber.d("TEXT CHANGED"));
+        
         loadData();
 
         return v;
 
     }
 
-    private List<Town> loadTowns(){
+    private List<Town> loadTowns() {
         List<Town> towns;
         towns = Town.loadTowns(getActivity());
         return towns;
     }
 
-    private void loadData(){
+    private void loadData() {
         ReportTask reportTask = new ReportTask(getContext());
         final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
         final ImageLoader mImageLoader = volleyApp.getImageLoader();
@@ -114,14 +137,14 @@ public class MeteogrammaFragment extends Fragment {
                             }
                         }
 
-                        for(int i = 0; i<MG_IDX; i++){
-                            for(int j=0; j<SCADENZA_IDX; j++){
+                        for (int i = 0; i < MG_IDX; i++) {
+                            for (int j = 0; j < SCADENZA_IDX; j++) {
                                 String imgUrl = response.getMeteogramma()[i].getScadenza()[j].getSimbolo();
                                 mImageLoader.get(imgUrl, new ImageLoader.ImageListener() {
                                     @Override
                                     public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                                         Timber.d("Image URL: " + response.getRequestUrl());
-                                        Timber.d("Image Load completed: "+ response.getRequestUrl());
+                                        Timber.d("Image Load completed: " + response.getRequestUrl());
                                     }
 
                                     @Override
@@ -133,8 +156,8 @@ public class MeteogrammaFragment extends Fragment {
                         }
 
                         mNetworkImageView.setImageUrl(response.getMeteogramma()[0].getScadenza()[0].getSimbolo(), mImageLoader);
-cielo.setText(response.getMeteogramma()[0].getScadenza()[0].getCielo());
-                        PagerTitleStrip pagerTitleStrip = (PagerTitleStrip)getActivity().findViewById(R.id.pager_title_strip);
+                        cielo.setText(response.getMeteogramma()[0].getScadenza()[0].getCielo());
+                        PagerTitleStrip pagerTitleStrip = (PagerTitleStrip) getActivity().findViewById(R.id.pager_title_strip);
 
                     }
                 }, new Response.ErrorListener() {
@@ -147,4 +170,10 @@ cielo.setText(response.getMeteogramma()[0].getScadenza()[0].getCielo());
         volleyApp.addToRequestQueue(bulletinRequest);
     }
 
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        actvSub.unsubscribe();
+    }
 }
