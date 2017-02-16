@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.lucazanini.arpav.location.Town;
+import eu.lucazanini.arpav.location.TownList;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -28,7 +29,8 @@ public class TownTaskTest {
 
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        List<Town> towns = Town.loadTowns(appContext);
+//        List<Town> towns = Town.loadTowns(appContext);
+        List<Town> towns = TownList.getInstance(appContext).loadTowns();
 
         Collections.sort(towns, new Town.NameComparator());
 

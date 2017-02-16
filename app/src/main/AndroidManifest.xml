@@ -21,9 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".XmlActivity">
-        </activity>
+        <activity android:name=".XmlActivity"></activity>
 
         <receiver
             android:name=".schedule.AlarmReceiver"
@@ -42,6 +40,7 @@
         <service
             android:name=".task.ReportService"
             android:exported="false" />
+
     </application>
 
 </manifest>

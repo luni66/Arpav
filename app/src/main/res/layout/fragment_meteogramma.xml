@@ -3,43 +3,117 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootlayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="4dp">
 
-    <AutoCompleteTextView
-        android:id="@+id/autoCompleteTextView1"
+    <android.support.v7.widget.AppCompatAutoCompleteTextView
+        android:id="@+id/locationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
+        android:singleLine="true"
+        android:maxLines="1"
         android:imeOptions="actionNext"
-        android:hint="Cerca il comune"/>
+        android:hint="@string/hint"/>
 
     <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/networkImageView"
+        android:id="@+id/skyView"
         android:layout_width="150dp"
         android:layout_height="170dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/autoCompleteTextView1"
+        android:layout_below="@+id/locationView"
         android:layout_marginTop="20dp"/>
 
     <TextView
-        android:text="Cielo"
+        android:id="@+id/lblCielo"
+        android:text="@string/cielo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:id="@+id/lblCielo"
-        android:layout_below="@+id/networkImageView"
-        android:layout_alignStart="@+id/networkImageView" />
+        android:layout_below="@id/skyView"
+        android:layout_alignStart="@id/locationView" />
 
     <TextView
-        android:text="TextView"
+        android:id="@+id/txtCielo"
+        android:text="@string/notFound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/lblCielo"
-        android:layout_toRightOf="@+id/lblCielo"
-        android:layout_marginStart="20dp"
-        android:id="@+id/txtCielo" />
+        android:layout_alignBaseline="@id/lblCielo"
+        android:layout_toRightOf="@id/lblCielo"
+        android:layout_marginStart="20dp"/>
+
+    <TextView
+        android:id="@+id/lblTemperatura"
+        android:text="@string/temperatura"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/lblCielo"
+        android:layout_alignStart="@id/locationView" />
+
+    <TextView
+        android:id="@+id/txtTemperatura"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/lblTemperatura"
+        android:layout_toRightOf="@id/lblTemperatura"
+        android:layout_marginStart="20dp" />
+
+    <TextView
+        android:id="@+id/lblPrecipitazioni"
+        android:text="@string/precipitazioni"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/lblTemperatura"
+        android:layout_alignStart="@id/locationView" />
+
+    <TextView
+        android:id="@+id/txtPrecipitazioni"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/lblPrecipitazioni"
+        android:layout_toRightOf="@id/lblPrecipitazioni"
+        android:layout_marginStart="20dp" />
+
+    <TextView
+        android:id="@+id/lblProbabilita"
+        android:text="@string/probabilita"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/lblPrecipitazioni"
+        android:layout_alignStart="@id/locationView" />
+
+    <TextView
+        android:id="@+id/txtProbabilita"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/lblProbabilita"
+        android:layout_toRightOf="@id/lblProbabilita"
+        android:layout_marginStart="20dp" />
+
+    <TextView
+        android:id="@+id/lblAttendibilita"
+        android:text="@string/attendibilita"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/lblProbabilita"
+        android:layout_alignStart="@id/locationView" />
+
+    <TextView
+        android:id="@+id/txtAttendibilita"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/lblAttendibilita"
+        android:layout_toRightOf="@id/lblAttendibilita"
+        android:layout_marginStart="20dp" />
 
 </RelativeLayout>

@@ -8,6 +8,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import java.io.UnsupportedEncodingException;
 
 import eu.lucazanini.arpav.model.Previsione;
+import rx.Observable;
 
 /**
  * Created by luke on 21/12/16.

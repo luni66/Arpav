@@ -5,4 +5,16 @@
     <string name="release_time">13:00</string>
     <string name="first_update_time">16:00</string>
     <string name="second_update_time">09:00</string>
+
+    <string name="hint">Inserisci il comune</string>
+    <!--    <string name="clear_search">Cancella il comune</string>-->
+
+    <string name="notFound">not found</string>
+
+    <string name="cielo">Cielo</string>
+    <string name="temperatura">Temperatura</string>
+    <string name="precipitazioni">Precipitazioni</string>
+    <string name="probabilita">Probabiltà precipitazioni</string>
+    <string name="attendibilita">Attendibilità previsioni</string>
+
 </resources>

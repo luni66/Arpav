@@ -1,7 +1,9 @@
 package eu.lucazanini.arpav.location;
 
 import android.content.Context;
+import android.database.MatrixCursor;
 import android.location.Location;
+import android.support.v4.widget.SimpleCursorAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -45,7 +47,6 @@ public class Town implements TownLocation {
 
     public Town(String name, double latitude, double longitude) {
         this.name = name;
-        this.zone = zone;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -114,7 +115,7 @@ public class Town implements TownLocation {
         this.province = province;
     }
 
-    public static String[] getNames(Context context) {
+/*    public static String[] getNames(Context context) {
         List<Town> towns = loadTowns(context);
         String[] names = new String[towns.size()];
 
@@ -124,9 +125,9 @@ public class Town implements TownLocation {
         }
 
         return names;
-    }
+    }*/
 
-    public static List<Town> loadTowns(Context context){
+/*    public static List<Town> loadTowns(Context context){
 
         List towns = new ArrayList();
 
@@ -163,7 +164,7 @@ public class Town implements TownLocation {
 
 
         return towns;
-    }
+    }*/
 
     public static class NameComparator implements Comparator<Town> {
 
