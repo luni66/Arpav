@@ -19,6 +19,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import eu.lucazanini.arpav.model.strategy.NoVentoStrategy;
+import eu.lucazanini.arpav.model.strategy.VentoStrategy;
+import eu.lucazanini.arpav.model.strategy.WindStrategy;
 import eu.lucazanini.arpav.preference.MockPreferences;
 import eu.lucazanini.arpav.preference.Preferences;
 import timber.log.Timber;
@@ -193,6 +196,7 @@ public class Previsione implements Parcelable {
         return isTest;
     }
 
+    //TODO da verificare
     /**
      * Parses the xml file passed as argument
      *
@@ -235,6 +239,7 @@ public class Previsione implements Parcelable {
                             scadenza.setData(parser.getAttributeValue(null, Meteogramma.Scadenza.ATTR_DATA));
                         } else if (meteogramma != null && tagName.equalsIgnoreCase(Meteogramma.Scadenza.TAG_PREVISIONE)) {
                             String title = parser.getAttributeValue(null, Meteogramma.Scadenza.ATTR_TITLE);
+                            Timber.d("TITLE "+title);
                             switch (title) {
                                 case Meteogramma.Scadenza.SIMBOLO:
                                     scadenza.setSimbolo(title);
@@ -256,6 +261,9 @@ public class Previsione implements Parcelable {
                                     break;
                                 case Meteogramma.Scadenza.QUOTA_NEVE:
                                     scadenza.setQuotaNeve(title);
+                                    break;
+                                case WindStrategy.VENTO:
+                                    scadenza.setProperty(Meteogramma.Scadenza.VENTO, title);
                                     break;
                                 case Meteogramma.Scadenza.ATTENDIBILITA:
                                     scadenza.setAttendibilita(title);
@@ -364,11 +372,21 @@ public class Previsione implements Parcelable {
                                 case Meteogramma.Scadenza.CIELO:
                                     scadenza.setCielo(value);
                                     break;
+                                case Meteogramma.Scadenza.TEMPERATURA:
+                                    scadenza.setTemperatura2000(value);
+                                    scadenza.setProperty(Meteogramma.Scadenza.TEMPERATURA, value);
+                                    break;
+                                case Meteogramma.Scadenza.TEMPERATURA_1500:
+                                    scadenza.setTemperatura2000(value);
+                                    scadenza.setProperty(Meteogramma.Scadenza.TEMPERATURA_1500, value);
+                                    break;
                                 case Meteogramma.Scadenza.TEMPERATURA_2000:
                                     scadenza.setTemperatura2000(value);
+                                    scadenza.setProperty(Meteogramma.Scadenza.TEMPERATURA_2000, value);
                                     break;
                                 case Meteogramma.Scadenza.TEMPERATURA_3000:
                                     scadenza.setTemperatura3000(value);
+                                    scadenza.setProperty(Meteogramma.Scadenza.TEMPERATURA_3000, value);
                                     break;
                                 case Meteogramma.Scadenza.PRECIPITAZIONI:
                                     scadenza.setPrecipitazioni(value);
@@ -379,6 +397,12 @@ public class Previsione implements Parcelable {
                                 case Meteogramma.Scadenza.QUOTA_NEVE:
                                     scadenza.setQuotaNeve(value);
                                     break;
+                                case Meteogramma.Scadenza.VENTO:
+                                    scadenza.setProperty(Meteogramma.Scadenza.VENTO, value);
+                                    break;
+//                                case WindStrategy.VENTO:
+//                                    scadenza.setVentoStrategy(new VentoStrategy(value));
+//                                    break;
                                 case Meteogramma.Scadenza.ATTENDIBILITA:
                                     scadenza.setAttendibilita(value);
                                     break;
@@ -425,6 +449,9 @@ public class Previsione implements Parcelable {
                         } else if (tagName.equalsIgnoreCase(Previsione.TAG_METEOGRAMMA)) {
                             meteogramma = null;
                         } else if (tagName.equalsIgnoreCase(Meteogramma.TAG_SCADENZA)) {
+//                            if(scadenza.getVentoStrategy() == null){
+//                                scadenza.setVentoStrategy(new NoVentoStrategy());
+//                            }
                         } else if (tagName.equalsIgnoreCase(Meteogramma.Scadenza.TAG_PREVISIONE)) {
                         }
                         tagName = "";

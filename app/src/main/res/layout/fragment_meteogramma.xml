@@ -1,119 +1,244 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rootlayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="4dp">
+    android:padding="8dp">
 
     <android.support.v7.widget.AppCompatAutoCompleteTextView
-        android:id="@+id/locationView"
-        android:layout_width="match_parent"
+        android:id="@+id/text_location"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         android:background="@android:color/transparent"
         android:singleLine="true"
         android:maxLines="1"
         android:imeOptions="actionNext"
-        android:hint="@string/hint"/>
+        android:hint="@string/hint" />
 
     <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/skyView"
-        android:layout_width="150dp"
-        android:layout_height="170dp"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/locationView"
-        android:layout_marginTop="20dp"/>
+        android:id="@+id/morningSkyView"
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/afternoonSkyView"
+        app:layout_constraintTop_toBottomOf="@+id/text_location"
+        android:layout_marginTop="8dp"
+        tools:layout_editor_absoluteX="56dp" />
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/afternoonSkyView"
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintStart_toEndOf="@id/morningSkyView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_location"
+        android:layout_marginTop="8dp"
+        tools:layout_editor_absoluteX="212dp" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/centerLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5"
+        tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="184dp" />
 
     <TextView
         android:id="@+id/lblCielo"
         android:text="@string/cielo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_below="@id/skyView"
-        android:layout_alignStart="@id/locationView" />
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/morningSkyView"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
 
     <TextView
-        android:id="@+id/txtCielo"
+        android:id="@+id/text_sky"
         android:text="@string/notFound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/lblCielo"
-        android:layout_toRightOf="@id/lblCielo"
-        android:layout_marginStart="20dp"/>
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblCielo"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/lblTemperatura"
         android:text="@string/temperatura"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/lblCielo"
-        android:layout_alignStart="@id/locationView" />
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblCielo"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
 
     <TextView
         android:id="@+id/txtTemperatura"
         android:text="@string/notFound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/lblTemperatura"
-        android:layout_toRightOf="@id/lblTemperatura"
-        android:layout_marginStart="20dp" />
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblTemperatura"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:id="@+id/lblTemperatura1500"
+        android:text="@string/temperatura_1500"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblTemperatura"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/txtTemperatura1500"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblTemperatura1500"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:id="@+id/lblTemperatura2000"
+        android:text="@string/temperatura_2000"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblTemperatura1500"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/txtTemperatura2000"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblTemperatura2000"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:id="@+id/lblTemperatura3000"
+        android:text="@string/temperatura_3000"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblTemperatura2000"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/txtTemperatura3000"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblTemperatura3000"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/lblPrecipitazioni"
         android:text="@string/precipitazioni"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/lblTemperatura"
-        android:layout_alignStart="@id/locationView" />
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblTemperatura3000"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
 
     <TextView
-        android:id="@+id/txtPrecipitazioni"
+        android:id="@+id/text_rain"
         android:text="@string/notFound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/lblPrecipitazioni"
-        android:layout_toRightOf="@id/lblPrecipitazioni"
-        android:layout_marginStart="20dp" />
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblPrecipitazioni"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/lblProbabilita"
         android:text="@string/probabilita"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/lblPrecipitazioni"
-        android:layout_alignStart="@id/locationView" />
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblPrecipitazioni"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
 
     <TextView
         android:id="@+id/txtProbabilita"
         android:text="@string/notFound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/lblProbabilita"
-        android:layout_toRightOf="@id/lblProbabilita"
-        android:layout_marginStart="20dp" />
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblProbabilita"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:id="@+id/lblQuotaNeve"
+        android:text="@string/quota_neve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblProbabilita"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/text_snow"
+        android:text="@string/notFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblQuotaNeve"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
 
     <TextView
         android:id="@+id/lblAttendibilita"
         android:text="@string/attendibilita"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/lblProbabilita"
-        android:layout_alignStart="@id/locationView" />
+        app:layout_constraintRight_toLeftOf="@+id/centerLine"
+        app:layout_constraintTop_toBottomOf="@+id/lblQuotaNeve"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp" />
 
     <TextView
-        android:id="@+id/txtAttendibilita"
+        android:id="@+id/text_reliability"
         android:text="@string/notFound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/lblAttendibilita"
-        android:layout_toRightOf="@id/lblAttendibilita"
-        android:layout_marginStart="20dp" />
+        android:layout_marginLeft="8dp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/lblAttendibilita"
+        app:layout_constraintLeft_toLeftOf="@+id/centerLine"
+        android:layout_marginStart="8dp" />
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

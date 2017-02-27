@@ -13,8 +13,14 @@
 
     <string name="cielo">Cielo</string>
     <string name="temperatura">Temperatura</string>
+    <string name="temperatura_1500">Temperatura 1500 m.</string>
+    <string name="temperatura_2000">Temperatura 2000 m.</string>
+    <string name="temperatura_3000">Temperatura 3000 m.</string>
     <string name="precipitazioni">Precipitazioni</string>
     <string name="probabilita">Probabiltà precipitazioni</string>
+    <string name="quota_neve">Quota neve</string>
     <string name="attendibilita">Attendibilità previsioni</string>
+
+    <string name="current_location">current_location</string>
 
 </resources>

@@ -27,6 +27,8 @@ import timber.log.Timber;
 
 import static eu.lucazanini.arpav.model.Meteogramma.SCADENZA_IDX;
 import static eu.lucazanini.arpav.model.Previsione.MG_IDX;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -80,8 +82,12 @@ public class BulletinRequestTest {
                                 Meteogramma.Scadenza scadenza = scadenze[j];
                                 assertThat(scadenza, is(notNullValue()));
                                 assertThat(scadenza.getData(), not(isEmptyOrNullString()));
+//                                assertThat(scadenza.getVentoStrategy(), is(notNullValue()));
+//                                assertThat(scadenza.getProperty(Meteogramma.Scadenza.VENTO),is(notNullValue()));
                             }
                         }
+                        assertTrue(meteogrammi[6].getScadenza()[0].getProperty(Meteogramma.Scadenza.VENTO).length()>0);
+                        assertEquals(meteogrammi[6].getScadenza()[0].getProperty(Meteogramma.Scadenza.VENTO), "Deboli meridionali");
 
                         if (response.getLanguage() == Previsione.Language.IT) {
                             Bollettino bollettino = response.getMeteoVeneto();
