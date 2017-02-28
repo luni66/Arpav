@@ -6,8 +6,6 @@ import android.os.Parcelable;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.lucazanini.arpav.model.strategy.WindStrategy;
-
 /**
  * Created by luke on 16/12/16
  */

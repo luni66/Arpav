@@ -1,6 +1,5 @@
 package eu.lucazanini.arpav.model;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Xml;
@@ -8,7 +7,6 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.DateFormat;
@@ -19,10 +17,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import eu.lucazanini.arpav.model.strategy.NoVentoStrategy;
-import eu.lucazanini.arpav.model.strategy.VentoStrategy;
-import eu.lucazanini.arpav.model.strategy.WindStrategy;
-import eu.lucazanini.arpav.preference.MockPreferences;
 import eu.lucazanini.arpav.preference.Preferences;
 import timber.log.Timber;
 
@@ -66,6 +60,68 @@ public class Previsione implements Parcelable {
         UPDATE_TIMES[0] = new UpdateTime(RELEASE_TIME);
         UPDATE_TIMES[1] = new UpdateTime(FIRST_UPDATE_TIME);
         UPDATE_TIMES[2] = new UpdateTime(SECOND_UPDATE_TIME);
+    }
+
+    public static String getUrl(Language language){
+        switch (language) {
+            case EN:
+                return URL_EN;
+            case FR:
+                return URL_FR;
+            case DE:
+                return URL_DE;
+            case IT:
+            default:
+                return URL_IT;
+        }
+    }
+
+    public Previsione(Language language, String text){
+        this.language = language;
+        switch (language) {
+            case EN:
+                uri = URI_EN;
+                url = URL_EN;
+                break;
+            case FR:
+                uri = URI_FR;
+                url = URL_FR;
+                break;
+            case DE:
+                uri = URI_DE;
+                url = URL_DE;
+                break;
+            case IT:
+            default:
+                uri = URI_IT;
+                url = URL_IT;
+        }
+        isTest = false;
+        parse(text);
+    }
+
+    public Previsione(String url, String text){
+        this.url=url;
+        switch (url) {
+            case URL_EN:
+                uri = URI_EN;
+                language=Language.EN;
+                break;
+            case URL_FR:
+                uri = URI_FR;
+                language=Language.FR;
+                break;
+            case URL_DE:
+                uri = URI_DE;
+                language=Language.DE;
+                break;
+            case URL_IT:
+            default:
+                uri = URI_IT;
+                language=Language.IT;
+        }
+        isTest = false;
+        parse(text);
     }
 
     public static final Creator<Previsione> CREATOR = new Creator<Previsione>() {
@@ -118,6 +174,7 @@ public class Previsione implements Parcelable {
         isTest = false;
     }
 
+    @Deprecated
     public Previsione(Preferences preferences) {
         this.language = preferences.getDefaultLanguage();
         uri = URI_IT;
@@ -125,6 +182,7 @@ public class Previsione implements Parcelable {
         isTest = false;
     }
 
+/*    @Deprecated
     public Previsione(Language language, String assets) {
         this.language = language;
         url = assets;
@@ -143,8 +201,9 @@ public class Previsione implements Parcelable {
                 uri = URI_IT;
         }
         isTest = true;
-    }
+    }*/
 
+    @Deprecated
     public Previsione(Language language) {
         this.language = language;
         switch (language) {
@@ -196,12 +255,10 @@ public class Previsione implements Parcelable {
         return isTest;
     }
 
-    //TODO da verificare
-    /**
+/*    //TODO da verificare
+    *//**
      * Parses the xml file passed as argument
-     *
-     * @param bis
-     */
+     *//*
     public void parse(BufferedInputStream bis) {
         String tagName = null;
         Bollettino meteoVeneto = null;
@@ -325,7 +382,7 @@ public class Previsione implements Parcelable {
         } catch (IOException e) {
             Timber.e("error parsing xml %s", e.toString());
         }
-    }
+    }*/
 
     public void parse(String text) {
         String tagName = null;
@@ -400,9 +457,6 @@ public class Previsione implements Parcelable {
                                 case Meteogramma.Scadenza.VENTO:
                                     scadenza.setProperty(Meteogramma.Scadenza.VENTO, value);
                                     break;
-//                                case WindStrategy.VENTO:
-//                                    scadenza.setVentoStrategy(new VentoStrategy(value));
-//                                    break;
                                 case Meteogramma.Scadenza.ATTENDIBILITA:
                                     scadenza.setAttendibilita(value);
                                     break;
@@ -449,9 +503,6 @@ public class Previsione implements Parcelable {
                         } else if (tagName.equalsIgnoreCase(Previsione.TAG_METEOGRAMMA)) {
                             meteogramma = null;
                         } else if (tagName.equalsIgnoreCase(Meteogramma.TAG_SCADENZA)) {
-//                            if(scadenza.getVentoStrategy() == null){
-//                                scadenza.setVentoStrategy(new NoVentoStrategy());
-//                            }
                         } else if (tagName.equalsIgnoreCase(Meteogramma.Scadenza.TAG_PREVISIONE)) {
                         }
                         tagName = "";

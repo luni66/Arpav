@@ -16,16 +16,22 @@ import rx.Observable;
 
 public class BulletinRequest extends Request<Previsione> {
     private final Response.Listener<Previsione> mListener;
+    private String url;
 
     public BulletinRequest(int method, String url, Response.Listener<Previsione> listener,
                          Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         mListener = listener;
+        this.url=url;
     }
 
     public BulletinRequest(String url, Response.Listener<Previsione> listener, Response.ErrorListener errorListener) {
         this(Method.GET, url, listener, errorListener);
     }
+
+//    public BulletinRequest(Previsione.Language language, Response.Listener<Previsione> listener, Response.ErrorListener errorListener) {
+//        this(Method.GET, Previsione.getUrl(language), listener, errorListener);
+//    }
 
     @Override
     protected Response<Previsione> parseNetworkResponse(NetworkResponse response) {
@@ -38,8 +44,9 @@ public class BulletinRequest extends Request<Previsione> {
             parsed = new String(response.data);
         }
 
-        previsione=new Previsione(Previsione.Language.IT);
-        previsione.parse(parsed);
+//        previsione=new Previsione(Previsione.Language.IT);
+//        previsione.parse(parsed);
+        previsione = new Previsione(url, parsed);
 
         return Response.success(previsione, HttpHeaderParser.parseCacheHeaders(response));
     }

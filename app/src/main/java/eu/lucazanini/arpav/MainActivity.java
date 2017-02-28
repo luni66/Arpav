@@ -16,22 +16,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.support.v7.app.ActionBar;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
-
-import eu.lucazanini.arpav.model.Bollettino;
-import eu.lucazanini.arpav.model.Meteogramma;
-import eu.lucazanini.arpav.model.Previsione;
-import eu.lucazanini.arpav.network.BulletinRequest;
-import eu.lucazanini.arpav.network.VolleySingleton;
-import eu.lucazanini.arpav.task.ReportTask;
-import timber.log.Timber;
-
-import static eu.lucazanini.arpav.model.Meteogramma.SCADENZA_IDX;
-import static eu.lucazanini.arpav.model.Previsione.MG_IDX;
-
 public class MainActivity extends AppCompatActivity {
 
     static final int NUM_ITEMS = 6;

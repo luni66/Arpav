@@ -4,7 +4,6 @@ package eu.lucazanini.arpav;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
@@ -39,7 +38,6 @@ import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import eu.lucazanini.arpav.task.ReportTask;
 import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
@@ -116,11 +114,14 @@ public class MeteogrammaFragment extends Fragment {
 
         String townName = getCurrentLocation();
 
-        if (townName != null) {
+        if (townName != null && !townName.equals("")) {
             actvLocation.setText(townName);
             CurrentLocation currentLocation = CurrentLocation.getInstance();
-            currentLocation.setTown(TownList.getInstance(context).getTown(townName));
-            loadData();
+            Town town = TownList.getInstance(context).getTown(townName);
+            if (town != null) {
+                currentLocation.setTown(TownList.getInstance(context).getTown(townName));
+                loadData();
+            }
         }
 
         java.util.Observable currentLocation = CurrentLocation.getInstance();
@@ -237,11 +238,11 @@ public class MeteogrammaFragment extends Fragment {
     }
 
     private void loadData() {
-        ReportTask reportTask = new ReportTask(getContext());
+//        ReportTask reportTask = new ReportTask(getContext());
         final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
         final ImageLoader mImageLoader = volleyApp.getImageLoader();
 
-        BulletinRequest bulletinRequest = new BulletinRequest(Request.Method.GET, Previsione.URL_IT,
+        BulletinRequest bulletinRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
                 new Response.Listener<Previsione>() {
 
                     //Action
@@ -311,12 +312,12 @@ public class MeteogrammaFragment extends Fragment {
                             level[1] = " (1500 m.)";
                             level[2] = " (2000 m.)";
                             level[3] = " (3000 m.)";
-                            temperature1="";
-                            temperature2="";
+                            temperature1 = "";
+                            temperature2 = "";
                             int count = 0;
                             int index = 0;
                             while (count < 2 && index < 4) {
-                                if (temperatures[index]!=null && !temperatures[index].equals("")) {
+                                if (temperatures[index] != null && !temperatures[index].equals("")) {
                                     if (temperature1.equals("")) {
                                         temperature1 = temperatures[index] + level[index];
                                     } else if (temperature2.equals("")) {
@@ -342,22 +343,22 @@ public class MeteogrammaFragment extends Fragment {
                             tvWind.setText(wind);
                             tvReliability.setText(reliability);
 
-                            if(temperature2.equals("")) {
+                            if (temperature2.equals("")) {
                                 ButterKnife.apply(tvTemperature2, GONE);
                                 ButterKnife.apply(imgTemperature2, GONE);
                             }
 
-                            if(snow == null || snow.equals("")) {
+                            if (snow == null || snow.equals("")) {
                                 ButterKnife.apply(tvSnow, GONE);
                                 ButterKnife.apply(imgSnow, GONE);
                             }
 
-                            if(wind==null || wind.equals("")) {
+                            if (wind == null || wind.equals("")) {
                                 ButterKnife.apply(tvWind, GONE);
                                 ButterKnife.apply(imgWind, GONE);
                             }
 
-                            if(reliability==null || reliability.equals("")) {
+                            if (reliability == null || reliability.equals("")) {
                                 ButterKnife.apply(tvReliability, GONE);
                             }
                         }

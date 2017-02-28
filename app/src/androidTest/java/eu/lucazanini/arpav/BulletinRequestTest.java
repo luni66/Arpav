@@ -1,16 +1,13 @@
 package eu.lucazanini.arpav;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.ImageRequest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +19,6 @@ import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import eu.lucazanini.arpav.task.ReportTask;
 import timber.log.Timber;
 
 import static eu.lucazanini.arpav.model.Meteogramma.SCADENZA_IDX;
@@ -49,7 +45,7 @@ public class BulletinRequestTest {
     public void volleyDownload() {
         final Context appContext = InstrumentationRegistry.getTargetContext();
 
-        ReportTask reportTask = new ReportTask(appContext);
+//        ReportTask reportTask = new ReportTask(appContext);
 
 //        reportTask.doRequest();
 

@@ -20,9 +20,10 @@ public class ReportService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        ReportTask reportTask = new ReportTask(this);
+        // deprecated
+/*        ReportTask reportTask = new ReportTask(this);
         //TODO custom language
-        reportTask.doTask(Previsione.Language.IT);
+        reportTask.doTask(Previsione.Language.IT);*/
     }
 
     public static Intent getIntent(Context context) {
