@@ -1,6 +1,5 @@
 package eu.lucazanini.arpav;
 
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,23 +11,33 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.Request;
+import com.android.volley.Cache;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.jakewharton.rxbinding.widget.AdapterViewItemClickEvent;
 import com.jakewharton.rxbinding.widget.RxAutoCompleteTextView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 
+import java.io.UnsupportedEncodingException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
@@ -37,8 +46,8 @@ import eu.lucazanini.arpav.model.Bollettino;
 import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
+import eu.lucazanini.arpav.network.ImageCacheManager;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import timber.log.Timber;
@@ -46,17 +55,20 @@ import timber.log.Timber;
 import static eu.lucazanini.arpav.model.Meteogramma.SCADENZA_IDX;
 import static eu.lucazanini.arpav.model.Previsione.MG_IDX;
 
-;
-
 /**
  * Created by luke on 23/01/17.
  */
 
-public class MeteogrammaFragment extends Fragment {
+public class MeteogrammaFragment extends Fragment implements Observer {
 
-    private Context context;
-    private Unbinder unbinder;
-
+    public static final String NUMBER_PAGE = "number_page";
+    protected static final int FIRST_DAY = 0;
+    protected static final int SECOND_MORNING_DAY = 1;
+    protected static final int SECOND_AFTERNOON_DAY = 2;
+    protected static final int THIRD_MORNING_DAY = 3;
+    protected static final int THIRD_AFTERNOON_DAY = 4;
+    protected static final int FOURTH_DAY = 5;
+    protected static final int FIFTH_DAY = 6;
     @BindView(R.id.text_location)
     protected AppCompatAutoCompleteTextView actvLocation;
     @BindView(R.id.image_daySky)
@@ -75,44 +87,67 @@ public class MeteogrammaFragment extends Fragment {
     protected TextView tvWind;
     @BindView(R.id.text_reliability)
     protected TextView tvReliability;
-
     @BindView(R.id.image_temperature2)
-    ImageView imgTemperature2;
+    protected ImageView imgTemperature2;
     @BindView(R.id.image_snow)
-    ImageView imgSnow;
+    protected ImageView imgSnow;
     @BindView(R.id.image_wind)
-    ImageView imgWind;
-
+    protected ImageView imgWind;
+    @BindView(R.id.save_location)
+    protected Button btnSaveLocation;
+    private Context context;
+    private Unbinder unbinder;
     private String location, daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability;
+    private int mgIndex;
 
-    //TextView tvDaySky;
-    Subscription actvSub, actvSub2;
-/*    @BindView(R.id.menu_item_search)
-    SearchView searchView;*/
+    private Subscription actvSub, actvSub2;
 
-/*    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        setRetainInstance(true);
-        setHasOptionsMenu(true);
-    }*/
+    private CurrentLocation currentLocation;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getContext();
+
+        Bundle args = getArguments();
+        int numberPage = args.getInt(NUMBER_PAGE);
+        mgIndex = numberPage;
+
+        currentLocation = CurrentLocation.getInstance();
+        currentLocation.addObserver(this);
+
+//        loadData();
+
+        Timber.d("fragment %s observers currentLocation", mgIndex);
+
     }
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        return super.onCreateView(inflater, container, savedInstanceState);
+        super.onCreateView(inflater, container, savedInstanceState);
+
         View v = inflater.inflate(R.layout.fragment_mg_first_day, container, false);
-//        v.setTag("test");
 
         unbinder = ButterKnife.bind(this, v);
 
-        String townName = getCurrentLocation();
+        Town town = currentLocation.getTown();
+
+        if (town == null) {
+            String townName = getPrefsLocation();
+            town = TownList.getInstance(context).getTown(townName);
+            if (town != null) {
+                currentLocation.setTown(town);
+                actvLocation.setText(town.getName());
+//                loadData();
+            }
+        } else {
+            actvLocation.setText(town.getName());
+//            loadData();
+        }
+
+/*        String townName = getPrefsLocation();
 
         if (townName != null && !townName.equals("")) {
             actvLocation.setText(townName);
@@ -122,29 +157,22 @@ public class MeteogrammaFragment extends Fragment {
                 currentLocation.setTown(TownList.getInstance(context).getTown(townName));
                 loadData();
             }
-        }
+        }*/
 
-        java.util.Observable currentLocation = CurrentLocation.getInstance();
-        currentLocation.addObserver(new Observer() {
-            @Override
-            public void update(java.util.Observable o, Object arg) {
-                String name = (String) arg;
-                Timber.d("OBSERVER " + name);
-                loadData();
-            }
-        });
+//        java.util.Observable currentLocation = CurrentLocation.getInstance();
+//        currentLocation.addObserver(new Observer() {
+//            @Override
+//            public void update(java.util.Observable o, Object arg) {
+//                String name = (String) arg;
+//                Timber.d("OBSERVER " + name);
+//                loadData();
+//            }
+//        });
 
-//        afternoonImage = (NetworkImageView)v.findViewById(R.id.networkImageView);
-//        tvDaySky=(TextView)v.findViewById(R.id.txtCielo);
-
-//        List<Town> towns = loadTowns();
-
-//        String[] names = Town.getNames(getContext());
 
         String[] names = TownList.getInstance(getContext()).getNames();
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, names);
-//        actvLocation.setThreshold(2);
         actvLocation.setAdapter(adapter);
 
 //        actvLocation.addTextChangedListener(new TextWatcher() {
@@ -167,7 +195,6 @@ public class MeteogrammaFragment extends Fragment {
         actvSub2 = RxTextView.textChanges(actvLocation).subscribe(new Action1<CharSequence>() {
             @Override
             public void call(CharSequence charSequence) {
-                Timber.d("textChanges " + actvLocation.getText());
             }
         });
 
@@ -178,21 +205,15 @@ public class MeteogrammaFragment extends Fragment {
 //            }
 //        });
 
-        Observable test = RxAutoCompleteTextView.itemClickEvents(actvLocation);
+//        Observable test = RxAutoCompleteTextView.itemClickEvents(actvLocation);
 
         actvSub = RxAutoCompleteTextView.itemClickEvents(actvLocation).subscribe(new Action1<AdapterViewItemClickEvent>() {
             @Override
             public void call(AdapterViewItemClickEvent adapterViewItemClickEvent) {
                 String name = actvLocation.getText().toString();
 
-                Timber.d("itemClickEvents " + name);
-
-                CurrentLocation currentLocation = CurrentLocation.getInstance();
                 currentLocation.setTown(TownList.getInstance(context).getTown(name));
 
-                saveCurrentLocation(name);
-
-                // Check if no view has focus:
                 View view = getActivity().getCurrentFocus();
                 if (view != null) {
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -215,17 +236,21 @@ public class MeteogrammaFragment extends Fragment {
 
     }
 
-    private void saveCurrentLocation(String townName) {
-//        Context context = getActivity();
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.current_location), townName);
-        editor.commit();
+    @OnClick(R.id.save_location)
+    protected void savePrefsLocation() {
+        String townName = actvLocation.getText().toString();
 
+        Town town = TownList.getInstance(context).getTown(townName);
+
+        if (town != null) {
+            SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.current_location), townName);
+            editor.commit();
+        }
     }
 
-    private String getCurrentLocation() {
-//        Context context = getActivity();
+    private String getPrefsLocation() {
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         String townName = sharedPref.getString(getString(R.string.current_location), "");
         return townName;
@@ -233,14 +258,40 @@ public class MeteogrammaFragment extends Fragment {
 
     private List<Town> loadTowns() {
         List<Town> towns = TownList.getInstance(getContext()).loadTowns();
-//        towns = Town.loadTowns(getContext());
         return towns;
     }
 
     private void loadData() {
-//        ReportTask reportTask = new ReportTask(getContext());
+
         final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
         final ImageLoader mImageLoader = volleyApp.getImageLoader();
+
+        Cache.Entry entry = volleyApp.getRequestQueue().getCache().get(Previsione.getUrl(Previsione.Language.IT));
+
+        if(entry!=null){
+            Timber.d("found file in cache ");
+            Date date = new Date(entry.serverDate);
+            Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
+            Timber.d("serverDate " + format.format(date));
+
+            Map<String, String> responseHeaders = entry.responseHeaders;
+
+  PrettyPrintingMap test = new PrettyPrintingMap(responseHeaders);
+            Timber.d(test.toString());
+
+
+//            String s = new String(entry.data);
+//            Timber.d(s);
+
+            Previsione previsione = new Previsione(Previsione.URL_IT, new String(entry.data));
+
+            if(previsione.isUpdate()){
+
+            }
+
+        } else {
+            Timber.d("not found file in cache");
+        }
 
         BulletinRequest bulletinRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
                 new Response.Listener<Previsione>() {
@@ -255,9 +306,6 @@ public class MeteogrammaFragment extends Fragment {
 
                     @Override
                     public void onResponse(Previsione response) {
-
-                        Timber.d("found previsione for %s", response.getDataAggiornamento());
-
 
                         Meteogramma[] meteogrammi = response.getMeteogramma();
                         for (int i = 0; i < MG_IDX; i++) {
@@ -277,7 +325,7 @@ public class MeteogrammaFragment extends Fragment {
                             }
                         }
 
-                        for (int i = 0; i < MG_IDX; i++) {
+/*                        for (int i = 0; i < MG_IDX; i++) {
                             for (int j = 0; j < SCADENZA_IDX; j++) {
                                 String imgUrl = response.getMeteogramma()[i].getScadenza()[j].getSimbolo();
                                 mImageLoader.get(imgUrl, new ImageLoader.ImageListener() {
@@ -293,20 +341,18 @@ public class MeteogrammaFragment extends Fragment {
                                     }
                                 });
                             }
-                        }
+                        }*/
 
-                        CurrentLocation currentLocation = CurrentLocation.getInstance();
                         if (currentLocation.isDefined()) {
                             Town town = currentLocation.getTown();
                             int zoneIdx = town.getZone() - 1;
 
-                            daySkyUrl = response.getMeteogramma()[zoneIdx].getScadenza()[0].getSimbolo();
-                            daySky = response.getMeteogramma()[zoneIdx].getScadenza()[0].getCielo();
+                            daySky = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getCielo();
                             String[] temperatures = new String[4];
-                            temperatures[0] = response.getMeteogramma()[zoneIdx].getScadenza()[0].getProperty(Meteogramma.Scadenza.TEMPERATURA);
-                            temperatures[1] = response.getMeteogramma()[zoneIdx].getScadenza()[0].getProperty(Meteogramma.Scadenza.TEMPERATURA_1500);
-                            temperatures[2] = response.getMeteogramma()[zoneIdx].getScadenza()[0].getProperty(Meteogramma.Scadenza.TEMPERATURA_2000);
-                            temperatures[3] = response.getMeteogramma()[zoneIdx].getScadenza()[0].getProperty(Meteogramma.Scadenza.TEMPERATURA_3000);
+                            temperatures[0] = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA);
+                            temperatures[1] = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA_1500);
+                            temperatures[2] = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA_2000);
+                            temperatures[3] = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA_3000);
                             String[] level = new String[4];
                             level[0] = "";
                             level[1] = " (1500 m.)";
@@ -327,59 +373,76 @@ public class MeteogrammaFragment extends Fragment {
                                 }
                                 index++;
                             }
-                            rain = response.getMeteogramma()[zoneIdx].getScadenza()[0].getPrecipitazioni();
-                            probability = response.getMeteogramma()[zoneIdx].getScadenza()[0].getProbabilitaPrecipitazione();
-                            snow = response.getMeteogramma()[zoneIdx].getScadenza()[0].getQuotaNeve();
-                            wind = response.getMeteogramma()[zoneIdx].getScadenza()[0].getProperty(Meteogramma.Scadenza.VENTO);
-                            reliability = response.getMeteogramma()[zoneIdx].getScadenza()[0].getAttendibilita();
+                            rain = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getPrecipitazioni();
+                            probability = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getProbabilitaPrecipitazione();
+                            snow = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getQuotaNeve();
+                            wind = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getProperty(Meteogramma.Scadenza.VENTO);
+                            reliability = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getAttendibilita();
 
-
-                            imgDaySky.setImageUrl(daySkyUrl, mImageLoader);
-                            tvDaySky.setText(daySky);
-                            tvTemperature1.setText(temperature1);
-                            tvTemperature2.setText(temperature2);
-                            tvRain.setText(rain + " (" + probability + ")");
-                            tvSnow.setText(snow);
-                            tvWind.setText(wind);
-                            tvReliability.setText(reliability);
-
-                            if (temperature2.equals("")) {
-                                ButterKnife.apply(tvTemperature2, GONE);
-                                ButterKnife.apply(imgTemperature2, GONE);
+                            try {
+                                tvDaySky.setText(daySky);
+                                tvTemperature1.setText(temperature1);
+                                tvTemperature2.setText(temperature2);
+                                tvRain.setText(rain + " (" + probability + ")");
+                                tvSnow.setText(snow);
+                                tvWind.setText(wind);
+                                tvReliability.setText(reliability);
+                            } catch (NullPointerException e) {
+                                Timber.e(e.toString());
                             }
 
-                            if (snow == null || snow.equals("")) {
-                                ButterKnife.apply(tvSnow, GONE);
-                                ButterKnife.apply(imgSnow, GONE);
-                            }
+//                            if (temperature2.equals("")) {
+//                                ButterKnife.apply(tvTemperature2, GONE);
+//                                ButterKnife.apply(imgTemperature2, GONE);
+//                            }
+//
+//                            if (snow == null || snow.equals("")) {
+//                                ButterKnife.apply(tvSnow, GONE);
+//                                ButterKnife.apply(imgSnow, GONE);
+//                            }
+//
+//                            if (wind == null || wind.equals("")) {
+//                                ButterKnife.apply(tvWind, GONE);
+//                                ButterKnife.apply(imgWind, GONE);
+//                            }
+//
+//                            if (reliability == null || reliability.equals("")) {
+//                                ButterKnife.apply(tvReliability, GONE);
+//                            }
 
-                            if (wind == null || wind.equals("")) {
-                                ButterKnife.apply(tvWind, GONE);
-                                ButterKnife.apply(imgWind, GONE);
-                            }
+                            daySkyUrl = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getSimbolo();
+                            mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
+                                @Override
+                                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                                    try {
+                                        imgDaySky.setImageUrl(daySkyUrl, mImageLoader);
+                                    } catch (NullPointerException e) {
+                                        Timber.e(e.toString());
+                                    }
+                                }
 
-                            if (reliability == null || reliability.equals("")) {
-                                ButterKnife.apply(tvReliability, GONE);
-                            }
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Timber.e("Image Load Error: " + error.getMessage());
+                                }
+                            });
+
+//                            ImageLoader imageLoader = ImageCacheManager.getInstance().getImageLoader();
+//                            if(imageLoader!=null)
+//                            imgDaySky.setImageUrl(daySkyUrl, imageLoader);
+
+
                         }
-
-
-//                        PagerTitleStrip pagerTitleStrip = (PagerTitleStrip) getActivity().findViewById(R.id.pager_title_strip);
-
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Timber.e(error);
             }
-        });
+        }, Integer.toString(mgIndex));
 
         volleyApp.addToRequestQueue(bulletinRequest);
-
-        //TODO https://www.javadoc.io/doc/io.reactivex/rxjava/1.2.6 vedi create e fromEmitter per CurrentLocation
-
     }
-
 
 
 /*    @Override
@@ -393,14 +456,57 @@ public class MeteogrammaFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        currentLocation.deleteObserver(this);
+        Timber.d("fragment %s doesn't observe currentLocation", mgIndex);
+
+        String tag = Integer.toString(mgIndex);
+        final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
+        volleyApp.getRequestQueue().cancelAll(tag);
 //        actvSub.unsubscribe();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        // TODO verificare se senza unbinder non è necessario try/catch per view
         unbinder.unbind();
         actvSub.unsubscribe();
         actvSub2.unsubscribe();
+    }
+
+    @Override
+    public void update(java.util.Observable o, Object arg) {
+        if(actvLocation!=null)
+            try {
+                actvLocation.setText((String) arg);
+            } catch (NullPointerException e) {
+           Timber.e(e.toString());
+            }
+        loadData();
+    }
+
+    private class PrettyPrintingMap<K, V> {
+        private Map<K, V> map;
+
+        public PrettyPrintingMap(Map<K, V> map) {
+            this.map = map;
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            Iterator<Map.Entry<K, V>> iter = map.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<K, V> entry = iter.next();
+                sb.append(entry.getKey());
+                sb.append('=').append('"');
+                sb.append(entry.getValue());
+                sb.append('"');
+                if (iter.hasNext()) {
+                    sb.append(',').append(' ');
+                }
+            }
+            return sb.toString();
+
+        }
     }
 }

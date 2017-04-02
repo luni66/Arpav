@@ -667,6 +667,41 @@ public class Previsione implements Parcelable {
         IT, EN, FR, DE
     }
 
+    public long getCacheExpiration(){
+        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+        Calendar nextTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+
+        double currentHour = currentTime.get(Calendar.HOUR_OF_DAY) + currentTime.get(Calendar.MINUTE) / 60D;
+
+        if (currentHour >= 0 && currentHour < 9) {
+//            nextTime.add(Calendar.DAY_OF_YEAR, -1);
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[2].getHours()-1);
+            nextTime.set(Calendar.MINUTE, UPDATE_TIMES[2].getMinutes());
+            nextTime.set(Calendar.SECOND, UPDATE_TIMES[2].getSeconds());
+            nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[2].getMilliSeconds());
+        } else if (currentHour >= 9 && currentHour < 13) {
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[0].getHours()-1);
+            nextTime.set(Calendar.MINUTE, UPDATE_TIMES[0].getMinutes());
+            nextTime.set(Calendar.SECOND, UPDATE_TIMES[0].getSeconds());
+            nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[0].getMilliSeconds());
+        } else if (currentHour >= 13 && currentHour < 16) {
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[1].getHours()-1);
+            nextTime.set(Calendar.MINUTE, UPDATE_TIMES[1].getMinutes());
+            nextTime.set(Calendar.SECOND, UPDATE_TIMES[1].getSeconds());
+            nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[1].getMilliSeconds());
+        } else if (currentHour >= 16 && currentHour < 24) {
+            nextTime.add(Calendar.DAY_OF_YEAR, 1);
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[2].getHours()-1);
+            nextTime.set(Calendar.MINUTE, UPDATE_TIMES[2].getMinutes());
+            nextTime.set(Calendar.SECOND, UPDATE_TIMES[2].getSeconds());
+            nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[2].getMilliSeconds());
+        } else {
+            throw new ArrayIndexOutOfBoundsException("hour time not in range 0-24");
+        }
+
+        return nextTime.getTimeInMillis();
+    }
+
     public static class UpdateTime {
 
         private int hours, minutes, seconds, milliSeconds;

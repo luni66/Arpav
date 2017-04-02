@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="8dp">
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/centerline"
+        app:layout_constraintGuide_percent="0.5"
+        android:orientation="vertical"/>
 
     <android.support.v7.widget.AppCompatAutoCompleteTextView
         android:id="@+id/text_location"
@@ -12,33 +18,33 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:hint="@string/hint"
-
+        android:imeOptions="actionNext"
         android:maxLines="1"
         android:singleLine="true"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.11" />
-
-    <Button
-        android:text="Save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:layout_editor_absoluteY="0dp"
-        android:id="@+id/save_location"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="8dp"
-        app:layout_constraintLeft_toRightOf="@+id/text_location" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/image_daySky"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="8dp"
+        android:id="@+id/image_morningSky"
+        android:layout_width="200px"
+        android:layout_height="200px"
         app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_location" />
+        app:layout_constraintRight_toLeftOf="@+id/image_afternoonSky"
+        app:layout_constraintTop_toBottomOf="@+id/text_location"
+        android:layout_marginTop="8dp" />
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/image_afternoonSky"
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_width="200px"
+        android:layout_height="200px"
+        app:layout_constraintLeft_toRightOf="@id/image_morningSky"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_location"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/text_sky"
@@ -48,12 +54,12 @@
         android:layout_marginTop="8dp"
         android:text="@string/notFound"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/image_daySky" />
+        app:layout_constraintTop_toBottomOf="@+id/image_morningSky" />
 
     <ImageView
         android:id="@+id/image_temperature1"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="64px"
+        android:layout_height="64px"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
@@ -67,15 +73,14 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
-        app:layout_constraintBottom_toBottomOf="@+id/image_temperature1"
-        app:layout_constraintLeft_toRightOf="@+id/image_temperature1"
-        app:layout_constraintTop_toTopOf="@+id/image_temperature1"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintBottom_toBottomOf="@id/image_temperature1"
+        app:layout_constraintLeft_toRightOf="@id/image_temperature1"
+        app:layout_constraintTop_toTopOf="@id/image_temperature1" />
 
     <ImageView
         android:id="@+id/image_temperature2"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="64px"
+        android:layout_height="64px"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
@@ -89,15 +94,14 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
-        app:layout_constraintBottom_toBottomOf="@+id/image_temperature2"
-        app:layout_constraintLeft_toRightOf="@+id/image_temperature2"
-        app:layout_constraintTop_toTopOf="@+id/image_temperature2"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintBottom_toBottomOf="@id/image_temperature2"
+        app:layout_constraintLeft_toRightOf="@id/image_temperature2"
+        app:layout_constraintTop_toTopOf="@id/image_temperature2" />
 
     <ImageView
         android:id="@+id/image_rain"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="64px"
+        android:layout_height="64px"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
@@ -111,15 +115,14 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
-        app:layout_constraintBottom_toBottomOf="@+id/image_rain"
-        app:layout_constraintLeft_toRightOf="@+id/image_rain"
-        app:layout_constraintTop_toTopOf="@+id/image_rain"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintBottom_toBottomOf="@id/image_rain"
+        app:layout_constraintLeft_toRightOf="@id/image_rain"
+        app:layout_constraintTop_toTopOf="@id/image_rain" />
 
     <ImageView
         android:id="@+id/image_snow"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="64px"
+        android:layout_height="64px"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
@@ -133,15 +136,14 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
-        app:layout_constraintBottom_toBottomOf="@+id/image_snow"
-        app:layout_constraintLeft_toRightOf="@+id/image_snow"
-        app:layout_constraintTop_toTopOf="@+id/image_snow"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintBottom_toBottomOf="@id/image_snow"
+        app:layout_constraintLeft_toRightOf="@id/image_snow"
+        app:layout_constraintTop_toTopOf="@id/image_snow" />
 
     <ImageView
         android:id="@+id/image_wind"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="64px"
+        android:layout_height="64px"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
@@ -155,10 +157,9 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
-        app:layout_constraintBottom_toBottomOf="@+id/image_wind"
-        app:layout_constraintLeft_toRightOf="@+id/image_wind"
-        app:layout_constraintTop_toTopOf="@+id/image_wind"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintBottom_toBottomOf="@id/image_wind"
+        app:layout_constraintLeft_toRightOf="@id/image_wind"
+        app:layout_constraintTop_toTopOf="@id/image_wind" />
 
     <TextView
         android:id="@+id/text_reliability"
@@ -169,7 +170,5 @@
         android:text="@string/notFound"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_wind" />
-
-
 
 </android.support.constraint.ConstraintLayout>

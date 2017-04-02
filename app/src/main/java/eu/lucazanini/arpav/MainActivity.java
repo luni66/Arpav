@@ -8,33 +8,40 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+// http://stackoverflow.com/questions/23133912/android-viewpager-update-off-screen-but-cached-fragments-in-viewpager
+
+// https://guides.codepath.com/android/ViewPager-with-FragmentPagerAdapter
 
 public class MainActivity extends AppCompatActivity {
 
-    static final int NUM_ITEMS = 6;
-    DemoCollectionPagerAdapter mDemoCollectionPagerAdapter;
-    ViewPager mPager;
+    //    static @BindInt(R.integer.PAGES) int PAGES;
+    private static final int PAGES = 6;
+    private static final int PAGES_LIMIT = 6;
+    @BindView(R.id.pager)
+    protected ViewPager pager;
+    private CollectionPagerAdapter collectionPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDemoCollectionPagerAdapter = new DemoCollectionPagerAdapter(getSupportFragmentManager());
+        ButterKnife.bind(this);
 
-//        final ActionBar actionBar = getActionBar();
+        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        mPager = (ViewPager) findViewById(R.id.pager);
-        mPager.setAdapter(mDemoCollectionPagerAdapter);
+        pager.setOffscreenPageLimit(PAGES_LIMIT);
+        pager.setAdapter(collectionPagerAdapter);
     }
 
     @Override
@@ -63,55 +70,33 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static class DemoCollectionPagerAdapter extends FragmentStatePagerAdapter {
+    public static class CollectionPagerAdapter extends FragmentStatePagerAdapter {
 
-        public DemoCollectionPagerAdapter(FragmentManager fm) {
+        public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int i) {
-            if (i > 0) {
-                Fragment fragment = new DemoObjectFragment();
-                Bundle args = new Bundle();
-                args.putInt(DemoObjectFragment.ARG_OBJECT, i + 1); // Our object is just an integer :-P
-                fragment.setArguments(args);
-                return fragment;
-            } else {
-                Fragment fragment = new MeteogrammaFragment();
-//                Bundle args = new Bundle();
-//                args.putInt(DemoObjectFragment.ARG_OBJECT, i + 10); // Our object is just an integer :-P
-//                fragment.setArguments(args);
-                return fragment;
-            }
+
+            MeteogrammaFragment fragment = new MeteogrammaFragment();
+            Bundle args = new Bundle();
+            args.putInt(MeteogrammaFragment.NUMBER_PAGE, i);
+            fragment.setArguments(args);
+
+            return fragment;
+
         }
 
         @Override
         public int getCount() {
-            // For this contrived example, we have a 100-object collection.
-            return NUM_ITEMS;
+            return PAGES;
         }
 
+        //TODO http://stackoverflow.com/questions/25191191/how-to-update-view-pager-item-title-dynamically
         @Override
         public CharSequence getPageTitle(int position) {
             return "OBJECT " + (position + 1);
-        }
-
-
-    }
-
-    public static class DemoObjectFragment extends Fragment {
-
-        public static final String ARG_OBJECT = "object";
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_collection_object, container, false);
-            Bundle args = getArguments();
-            ((TextView) rootView.findViewById(android.R.id.text1)).setText(
-                    Integer.toString(args.getInt(ARG_OBJECT)));
-            return rootView;
         }
     }
 }

@@ -23,4 +23,6 @@
 
     <string name="current_location">current_location</string>
 
+    <!--<integer name="pages">6</integer>-->
+
 </resources>

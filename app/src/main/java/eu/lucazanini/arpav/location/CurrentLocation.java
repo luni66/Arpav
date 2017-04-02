@@ -3,24 +3,27 @@ package eu.lucazanini.arpav.location;
 
 import java.util.Observable;
 
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
+
 /**
  * Created by luke on 14/02/17.
  */
 
-public class CurrentLocation extends Observable {
+//public class CurrentLocation {
+    public class CurrentLocation extends Observable {
 
-    private static CurrentLocation instance = null;
+    private static CurrentLocation instance = new CurrentLocation();
     private Town town;
-//    private rx.Observable<String> townName;
 
     protected CurrentLocation() {
         // Exists only to defeat instantiation.
     }
 
     public static CurrentLocation getInstance() {
-        if (instance == null) {
-            instance = new CurrentLocation();
-        }
+//        if (instance == null) {
+//            instance = new CurrentLocation();
+//        }
         return instance;
     }
 
@@ -30,7 +33,7 @@ public class CurrentLocation extends Observable {
 
     public void setTown(Town town) {
         this.town = town;
-//        townName = rx.Observable.<String>just(town.getName());
+
         setChanged();
         notifyObservers(town.getName());
     }
@@ -39,7 +42,4 @@ public class CurrentLocation extends Observable {
         return town == null ? false : true;
     }
 
-//    public rx.Observable<String> getTownName() {
-//        return townName;
-//    }
 }
