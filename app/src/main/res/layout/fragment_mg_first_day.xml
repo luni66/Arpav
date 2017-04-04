@@ -30,6 +30,16 @@
         android:layout_marginStart="8dp"
         app:layout_constraintLeft_toRightOf="@+id/text_location" />
 
+    <Button
+        android:text="Test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteY="0dp"
+        android:id="@+id/test"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/save_location" />
+
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/image_daySky"
         android:layout_width="100dp"

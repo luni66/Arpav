@@ -83,6 +83,14 @@ public class Meteogramma implements Parcelable {
         return giorni;
     }
 
+    public String[] getDateGiorni(){
+        String[] dates = new String[SCADENZA_IDX];
+        for(int i=0; i<SCADENZA_IDX; i++){
+            dates[i] = giorni[i].getData();
+        }
+        return dates;
+    }
+
     public static class Scadenza implements Parcelable {
 
         /*

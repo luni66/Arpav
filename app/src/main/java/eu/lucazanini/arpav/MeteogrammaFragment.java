@@ -45,9 +45,11 @@ import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.Bollettino;
 import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
+import eu.lucazanini.arpav.model.Titles;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.ImageCacheManager;
 import eu.lucazanini.arpav.network.VolleySingleton;
+import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import timber.log.Timber;
@@ -99,10 +101,15 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private Unbinder unbinder;
     private String location, daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability;
     private int mgIndex;
-
     private Subscription actvSub, actvSub2;
-
     private CurrentLocation currentLocation;
+//    private static Titles titles = new Titles();
+    private Observable<String> myObservable;
+
+
+    @BindView(R.id.test)
+    protected Button btnTest;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -115,6 +122,9 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
         currentLocation = CurrentLocation.getInstance();
         currentLocation.addObserver(this);
+
+//        titles = new Titles();
+//        myObservable = Observable.from(titles.getTitles());
 
 //        loadData();
 
@@ -250,6 +260,11 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         }
     }
 
+    @OnClick(R.id.test)
+    protected void changeTitles() {
+        ((MainActivity)getActivity()).refreshTitles();
+    }
+
     private String getPrefsLocation() {
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         String townName = sharedPref.getString(getString(R.string.current_location), "");
@@ -259,6 +274,14 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private List<Town> loadTowns() {
         List<Town> towns = TownList.getInstance(getContext()).loadTowns();
         return towns;
+    }
+
+    public Observable<String> getMyObservable() {
+        return myObservable;
+    }
+
+    public void setMyObservable(Observable<String> myObservable) {
+        this.myObservable = myObservable;
     }
 
     private void loadData() {
@@ -378,6 +401,20 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                             snow = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getQuotaNeve();
                             wind = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getProperty(Meteogramma.Scadenza.VENTO);
                             reliability = response.getMeteogramma()[zoneIdx].getScadenza()[mgIndex].getAttendibilita();
+
+//                            if(titles==null) {
+//                                titles = new Titles(response.getMeteogramma()[zoneIdx].getDateGiorni());
+//                                myObservable = Observable.from(titles.getTitles());
+//                            } else {
+//
+//                            }
+
+                            for(int i = 0; i<Titles.PAGES; i++){
+                                Titles titles = MainActivity.getTitles();
+                                if(!titles.getTitle(i).equals(response.getMeteogramma()[zoneIdx].getScadenza()[i].getData())){
+                                    titles.setTitle(response.getMeteogramma()[zoneIdx].getScadenza()[i].getData(), i);
+                                }
+                            }
 
                             try {
                                 tvDaySky.setText(daySky);
