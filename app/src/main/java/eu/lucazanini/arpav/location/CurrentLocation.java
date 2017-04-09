@@ -7,23 +7,16 @@ import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
- * Created by luke on 14/02/17.
+ * Contains the current location
  */
-
-//public class CurrentLocation {
     public class CurrentLocation extends Observable {
 
     private static CurrentLocation instance = new CurrentLocation();
     private Town town;
 
-    protected CurrentLocation() {
-        // Exists only to defeat instantiation.
-    }
+    protected CurrentLocation() {}
 
     public static CurrentLocation getInstance() {
-//        if (instance == null) {
-//            instance = new CurrentLocation();
-//        }
         return instance;
     }
 

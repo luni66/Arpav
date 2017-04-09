@@ -7,18 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by luke on 16/12/16
+ * Contains scadenza that it is the forecast for the 18 zones of Veneto
  */
 public class Meteogramma implements Parcelable {
 
     public final static String ATTR_ZONE_ID = "zoneid";
     public final static String ATTR_NOME = "name";
     public final static String TAG_SCADENZA = "scadenza";
-    private String zoneId;
-    private String name;
-    public final static int SCADENZA_IDX = 7;
-    private Scadenza[] giorni = new Scadenza[SCADENZA_IDX];
-
+    public final static int SCADENZA_NUMBER = 7;
     public static final Creator<Meteogramma> CREATOR = new Creator<Meteogramma>() {
         @Override
         public Meteogramma createFromParcel(Parcel in) {
@@ -30,6 +26,9 @@ public class Meteogramma implements Parcelable {
             return new Meteogramma[size];
         }
     };
+    private String zoneId;
+    private String name;
+    private Scadenza[] giorni = new Scadenza[SCADENZA_NUMBER];
 
     public Meteogramma(String zoneId) {
         this.zoneId = zoneId;
@@ -83,160 +82,15 @@ public class Meteogramma implements Parcelable {
         return giorni;
     }
 
-    public String[] getDateGiorni(){
-        String[] dates = new String[SCADENZA_IDX];
-        for(int i=0; i<SCADENZA_IDX; i++){
+    public String[] getDateGiorni() {
+        String[] dates = new String[SCADENZA_NUMBER];
+        for (int i = 0; i < SCADENZA_NUMBER; i++) {
             dates[i] = giorni[i].getData();
         }
         return dates;
     }
 
     public static class Scadenza implements Parcelable {
-
-        /*
-        Temperatura max giorno corrente
-Temperatura min e max in giorni sdoppiati
-Temperatura assente ultimi 2 giorni
-
-1 Dolomiti Nord-Est
-Cielo
-Temperatura 2000m
-Temperatura 3000m
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-2 Dolomiti sud Ovest
-Cielo
-Temperatura 2000m
-Temperatura 3000m
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-3 Belluno e Prealpi orientali
-Cielo
-Temperatura 1500m
-Temperatura 2000m
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-4 Prealpi centrali
-Cielo
-Temperatura 1500m
-Temperatura 2000m
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-5 Pedemontana orientale
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-6 Treviso e pianura orientale
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-7 Veneziano orientale
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-8 Prealpi occidentali
-Cielo
-Temperatura 1500m
-Temperatura 2000m
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-9 Vicenza e pedemontana
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-10 Padova e pianura centrale
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-11 Venezia e laguna
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Vento
-Attendibilita
-12 Delta del Po
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Vento
-Attendibilita
-13 Rovigo e pianura meridionale
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-14 Verona e pedemontana
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Attendibilita
-15 Area del Garda
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Vento
-Attendibilita
-16 Litorale nord
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Vento
-Attendibilita
-17 Litorale centrale
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Vento
-Attendibilita
-18 Litorale sud
-Cielo
-Temperatura
-Precipitazioni
-Probabilita' precipitazione
-Quota neve
-Vento
-Attendibilita
-
-         */
 
         public final static String TAG_PREVISIONE = "previsione";
         public final static String ATTR_DATA = "data";
@@ -253,30 +107,6 @@ Attendibilita
         public final static String QUOTA_NEVE = "Quota neve";
         public final static String VENTO = "Vento";
         public final static String ATTENDIBILITA = "Attendibilita";
-        private String data, simbolo, cielo, temperatura2000, temperatura3000, precipitazioni,
-                probabilitaPrecipitazione, quotaNeve, attendibilita;
-        private Map<String, String> properties=new HashMap<>();;
-
-        // TODO verificare in caso di assenza
-        public String getProperty(String key){
-            return properties.get(key);
-        }
-
-        // TODO verificare in caso di sostituzione
-        public void setProperty(String key, String value){
-            properties.put(key, value);
-        }
-
-/*        private WindStrategy ventoStrategy;
-
-        public WindStrategy getVentoStrategy() {
-            return ventoStrategy;
-        }
-
-        public void setVentoStrategy(WindStrategy ventoStrategy) {
-            this.ventoStrategy = ventoStrategy;
-        }*/
-
         public static final Creator<Scadenza> CREATOR = new Creator<Scadenza>() {
             @Override
             public Scadenza createFromParcel(Parcel in) {
@@ -288,6 +118,10 @@ Attendibilita
                 return new Scadenza[size];
             }
         };
+        private String data, simbolo, cielo, temperatura2000, temperatura3000, precipitazioni,
+                probabilitaPrecipitazione, quotaNeve, attendibilita;
+        ;
+        private Map<String, String> properties = new HashMap<>();
 
         public Scadenza() {
         }
@@ -303,15 +137,22 @@ Attendibilita
             quotaNeve = in.readString();
             attendibilita = in.readString();
 
-//            ventoStrategy = in.readParcelable(WindStrategy.class.getClassLoader());
-
-//            properties=new HashMap<>();
             final int propertiesIdx = in.readInt();
-            for (int i=0; i<propertiesIdx; i++) {
+            for (int i = 0; i < propertiesIdx; i++) {
                 String key = in.readString();
                 String value = in.readString();
                 properties.put(key, value);
             }
+        }
+
+        // TODO verificare in caso di assenza
+        public String getProperty(String key) {
+            return properties.get(key);
+        }
+
+        // TODO verificare in caso di sostituzione
+        public void setProperty(String key, String value) {
+            properties.put(key, value);
         }
 
         public String getData() {
@@ -402,8 +243,6 @@ Attendibilita
             parcel.writeString(probabilitaPrecipitazione);
             parcel.writeString(quotaNeve);
             parcel.writeString(attendibilita);
-
-//            parcel.writeParcelable(ventoStrategy, 0);
 
             int propertiesIdx = properties.size();
             parcel.writeInt(propertiesIdx);

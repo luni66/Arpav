@@ -2,12 +2,9 @@ package eu.lucazanini.arpav.model;
 
 import java.util.Observable;
 
-import timber.log.Timber;
-
 /**
- * Created by luke on 02/04/17.
+ * Titles of the fragments
  */
-
 public class Titles extends Observable {
 
     public static int PAGES = 7;
@@ -56,8 +53,7 @@ public class Titles extends Observable {
         }
     }
 
-    private void isChanged(){
-        Timber.d("ISCHANGED");
+    private void isChanged() {
         setChanged();
         notifyObservers(titles);
     }

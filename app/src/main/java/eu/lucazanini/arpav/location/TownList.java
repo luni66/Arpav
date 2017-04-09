@@ -11,23 +11,20 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by luke on 15/02/17.
- */
-
 public class TownList {
 
-    private static TownList instance = null;
+    private static TownList instance;
     private Context context;
     private List<Town> towns;
 
+    protected TownList() {}
+
     protected TownList(Context context) {
-        // Exists only to defeat instantiation.
         this.context = context;
         loadTowns();
     }
 
-    public static TownList getInstance(Context context) {
+    public synchronized static TownList getInstance(Context context) {
         if (instance == null) {
             instance = new TownList(context);
         }
@@ -47,7 +44,6 @@ public class TownList {
     }
 
     public String[] getNames() {
-//        towns = loadTowns();
         String[] names = new String[towns.size()];
 
         int i = 0;
@@ -86,13 +82,10 @@ public class TownList {
                 towns.addAll(townsPr);
             }
 
-//            towns.sort(new AlphabeticComparator());
-
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
         }
-
 
         return towns;
     }

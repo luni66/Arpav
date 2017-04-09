@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import timber.log.Timber;
 
 /**
- * Created by luke on 16/12/16.
+ * class associated to the Meteo Bulletin, one ot three bulletin in the xml file
  */
 public class Bollettino implements Parcelable {
     public final static String ATTR_BOLLETTINO_ID = "bollettinoid";
@@ -16,11 +16,8 @@ public class Bollettino implements Parcelable {
     public final static String TAG_AVVISO = "avviso";
     public final static String TAG_FENOMENI_PARTICOLARI = "fenomeniparticolari";
     public final static String TAG_GIORNO = "giorno";
-    public final static int DAYS = 5;
+    public final static int DAY_NUMBER = 5;
     public final static String METEO_VENETO = "MV";
-    private String bollettinoId, nome, titolo, evoluzioneGenerale, avviso, fenomeniParticolari;
-    private Giorno[] giorni = new Giorno[DAYS];
-
     public static final Creator<Bollettino> CREATOR = new Creator<Bollettino>() {
         @Override
         public Bollettino createFromParcel(Parcel in) {
@@ -32,6 +29,8 @@ public class Bollettino implements Parcelable {
             return new Bollettino[size];
         }
     };
+    private String bollettinoId, nome, titolo, evoluzioneGenerale, avviso, fenomeniParticolari;
+    private Giorno[] giorni = new Giorno[DAY_NUMBER];
 
     protected Bollettino(Parcel in) {
         bollettinoId = in.readString();
@@ -134,10 +133,6 @@ public class Bollettino implements Parcelable {
         public final static String ATTR_IMMAGINE = "src";
         public final static String ATTR_DIDASCALIA = "caption";
         public final static String TAG_TESTO = "text";
-        private String data, testo;
-        private String[] sorgente, didascalia;
-        private int imgIndex;
-
         public static final Creator<Giorno> CREATOR = new Creator<Giorno>() {
             @Override
             public Giorno createFromParcel(Parcel in) {
@@ -149,6 +144,9 @@ public class Bollettino implements Parcelable {
                 return new Giorno[size];
             }
         };
+        private String data, testo;
+        private String[] sorgente, didascalia;
+        private int imgIndex;
 
         public Giorno() {
             sorgente = new String[2];

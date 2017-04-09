@@ -10,7 +10,6 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.Observable;
@@ -19,28 +18,17 @@ import java.util.Observer;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.lucazanini.arpav.model.Titles;
-import rx.functions.Action1;
-import timber.log.Timber;
 
 // http://stackoverflow.com/questions/23133912/android-viewpager-update-off-screen-but-cached-fragments-in-viewpager
 
 // https://guides.codepath.com/android/ViewPager-with-FragmentPagerAdapter
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TitlesCallBack {
 
-    //    static @BindInt(R.integer.PAGES) int PAGES;
     private static final int PAGES = 7;
     private static final int PAGES_LIMIT = 7;
-    @BindView(R.id.pager)
-    protected ViewPager pager;
+    protected @BindView(R.id.pager) ViewPager pager;
     private CollectionPagerAdapter collectionPagerAdapter;
-    private static int start = 1;
-
-    public static Titles getTitles() {
-        return titles;
-    }
-
-    private static final Titles titles = new Titles();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,29 +72,31 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void refreshTitles(){
-start=10;
-        collectionPagerAdapter.notifyDataSetChanged();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        collectionPagerAdapter.stopObserving();
     }
 
-
+    @Override
+    public Titles getTitles() {
+        return titles;
+    }
 
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter implements Observer {
 
-//        private Titles titles;
+        public CollectionPagerAdapter(FragmentManager fm) {
+            super(fm);
+            titles.addObserver(this);
+        }
 
         @Override
         public void update(Observable o, Object arg) {
-            Timber.d("UPDATE ADAPTER");
-//            titles.setTitles(((String[])arg));
             notifyDataSetChanged();
         }
 
-        public CollectionPagerAdapter(FragmentManager fm) {
-            super(fm);
-            Timber.d("ADAPTER CONSTRUCTOR");
-//            titles = new Titles();
-            titles.addObserver(this);
+        public void stopObserving() {
+            titles.deleteObserver(this);
         }
 
         @Override
@@ -117,9 +107,7 @@ start=10;
             args.putInt(MeteogrammaFragment.NUMBER_PAGE, i);
             fragment.setArguments(args);
 
-
             return fragment;
-
         }
 
         @Override
@@ -127,10 +115,8 @@ start=10;
             return PAGES;
         }
 
-        //TODO http://stackoverflow.com/questions/25191191/how-to-update-view-pager-item-title-dynamically
         @Override
         public CharSequence getPageTitle(int position) {
-//            return "OBJECT " + (position + start);
             return titles.getTitle(position);
         }
     }

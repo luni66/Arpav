@@ -21,8 +21,8 @@ import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import timber.log.Timber;
 
-import static eu.lucazanini.arpav.model.Meteogramma.SCADENZA_IDX;
-import static eu.lucazanini.arpav.model.Previsione.MG_IDX;
+import static eu.lucazanini.arpav.model.Meteogramma.SCADENZA_NUMBER;
+import static eu.lucazanini.arpav.model.Previsione.METEOGRAMMI_NUMBER;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.anyOf;
@@ -56,7 +56,7 @@ public class BulletinRequestTest {
 
 //        RequestFuture<Previsione> future = RequestFuture.newFuture();
 
-        final CountDownLatch latch = new CountDownLatch(1+MG_IDX*SCADENZA_IDX);
+        final CountDownLatch latch = new CountDownLatch(1+ METEOGRAMMI_NUMBER * SCADENZA_NUMBER);
 
         BulletinRequest bulletinRequest = new BulletinRequest(Request.Method.GET, Previsione.URL_IT,
                 new Response.Listener<Previsione>() {
@@ -69,12 +69,12 @@ public class BulletinRequestTest {
                         assertThat(response.getDataAggiornamento(), anyOf(is(nullValue()), containsString("alle")));
 
                         Meteogramma[] meteogrammi = response.getMeteogramma();
-                        for (int i = 0; i < MG_IDX; i++) {
+                        for (int i = 0; i < METEOGRAMMI_NUMBER; i++) {
                             Meteogramma meteogramma = meteogrammi[i];
                             assertThat(meteogramma, is(notNullValue()));
 
                             Meteogramma.Scadenza[] scadenze = meteogramma.getScadenza();
-                            for (int j = 0; j < SCADENZA_IDX; j++) {
+                            for (int j = 0; j < SCADENZA_NUMBER; j++) {
                                 Meteogramma.Scadenza scadenza = scadenze[j];
                                 assertThat(scadenza, is(notNullValue()));
                                 assertThat(scadenza.getData(), not(isEmptyOrNullString()));
@@ -89,7 +89,7 @@ public class BulletinRequestTest {
                             Bollettino bollettino = response.getMeteoVeneto();
                             assertThat(bollettino, is(notNullValue()));
                             Bollettino.Giorno[] giorni = bollettino.getGiorni();
-                            for (int i = 0; i < Bollettino.DAYS; i++) {
+                            for (int i = 0; i < Bollettino.DAY_NUMBER; i++) {
                                 Bollettino.Giorno giorno = giorni[i];
                                 assertThat(giorno, is(notNullValue()));
                             }
@@ -113,8 +113,8 @@ public class BulletinRequestTest {
                                 });*/
 
 
-                        for(int i = 0; i<MG_IDX; i++){
-                            for(int j=0; j<SCADENZA_IDX; j++){
+                        for(int i = 0; i< METEOGRAMMI_NUMBER; i++){
+                            for(int j = 0; j< SCADENZA_NUMBER; j++){
                                 String imgUrl = response.getMeteogramma()[i].getScadenza()[j].getSimbolo();
                                 mImageLoader.get(imgUrl, new ImageLoader.ImageListener() {
                                     @Override

@@ -21,9 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by luke on 02/12/16.
+ * Town in Veneto
  */
-
 public class Town implements TownLocation {
 
     protected String name;
@@ -115,57 +114,6 @@ public class Town implements TownLocation {
         this.province = province;
     }
 
-/*    public static String[] getNames(Context context) {
-        List<Town> towns = loadTowns(context);
-        String[] names = new String[towns.size()];
-
-        int i=0;
-        for (Town town: towns) {
-            names[i++]=town.getName();
-        }
-
-        return names;
-    }*/
-
-/*    public static List<Town> loadTowns(Context context){
-
-        List towns = new ArrayList();
-
-        String[] paths = new String[]{"belluno.json", "padova.json", "rovigo.json", "venezia.json", "verona.json", "vicenza.json"};
-
-        String json = null;
-        try {
-
-            for (String path:paths
-                 ) {
-                List townsPr = new ArrayList();
-                InputStream is = context.getAssets().open(path);
-                int size = is.available();
-                byte[] buffer = new byte[size];
-                is.read(buffer);
-                is.close();
-                json = new String(buffer, "UTF-8");
-
-                Gson gson = new Gson();
-                Type fooType = new TypeToken<List<Town>>() {
-                }.getType();
-
-                townsPr = gson.fromJson(json, fooType);
-
-                towns.addAll(townsPr);
-            }
-
-//            towns.sort(new AlphabeticComparator());
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-
-
-        return towns;
-    }*/
-
     public static class NameComparator implements Comparator<Town> {
 
         @Override
@@ -191,5 +139,4 @@ public class Town implements TownLocation {
             return result;
         }
     }
-
 }

@@ -1,9 +1,5 @@
 package eu.lucazanini.arpav.location;
 
-/**
- * Created by luke on 02/12/16.
- */
-
 public interface TownLocation {
 
     /**

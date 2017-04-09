@@ -12,9 +12,8 @@ import java.util.Map;
 import eu.lucazanini.arpav.model.Previsione;
 
 /**
- * Created by luke on 21/12/16.
+ * Volley request for Bulettin
  */
-
 public class BulletinRequest extends Request<Previsione> {
     private final Response.Listener<Previsione> mListener;
     private String url;
@@ -35,10 +34,6 @@ public class BulletinRequest extends Request<Previsione> {
         setTag(tag);
     }
 
-//    public BulletinRequest(Previsione.Language language, Response.Listener<Previsione> listener, Response.ErrorListener errorListener) {
-//        this(Method.GET, Previsione.getUrl(language), listener, errorListener);
-//    }
-
     @Override
     protected Response<Previsione> parseNetworkResponse(NetworkResponse response) {
         Previsione previsione;
@@ -50,11 +45,7 @@ public class BulletinRequest extends Request<Previsione> {
             parsed = new String(response.data);
         }
 
-//        previsione=new Previsione(Previsione.Language.IT);
-//        previsione.parse(parsed);
         previsione = new Previsione(url, parsed);
-
-        //TODO http://stackoverflow.com/questions/28523435/what-s-the-different-of-entry-softttl-and-entry-ttl-in-volley
 
         long now = System.currentTimeMillis();
 
@@ -83,37 +74,6 @@ public class BulletinRequest extends Request<Previsione> {
         entry.serverDate = serverDate;
         entry.responseHeaders = headers;
 
-
-/*        // force response to be cached
-        Map<String, String> headers = response.headers;
-        long cacheExpiration = 15 * 60 * 1000;
-        long now = System.currentTimeMillis();
-        Cache.Entry entry = new Cache.Entry();
-        entry.data = response.data;
-        entry.etag = headers.get("ETag");
-        entry.ttl = now + cacheExpiration;
-        entry.serverDate = HttpHeaderParser.parseDateAsEpoch(headers.get("Date"));
-        entry.responseHeaders = headers;*/
-
-/*        // force response to be cached
-        Map<String, String> headers = response.headers;
-//        long cacheExpiration = 5 * 60 * 1000;
-//        long now = System.currentTimeMillis();
-        Cache.Entry entry = new Cache.Entry();
-        entry.data = response.data;
-        entry.etag = headers.get("ETag");
-//        entry.ttl = now + cacheExpiration;
-        if (previsione.isUpdate()) {
-            entry.ttl = previsione.getCacheExpiration();
-        } else {
-            long cacheExpiration = 15 * 60 * 1000;
-            long now = System.currentTimeMillis();
-            entry.ttl = now + cacheExpiration;
-        }
-        entry.serverDate = HttpHeaderParser.parseDateAsEpoch(headers.get("Date"));
-        entry.responseHeaders = headers;*/
-
-//        return Response.success(previsione, HttpHeaderParser.parseCacheHeaders(response));
         return Response.success(previsione, entry);
     }
 

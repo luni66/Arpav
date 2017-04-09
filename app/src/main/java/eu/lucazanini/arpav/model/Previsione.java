@@ -21,7 +21,8 @@ import eu.lucazanini.arpav.preference.Preferences;
 import timber.log.Timber;
 
 /**
- * Java class associated to the bulletin
+ * Java class associated to the bulletin.
+ * the xml file contains 18 Meteogrammi and 3 bollettini
  */
 public class Previsione implements Parcelable {
 
@@ -45,6 +46,24 @@ public class Previsione implements Parcelable {
     public final static String RELEASE_TIME = "13:00";
     public final static String FIRST_UPDATE_TIME = "16:00";
     public final static String SECOND_UPDATE_TIME = "09:00";
+    public final static int METEOGRAMMI_NUMBER = 18;
+    public static final Creator<Previsione> CREATOR = new Creator<Previsione>() {
+        @Override
+        public Previsione createFromParcel(Parcel in) {
+            return new Previsione(in);
+        }
+
+        @Override
+        public Previsione[] newArray(int size) {
+            return new Previsione[size];
+        }
+    };
+
+    static {
+        UPDATE_TIMES[0] = new UpdateTime(RELEASE_TIME);
+        UPDATE_TIMES[1] = new UpdateTime(FIRST_UPDATE_TIME);
+        UPDATE_TIMES[2] = new UpdateTime(SECOND_UPDATE_TIME);
+    }
 
     private final String url;
     private final String uri;
@@ -53,30 +72,9 @@ public class Previsione implements Parcelable {
     private Bollettino meteoVeneto;
     private Calendar releaseDate, updateDate;
     private Language language;
-    public final static int MG_IDX = 18;
-    private Meteogramma[] meteogramma = new Meteogramma[MG_IDX];
+    private Meteogramma[] meteogramma = new Meteogramma[METEOGRAMMI_NUMBER];
 
-    static {
-        UPDATE_TIMES[0] = new UpdateTime(RELEASE_TIME);
-        UPDATE_TIMES[1] = new UpdateTime(FIRST_UPDATE_TIME);
-        UPDATE_TIMES[2] = new UpdateTime(SECOND_UPDATE_TIME);
-    }
-
-    public static String getUrl(Language language){
-        switch (language) {
-            case EN:
-                return URL_EN;
-            case FR:
-                return URL_FR;
-            case DE:
-                return URL_DE;
-            case IT:
-            default:
-                return URL_IT;
-        }
-    }
-
-    public Previsione(Language language, String text){
+    public Previsione(Language language, String text) {
         this.language = language;
         switch (language) {
             case EN:
@@ -100,41 +98,29 @@ public class Previsione implements Parcelable {
         parse(text);
     }
 
-    public Previsione(String url, String text){
-        this.url=url;
+    public Previsione(String url, String text) {
+        this.url = url;
         switch (url) {
             case URL_EN:
                 uri = URI_EN;
-                language=Language.EN;
+                language = Language.EN;
                 break;
             case URL_FR:
                 uri = URI_FR;
-                language=Language.FR;
+                language = Language.FR;
                 break;
             case URL_DE:
                 uri = URI_DE;
-                language=Language.DE;
+                language = Language.DE;
                 break;
             case URL_IT:
             default:
                 uri = URI_IT;
-                language=Language.IT;
+                language = Language.IT;
         }
         isTest = false;
         parse(text);
     }
-
-    public static final Creator<Previsione> CREATOR = new Creator<Previsione>() {
-        @Override
-        public Previsione createFromParcel(Parcel in) {
-            return new Previsione(in);
-        }
-
-        @Override
-        public Previsione[] newArray(int size) {
-            return new Previsione[size];
-        }
-    };
 
     protected Previsione(Parcel in) {
         language = Language.valueOf(in.readString());
@@ -182,27 +168,6 @@ public class Previsione implements Parcelable {
         isTest = false;
     }
 
-/*    @Deprecated
-    public Previsione(Language language, String assets) {
-        this.language = language;
-        url = assets;
-        switch (language) {
-            case EN:
-                uri = URI_EN;
-                break;
-            case FR:
-                uri = URI_FR;
-                break;
-            case DE:
-                uri = URI_DE;
-                break;
-            case IT:
-            default:
-                uri = URI_IT;
-        }
-        isTest = true;
-    }*/
-
     @Deprecated
     public Previsione(Language language) {
         this.language = language;
@@ -225,6 +190,20 @@ public class Previsione implements Parcelable {
                 url = URL_IT;
         }
         isTest = false;
+    }
+
+    public static String getUrl(Language language) {
+        switch (language) {
+            case EN:
+                return URL_EN;
+            case FR:
+                return URL_FR;
+            case DE:
+                return URL_DE;
+            case IT:
+            default:
+                return URL_IT;
+        }
     }
 
     @Override
@@ -254,135 +233,6 @@ public class Previsione implements Parcelable {
     public boolean isTest() {
         return isTest;
     }
-
-/*    //TODO da verificare
-    *//**
-     * Parses the xml file passed as argument
-     *//*
-    public void parse(BufferedInputStream bis) {
-        String tagName = null;
-        Bollettino meteoVeneto = null;
-        Bollettino.Giorno giorno = null;
-        Meteogramma.Scadenza scadenza = null;
-        Meteogramma meteogramma = null;
-        boolean insideMeteoVeneto = false;
-        boolean insideGiorno = false;
-        String bollettinoId = null;
-        String zoneId = null;
-
-        try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(bis, null);
-
-            int eventType = parser.getEventType();
-
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                switch (eventType) {
-                    case XmlPullParser.START_DOCUMENT:
-                        break;
-                    case XmlPullParser.START_TAG:
-                        tagName = parser.getName();
-                        if (tagName.equalsIgnoreCase(Previsione.TAG_DATA_EMISSIONE)) {
-                            setDataEmissione(parser.getAttributeValue(null, Previsione.ATTR_DATA));
-                        } else if (tagName.equalsIgnoreCase(Previsione.TAG_DATA_AGGIORNAMENTO)) {
-                            setDataAggiornamento(parser.getAttributeValue(null, Previsione.ATTR_DATA));
-                        } else if (tagName.equalsIgnoreCase(Previsione.TAG_METEOGRAMMA)) {
-                            zoneId = parser.getAttributeValue(null, Meteogramma.ATTR_ZONE_ID);
-                            meteogramma = newMeteogramma(zoneId);
-                            meteogramma.setName(parser.getAttributeValue(null, Meteogramma.ATTR_NOME));
-                        } else if (meteogramma != null && tagName.equalsIgnoreCase(Meteogramma.TAG_SCADENZA)) {
-                            scadenza = meteogramma.newScadenza();
-                            scadenza.setData(parser.getAttributeValue(null, Meteogramma.Scadenza.ATTR_DATA));
-                        } else if (meteogramma != null && tagName.equalsIgnoreCase(Meteogramma.Scadenza.TAG_PREVISIONE)) {
-                            String title = parser.getAttributeValue(null, Meteogramma.Scadenza.ATTR_TITLE);
-                            Timber.d("TITLE "+title);
-                            switch (title) {
-                                case Meteogramma.Scadenza.SIMBOLO:
-                                    scadenza.setSimbolo(title);
-                                    break;
-                                case Meteogramma.Scadenza.CIELO:
-                                    scadenza.setCielo(title);
-                                    break;
-                                case Meteogramma.Scadenza.TEMPERATURA_2000:
-                                    scadenza.setTemperatura2000(title);
-                                    break;
-                                case Meteogramma.Scadenza.TEMPERATURA_3000:
-                                    scadenza.setTemperatura3000(title);
-                                    break;
-                                case Meteogramma.Scadenza.PRECIPITAZIONI:
-                                    scadenza.setPrecipitazioni(title);
-                                    break;
-                                case Meteogramma.Scadenza.PROBABILITA_PRECIPITAZIONE:
-                                    scadenza.setProbabilitaPrecipitazione(title);
-                                    break;
-                                case Meteogramma.Scadenza.QUOTA_NEVE:
-                                    scadenza.setQuotaNeve(title);
-                                    break;
-                                case WindStrategy.VENTO:
-                                    scadenza.setProperty(Meteogramma.Scadenza.VENTO, title);
-                                    break;
-                                case Meteogramma.Scadenza.ATTENDIBILITA:
-                                    scadenza.setAttendibilita(title);
-                                    break;
-                            }
-                        } else if (tagName.equalsIgnoreCase(Previsione.TAG_BOLLETTINO)) {
-                            bollettinoId = parser.getAttributeValue(null, Bollettino.ATTR_BOLLETTINO_ID);
-                            if (bollettinoId.equalsIgnoreCase(Bollettino.METEO_VENETO)) {
-                                insideMeteoVeneto = true;
-                                meteoVeneto = newMeteoVeneto();
-                                meteoVeneto.setBollettinoId(bollettinoId);
-                                meteoVeneto.setNome(parser.getAttributeValue(null, Bollettino.ATTR_NOME));
-                                meteoVeneto.setTitolo(parser.getAttributeValue(null, Bollettino.ATTR_TITOLO));
-                            }
-                        } else if (tagName.equalsIgnoreCase(Bollettino.TAG_GIORNO) && insideMeteoVeneto) {
-                            insideGiorno = true;
-                            giorno = meteoVeneto.newGiorno();
-                            if (giorno != null) {
-                                giorno.setData(parser.getAttributeValue(null, Bollettino.Giorno.ATTR_DATA));
-                            }
-                        } else if (tagName.equalsIgnoreCase(Bollettino.Giorno.TAG_IMMAGINE) && insideMeteoVeneto && giorno != null && insideGiorno) {
-                            giorno.addImmagine(parser.getAttributeValue(null, Bollettino.Giorno.ATTR_IMMAGINE), parser.getAttributeValue(null, Bollettino.Giorno.ATTR_DIDASCALIA));
-                        }
-                        break;
-                    case XmlPullParser.TEXT:
-                        if (insideMeteoVeneto) {
-                            if (tagName.equalsIgnoreCase(Bollettino.TAG_EVOLUZIONE_GENERALE)) {
-                                meteoVeneto.setEvoluzioneGenerale(parser.getText());
-                            } else if (tagName.equalsIgnoreCase(Bollettino.TAG_AVVISO)) {
-                                meteoVeneto.setAvviso(parser.getText());
-                            } else if (tagName.equalsIgnoreCase(Bollettino.TAG_FENOMENI_PARTICOLARI)) {
-                                meteoVeneto.setFenomeniParticolari(parser.getText());
-                            } else if (tagName.equalsIgnoreCase(Bollettino.Giorno.TAG_TESTO)) {
-                                giorno.setTesto(parser.getText());
-                            }
-                        }
-                        break;
-                    case XmlPullParser.END_TAG:
-                        tagName = parser.getName();
-                        if (tagName.equalsIgnoreCase(Previsione.TAG_BOLLETTINO)) {
-                            bollettinoId = null;
-                            insideMeteoVeneto = false;
-                        } else if (tagName.equalsIgnoreCase(Bollettino.TAG_GIORNO)) {
-                            insideGiorno = false;
-                        } else if (tagName.equalsIgnoreCase(Previsione.TAG_METEOGRAMMA)) {
-                            meteogramma = null;
-                        } else if (tagName.equalsIgnoreCase(Meteogramma.TAG_SCADENZA)) {
-                        } else if (tagName.equalsIgnoreCase(Meteogramma.Scadenza.TAG_PREVISIONE)) {
-                        }
-                        tagName = "";
-                        break;
-                    default:
-                        break;
-                }
-                eventType = parser.next();
-            }
-        } catch (XmlPullParserException e) {
-            Timber.e("error parsing xml %s", e.toString());
-        } catch (IOException e) {
-            Timber.e("error parsing xml %s", e.toString());
-        }
-    }*/
 
     public void parse(String text) {
         String tagName = null;
@@ -663,11 +513,7 @@ public class Previsione implements Parcelable {
         return meteoVeneto;
     }
 
-    public enum Language {
-        IT, EN, FR, DE
-    }
-
-    public long getCacheExpiration(){
+    public long getCacheExpiration() {
         Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
         Calendar nextTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
 
@@ -675,23 +521,23 @@ public class Previsione implements Parcelable {
 
         if (currentHour >= 0 && currentHour < 9) {
 //            nextTime.add(Calendar.DAY_OF_YEAR, -1);
-            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[2].getHours()-1);
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[2].getHours() - 1);
             nextTime.set(Calendar.MINUTE, UPDATE_TIMES[2].getMinutes());
             nextTime.set(Calendar.SECOND, UPDATE_TIMES[2].getSeconds());
             nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[2].getMilliSeconds());
         } else if (currentHour >= 9 && currentHour < 13) {
-            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[0].getHours()-1);
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[0].getHours() - 1);
             nextTime.set(Calendar.MINUTE, UPDATE_TIMES[0].getMinutes());
             nextTime.set(Calendar.SECOND, UPDATE_TIMES[0].getSeconds());
             nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[0].getMilliSeconds());
         } else if (currentHour >= 13 && currentHour < 16) {
-            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[1].getHours()-1);
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[1].getHours() - 1);
             nextTime.set(Calendar.MINUTE, UPDATE_TIMES[1].getMinutes());
             nextTime.set(Calendar.SECOND, UPDATE_TIMES[1].getSeconds());
             nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[1].getMilliSeconds());
         } else if (currentHour >= 16 && currentHour < 24) {
             nextTime.add(Calendar.DAY_OF_YEAR, 1);
-            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[2].getHours()-1);
+            nextTime.set(Calendar.HOUR_OF_DAY, UPDATE_TIMES[2].getHours() - 1);
             nextTime.set(Calendar.MINUTE, UPDATE_TIMES[2].getMinutes());
             nextTime.set(Calendar.SECOND, UPDATE_TIMES[2].getSeconds());
             nextTime.set(Calendar.MILLISECOND, UPDATE_TIMES[2].getMilliSeconds());
@@ -700,6 +546,10 @@ public class Previsione implements Parcelable {
         }
 
         return nextTime.getTimeInMillis();
+    }
+
+    public enum Language {
+        IT, EN, FR, DE
     }
 
     public static class UpdateTime {
