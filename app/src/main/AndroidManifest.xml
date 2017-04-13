@@ -10,19 +10,39 @@
     <!--per cache di volley ???-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!--android:theme="@style/AppTheme"-->
+
     <application
         android:name=".ArpavApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data android:name="android.app.default_searchable" android:value=".SearchableActivity" />
+
+<!--            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable" />-->
+        </activity>
+
+        <activity android:name=".SearchableActivity"
+                  android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data android:name="android.app.default_searchable" android:value=".SearchableActivity" />
+
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable"/>
+
         </activity>
 
         <receiver

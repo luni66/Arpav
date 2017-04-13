@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Town in Veneto
+ *
  */
 public class Town implements TownLocation {
 

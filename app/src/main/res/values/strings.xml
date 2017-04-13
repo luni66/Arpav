@@ -6,7 +6,8 @@
     <string name="first_update_time">16:00</string>
     <string name="second_update_time">09:00</string>
 
-    <string name="hint">Inserisci il comune</string>
+    <string name="search_hint">Inserisci il comune</string>
+    <string name="search_title">Inserisci il comune</string>
     <!--    <string name="clear_search">Cancella il comune</string>-->
 
     <string name="notFound">not found</string>

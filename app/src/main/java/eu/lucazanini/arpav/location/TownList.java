@@ -1,6 +1,8 @@
 package eu.lucazanini.arpav.location;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -10,6 +12,9 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import eu.lucazanini.arpav.database.TownDbHelper;
+import eu.lucazanini.arpav.database.TownContract.TownEntry;
 
 public class TownList {
 
@@ -89,4 +94,23 @@ public class TownList {
 
         return towns;
     }
+
+    public void save(){
+        TownDbHelper townDbHelper = new TownDbHelper(context);
+        SQLiteDatabase db = townDbHelper.getWritableDatabase();
+
+        for (Town town: towns) {
+            ContentValues values = new ContentValues();
+            values.put(TownEntry.COL_NAME, town.getName());
+            values.put(TownEntry.COL_ZONE, town.getZone());
+            values.put(TownEntry.COL_PROVINCE, town.getProvince().toString());
+            values.put(TownEntry.COL_LONGITUDE, town.getLongitude());
+            values.put(TownEntry.COL_LATITUDE, town.getLatitude());
+
+            long newRowId = db.insert(TownEntry.TABLE_NAME, null, values);
+        }
+
+
+    }
+
 }

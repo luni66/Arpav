@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:hint="@string/hint"
+        android:hint="@string/search_hint"
 
         android:maxLines="1"
         android:singleLine="true"
@@ -57,6 +57,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_sky"
         app:srcCompat="@drawable/temperature" />
@@ -67,6 +68,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/image_temperature1"
         app:layout_constraintLeft_toRightOf="@+id/image_temperature1"
         app:layout_constraintTop_toTopOf="@+id/image_temperature1"
@@ -79,6 +81,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_temperature1"
         app:srcCompat="@drawable/temperature" />
@@ -89,6 +92,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/image_temperature2"
         app:layout_constraintLeft_toRightOf="@+id/image_temperature2"
         app:layout_constraintTop_toTopOf="@+id/image_temperature2"
@@ -101,6 +105,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_temperature2"
         app:srcCompat="@drawable/rain" />
@@ -111,6 +116,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/image_rain"
         app:layout_constraintLeft_toRightOf="@+id/image_rain"
         app:layout_constraintTop_toTopOf="@+id/image_rain"
@@ -123,6 +129,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_rain"
         app:srcCompat="@drawable/snow" />
@@ -133,6 +140,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/image_snow"
         app:layout_constraintLeft_toRightOf="@+id/image_snow"
         app:layout_constraintTop_toTopOf="@+id/image_snow"
@@ -145,6 +153,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerInside"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_snow"
         app:srcCompat="@drawable/wind" />
@@ -155,6 +164,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="@string/notFound"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/image_wind"
         app:layout_constraintLeft_toRightOf="@+id/image_wind"
         app:layout_constraintTop_toTopOf="@+id/image_wind"
@@ -167,9 +177,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/notFound"
+        android:visibility="gone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_wind" />
-
-
 
 </android.support.constraint.ConstraintLayout>
