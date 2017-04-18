@@ -1,8 +1,10 @@
 package eu.lucazanini.arpav;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -13,16 +15,23 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 
+import java.lang.ref.WeakReference;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import eu.lucazanini.arpav.database.TownDataSource;
 import eu.lucazanini.arpav.model.MyAdapter;
+import timber.log.Timber;
 
 public class SearchableActivity  extends AppCompatActivity {
 
     protected @BindView(R.id.search_list) RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+//    protected @BindView(R.id.list) ListView mListView;
+//    private RecyclerView.Adapter mAdapter;
+    private MyAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    protected String[] myDataset;
+//    protected String[] myDataset;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,20 +49,10 @@ public class SearchableActivity  extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        // specify an adapter (see also next example)
-        initDataset();
-        mAdapter = new MyAdapter(myDataset);
-        mRecyclerView.setAdapter(mAdapter);
+        AsyncTask<Void, Void, List<String>> readTowns = new ReadTowns(this).execute();
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-
-/*        // Get the intent, verify the action and get the query
-        Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            doMySearch(query);
-        }*/
     }
 
     @Override
@@ -73,6 +72,25 @@ public class SearchableActivity  extends AppCompatActivity {
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Timber.d("onQueryTextSubmit "+query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Timber.d("onQueryTextChange "+newText);
+                if(newText.length()>1) {
+                    AsyncTask<String, Void, List<String>> readFilteredTowns = new ReadFilteredTowns(SearchableActivity.this).execute(newText);
+                } else {
+                    AsyncTask<Void, Void, List<String>> readTowns = new ReadTowns(SearchableActivity.this).execute();
+                }
+                return false;
+            }
+        });
+
         return true;
     }
 
@@ -81,10 +99,71 @@ public class SearchableActivity  extends AppCompatActivity {
        return  intent;
     }
 
-    private void initDataset() {
-        myDataset = new String[100];
-        for (int i = 0; i < 100; i++) {
-            myDataset[i] = "This is element #" + i;
+    private class ReadTowns extends AsyncTask<Void, Void, List<String>>{
+
+        private final WeakReference<SearchableActivity> weakActivity;
+
+        private ReadTowns(SearchableActivity activity) {
+            weakActivity = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected List<String> doInBackground(Void... params) {
+            final SearchableActivity activity = weakActivity.get();
+            List<String> townNames = null;
+            TownDataSource townDataSource = new TownDataSource(activity);
+            if(activity != null) {
+                townDataSource.open();
+                townNames = townDataSource.getTownNames();
+            }
+            return townNames;
+        }
+
+        @Override
+        protected void onPostExecute(List<String> townNames) {
+            final SearchableActivity activity = weakActivity.get();
+            if(activity != null && townNames!=null) {
+                activity.mAdapter = new MyAdapter(townNames);
+                activity.mRecyclerView.setAdapter(mAdapter);
+            }
+            TownDataSource townDataSource = new TownDataSource(activity);
+            townDataSource.close();
         }
     }
+
+    private class ReadFilteredTowns extends AsyncTask<String, Void, List<String>>{
+
+        private final WeakReference<SearchableActivity> weakActivity;
+
+        private ReadFilteredTowns(SearchableActivity activity) {
+            weakActivity = new WeakReference<>(activity);
+        }
+
+        @Override
+        protected List<String> doInBackground(String... params) {
+            final SearchableActivity activity = weakActivity.get();
+            String like = params[0];
+            List<String> townNames = null;
+            TownDataSource townDataSource = new TownDataSource(activity);
+            if(activity != null) {
+                townDataSource.open();
+                townNames = townDataSource.getTownNames(like);
+            }
+            return townNames;
+        }
+
+        @Override
+        protected void onPostExecute(List<String> townNames) {
+            final SearchableActivity activity = weakActivity.get();
+            if(activity != null && townNames!=null) {
+                activity.mAdapter.update(townNames);
+//                activity.mAdapter = new MyAdapter(townNames);
+//                activity.mRecyclerView.setAdapter(mAdapter);
+//                activity.mAdapter.notifyDataSetChanged();
+            }
+            TownDataSource townDataSource = new TownDataSource(activity);
+            townDataSource.close();
+        }
+    }
+
 }
