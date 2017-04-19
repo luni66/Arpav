@@ -19,6 +19,7 @@ import java.util.Observer;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.lucazanini.arpav.model.Titles;
+import timber.log.Timber;
 
 // http://stackoverflow.com/questions/23133912/android-viewpager-update-off-screen-but-cached-fragments-in-viewpager
 
@@ -51,6 +52,22 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack {
 
 //        TownList towns = TownList.getInstance(this);
 //        towns.save();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Timber.d("onActivityResult requestCode "+requestCode);
+//        super.onActivityResult(requestCode, resultCode, data);
+        // Check which request we're responding to
+        if (requestCode == MeteogrammaFragment.REQUEST_CODE) {
+            Timber.d("onActivityResult REQUEST_CODE");
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                Timber.d("onActivityResult RESULT_OK");
+                String town  = data.getStringExtra("TOWN_NAME");
+                Timber.d("onActivityResult " + town);
+            }
+        }
     }
 
     @Override

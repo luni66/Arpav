@@ -14,6 +14,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -123,7 +124,16 @@ public class SearchableActivity  extends AppCompatActivity {
         protected void onPostExecute(List<String> townNames) {
             final SearchableActivity activity = weakActivity.get();
             if(activity != null && townNames!=null) {
-                activity.mAdapter = new MyAdapter(townNames);
+                activity.mAdapter = new MyAdapter(townNames, new MyAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(String town) {
+                        Intent resultIntent = new Intent();
+// TODO Add extras or a data URI to this intent as appropriate.
+                        resultIntent.putExtra("TOWN_NAME", town);
+                        activity.setResult(Activity.RESULT_OK, resultIntent);
+                        activity.finish();
+                    }
+                });
                 activity.mRecyclerView.setAdapter(mAdapter);
             }
             TownDataSource townDataSource = new TownDataSource(activity);

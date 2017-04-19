@@ -49,6 +49,8 @@ import rx.Subscription;
 import rx.functions.Action1;
 import timber.log.Timber;
 
+import static android.app.Activity.RESULT_OK;
+
 public class MeteogrammaFragment extends Fragment implements Observer {
 
     public static final String NUMBER_PAGE = "number_page";
@@ -74,7 +76,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private Subscription actvSub, actvSub2;
     private CurrentLocation currentLocation;
     private TitlesCallBack titlesCallBack;
-    private final static int REQUEST_CODE = 0;
+    public final static int REQUEST_CODE = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -366,7 +368,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             case R.id.action_search:
 
                 Intent intent = SearchableActivity.getIntent(context);
-                startActivityForResult(intent, REQUEST_CODE);
+                getActivity().startActivityForResult(intent, REQUEST_CODE);
 
                 return true;
             default:
@@ -404,4 +406,19 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                 }
             loadData();
         }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+        // Check which request we're responding to
+        if (requestCode == REQUEST_CODE) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+
+                // Do something with the contact here (bigger example below)
+            }
+        }
     }
+}
