@@ -1,4 +1,4 @@
-package eu.lucazanini.arpav;
+package eu.lucazanini.arpav.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,29 +8,39 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.Observable;
 import java.util.Observer;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import eu.lucazanini.arpav.model.Titles;
+import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
+import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.location.CurrentLocation;
+import eu.lucazanini.arpav.model.SlideTitles;
 import timber.log.Timber;
+
+import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
 
 // http://stackoverflow.com/questions/23133912/android-viewpager-update-off-screen-but-cached-fragments-in-viewpager
 
 // https://guides.codepath.com/android/ViewPager-with-FragmentPagerAdapter
 
-public class MainActivity extends AppCompatActivity implements TitlesCallBack {
+public class MainActivity extends AppCompatActivity implements TitlesCallBack, Observer {
 
     private static final int PAGES = 7;
     private static final int PAGES_LIMIT = 7;
     protected @BindView(R.id.pager) ViewPager pager;
+    protected @BindView(R.id.my_toolbar) Toolbar myToolbar;
+    protected @BindString(R.string.action_title) String defaultTitle;
     private CollectionPagerAdapter collectionPagerAdapter;
+    private CurrentLocation currentLocation;
+    private ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,17 +51,23 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack {
 
         collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
-//        final ActionBar actionBar = getSupportActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
-
         pager.setOffscreenPageLimit(PAGES_LIMIT);
         pager.setAdapter(collectionPagerAdapter);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+//        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+        actionBar = getSupportActionBar();
 
-//        TownList towns = TownList.getInstance(this);
-//        towns.save();
+        currentLocation = CurrentLocation.getInstance();
+
+        if(currentLocation.isDefined()){
+            actionBar.setTitle(currentLocation.getTown().getName());
+        } else{
+            actionBar.setTitle(defaultTitle);
+        }
+
+        currentLocation.addObserver(this);
+
     }
 
     @Override
@@ -59,13 +75,11 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack {
         Timber.d("onActivityResult requestCode "+requestCode);
 //        super.onActivityResult(requestCode, resultCode, data);
         // Check which request we're responding to
-        if (requestCode == MeteogrammaFragment.REQUEST_CODE) {
-            Timber.d("onActivityResult REQUEST_CODE");
+        if (requestCode == REQUEST_CODE) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                Timber.d("onActivityResult RESULT_OK");
-                String town  = data.getStringExtra("TOWN_NAME");
-                Timber.d("onActivityResult " + town);
+                String town  = data.getStringExtra(SearchableActivity.TOWN_NAME);
+                currentLocation.setTown(town, this);
             }
         }
     }
@@ -92,26 +106,45 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack {
                     NavUtils.navigateUpTo(this, upIntent);
                 }
                 return true;
+            case R.id.action_search:
+                Intent intent = SearchableActivity.getIntent(this);
+                startActivityForResult(intent, REQUEST_CODE);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        currentLocation.deleteObserver(this);
         collectionPagerAdapter.stopObserving();
     }
 
     @Override
-    public Titles getTitles() {
-        return titles;
+    public SlideTitles getTitles() {
+        return SLIDE_TITLES;
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if(o instanceof CurrentLocation) {
+            String title;
+            if(arg!=null) {
+                title = arg.toString();
+            } else{
+                title = defaultTitle;
+            }
+            actionBar.setTitle(title);
+        }
     }
 
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter implements Observer {
 
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
-            titles.addObserver(this);
+            SLIDE_TITLES.addObserver(this);
         }
 
         @Override
@@ -120,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack {
         }
 
         public void stopObserving() {
-            titles.deleteObserver(this);
+            SLIDE_TITLES.deleteObserver(this);
         }
 
         @Override
@@ -141,32 +174,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return titles.getTitle(position);
+            return SLIDE_TITLES.getSlideTitle(position);
         }
-    }
-
-/*    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-//        return super.onCreateOptionsMenu(menu);
-
-        super.onCreateOptionsMenu(menu);
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.search_menu, menu);
-
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-
-        return true;
-    }*/
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
     }
 }

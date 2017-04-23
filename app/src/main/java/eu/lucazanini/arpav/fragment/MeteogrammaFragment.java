@@ -1,7 +1,6 @@
-package eu.lucazanini.arpav;
+package eu.lucazanini.arpav.fragment;
 
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
-import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,20 +27,21 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.jakewharton.rxbinding.widget.RxAutoCompleteTextView;
 import com.jakewharton.rxbinding.widget.RxTextView;
 
-import java.util.List;
 import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.activity.TitlesCallBack;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.Bollettino;
 import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
-import eu.lucazanini.arpav.model.Titles;
+import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import rx.Subscription;
@@ -54,6 +53,7 @@ import static android.app.Activity.RESULT_OK;
 public class MeteogrammaFragment extends Fragment implements Observer {
 
     public static final String NUMBER_PAGE = "number_page";
+    public final static int REQUEST_CODE = 0;
     protected @BindView(R.id.text_location) AppCompatAutoCompleteTextView actvLocation;
     protected @BindView(R.id.image_daySky) NetworkImageView imgDaySky;
     protected @BindView(R.id.text_sky) TextView tvDaySky;
@@ -75,8 +75,8 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private int pageNumber;
     private Subscription actvSub, actvSub2;
     private CurrentLocation currentLocation;
+//    private ActionTitle actionTitle;
     private TitlesCallBack titlesCallBack;
-    public final static int REQUEST_CODE = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,6 +90,9 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
         currentLocation = CurrentLocation.getInstance();
         currentLocation.addObserver(this);
+
+//        actionTitle = new ActionTitle();
+//        actionTitle.addObserver(this);
     }
 
 
@@ -173,10 +176,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         return townName;
     }
 
-    private List<Town> loadTowns() {
-        List<Town> towns = TownList.getInstance(getContext()).loadTowns();
-        return towns;
-    }
+//    private List<Town> loadTowns() {
+//        List<Town> towns = TownList.getInstance(getContext()).loadTowns();
+//        return towns;
+//    }
 
     private void loadData() {
 
@@ -227,6 +230,9 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                             Town town = currentLocation.getTown();
                             int zoneIdx = town.getZone() - 1;
 
+//                            ActionTitle actionTitle = new ActionTitle();
+//                            actionTitle.setActionTitle(town.getName());
+
                             Meteogramma[] meteogrammi = null;
                             Meteogramma.Scadenza[] scadenze = null;
                             Bollettino bollettino = null;
@@ -274,10 +280,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                             wind = scadenze[pageNumber].getProperty(Meteogramma.Scadenza.VENTO);
                             reliability = scadenze[pageNumber].getAttendibilita();
 
-                            for (int i = 0; i < Titles.PAGES; i++) {
-                                Titles titles = titlesCallBack.getTitles();
-                                if (!titles.getTitle(i).equals(scadenze[i].getData())) {
-                                    titles.setTitle(scadenze[i].getData(), i);
+                            for (int i = 0; i < SlideTitles.PAGES; i++) {
+                                SlideTitles slideTitles = titlesCallBack.getTitles();
+                                if (!slideTitles.getSlideTitle(i).equals(scadenze[i].getData())) {
+                                    slideTitles.setSlideTitle(scadenze[i].getData(), i);
                                 }
                             }
 
@@ -334,78 +340,51 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.meteogramma_menu, menu);
-
-//        SearchView searchView = (SearchView)MenuItemCompat.getActionView(menu.findItem(R.id.search));
-
-/*        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getActivity().getComponentName()));
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                                              @Override
-                                              public boolean onQueryTextSubmit(String query) {
-                                                  Timber.d("onQueryTextSubmit");
-                                                  return false;
-                                              }
-
-                                              @Override
-                                              public boolean onQueryTextChange(String newText) {
-                                                  Timber.d("onQueryTextChange");
-                                                  return false;
-                                              }
-                                          }
-
-        );*/
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search:
-
-                Intent intent = SearchableActivity.getIntent(context);
-                getActivity().startActivityForResult(intent, REQUEST_CODE);
-
-                return true;
+//                Intent intent = SearchableActivity.getIntent(context);
+//                getActivity().startActivityForResult(intent, REQUEST_CODE);
+//                return true;
+                return false;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-        @Override
-        public void onDestroy () {
-            super.onDestroy();
-            currentLocation.deleteObserver(this);
-            Timber.d("fragment %s doesn't observe currentLocation", pageNumber);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        currentLocation.deleteObserver(this);
+        Timber.d("fragment %s doesn't observe currentLocation", pageNumber);
 
-            String tag = Integer.toString(pageNumber);
-            final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
-            volleyApp.getRequestQueue().cancelAll(tag);
+        String tag = Integer.toString(pageNumber);
+        final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
+        volleyApp.getRequestQueue().cancelAll(tag);
 //        actvSub.unsubscribe();
-        }
+    }
 
-        @Override
-        public void onDestroyView () {
-            super.onDestroyView();
-            unbinder.unbind();
-            actvSub.unsubscribe();
-            actvSub2.unsubscribe();
-        }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+        actvSub.unsubscribe();
+        actvSub2.unsubscribe();
+    }
 
-        @Override
-        public void update (java.util.Observable o, Object arg){
-            if (actvLocation != null)
-                try {
-                    actvLocation.setText((String) arg);
-                } catch (NullPointerException e) {
-                    Timber.e(e.toString());
-                }
-            loadData();
-        }
+    @Override
+    public void update(java.util.Observable o, Object arg) {
+        if (actvLocation != null)
+            try {
+                actvLocation.setText((String) arg);
+            } catch (NullPointerException e) {
+                Timber.e(e.toString());
+            }
+        loadData();
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

@@ -1,4 +1,4 @@
-package eu.lucazanini.arpav;
+package eu.lucazanini.arpav.activity;
 
 import android.app.Activity;
 import android.app.SearchManager;
@@ -14,25 +14,27 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.View;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.adapter.TownAdapter;
 import eu.lucazanini.arpav.database.TownDataSource;
-import eu.lucazanini.arpav.model.MyAdapter;
 import timber.log.Timber;
 
-public class SearchableActivity  extends AppCompatActivity {
+public class SearchableActivity extends AppCompatActivity {
 
-    protected @BindView(R.id.search_list) RecyclerView mRecyclerView;
-//    protected @BindView(R.id.list) ListView mListView;
-//    private RecyclerView.Adapter mAdapter;
-    private MyAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-//    protected String[] myDataset;
+    public final static String TOWN_NAME = "town_name";
+    protected @BindView(R.id.search_list) RecyclerView recyclerView;
+    private TownAdapter townAdapter;
+
+    public static Intent getIntent(Context context) {
+        Intent intent = new Intent(context, SearchableActivity.class);
+        return intent;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,13 +44,10 @@ public class SearchableActivity  extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
 
         AsyncTask<Void, Void, List<String>> readTowns = new ReadTowns(this).execute();
 
@@ -58,14 +57,11 @@ public class SearchableActivity  extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        return super.onCreateOptionsMenu(menu);
-
         super.onCreateOptionsMenu(menu);
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.search_menu, menu);
 
-        // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView =
@@ -76,14 +72,12 @@ public class SearchableActivity  extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Timber.d("onQueryTextSubmit "+query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Timber.d("onQueryTextChange "+newText);
-                if(newText.length()>1) {
+                if (newText.length() > 1) {
                     AsyncTask<String, Void, List<String>> readFilteredTowns = new ReadFilteredTowns(SearchableActivity.this).execute(newText);
                 } else {
                     AsyncTask<Void, Void, List<String>> readTowns = new ReadTowns(SearchableActivity.this).execute();
@@ -95,12 +89,7 @@ public class SearchableActivity  extends AppCompatActivity {
         return true;
     }
 
-    public static Intent getIntent(Context context){
-        Intent intent = new Intent(context, SearchableActivity.class);
-       return  intent;
-    }
-
-    private class ReadTowns extends AsyncTask<Void, Void, List<String>>{
+    private class ReadTowns extends AsyncTask<Void, Void, List<String>> {
 
         private final WeakReference<SearchableActivity> weakActivity;
 
@@ -113,7 +102,7 @@ public class SearchableActivity  extends AppCompatActivity {
             final SearchableActivity activity = weakActivity.get();
             List<String> townNames = null;
             TownDataSource townDataSource = new TownDataSource(activity);
-            if(activity != null) {
+            if (activity != null) {
                 townDataSource.open();
                 townNames = townDataSource.getTownNames();
             }
@@ -123,25 +112,24 @@ public class SearchableActivity  extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<String> townNames) {
             final SearchableActivity activity = weakActivity.get();
-            if(activity != null && townNames!=null) {
-                activity.mAdapter = new MyAdapter(townNames, new MyAdapter.OnItemClickListener() {
+            if (activity != null && townNames != null) {
+                activity.townAdapter = new TownAdapter(townNames, new TownAdapter.OnItemClickListener() {
                     @Override
                     public void onItemClick(String town) {
                         Intent resultIntent = new Intent();
-// TODO Add extras or a data URI to this intent as appropriate.
-                        resultIntent.putExtra("TOWN_NAME", town);
+                        resultIntent.putExtra(TOWN_NAME, town);
                         activity.setResult(Activity.RESULT_OK, resultIntent);
                         activity.finish();
                     }
                 });
-                activity.mRecyclerView.setAdapter(mAdapter);
+                activity.recyclerView.setAdapter(townAdapter);
             }
             TownDataSource townDataSource = new TownDataSource(activity);
             townDataSource.close();
         }
     }
 
-    private class ReadFilteredTowns extends AsyncTask<String, Void, List<String>>{
+    private class ReadFilteredTowns extends AsyncTask<String, Void, List<String>> {
 
         private final WeakReference<SearchableActivity> weakActivity;
 
@@ -155,7 +143,7 @@ public class SearchableActivity  extends AppCompatActivity {
             String like = params[0];
             List<String> townNames = null;
             TownDataSource townDataSource = new TownDataSource(activity);
-            if(activity != null) {
+            if (activity != null) {
                 townDataSource.open();
                 townNames = townDataSource.getTownNames(like);
             }
@@ -165,15 +153,14 @@ public class SearchableActivity  extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<String> townNames) {
             final SearchableActivity activity = weakActivity.get();
-            if(activity != null && townNames!=null) {
-                activity.mAdapter.update(townNames);
-//                activity.mAdapter = new MyAdapter(townNames);
-//                activity.mRecyclerView.setAdapter(mAdapter);
-//                activity.mAdapter.notifyDataSetChanged();
+            if (activity != null && townNames != null) {
+                activity.townAdapter.update(townNames);
+//                activity.townAdapter = new TownAdapter(townNames);
+//                activity.recyclerView.setAdapter(townAdapter);
+//                activity.townAdapter.notifyDataSetChanged();
             }
             TownDataSource townDataSource = new TownDataSource(activity);
             townDataSource.close();
         }
     }
-
 }
