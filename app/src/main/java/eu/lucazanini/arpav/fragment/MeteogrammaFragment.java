@@ -7,15 +7,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,8 +21,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.jakewharton.rxbinding.widget.RxAutoCompleteTextView;
-import com.jakewharton.rxbinding.widget.RxTextView;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.Observer;
 
@@ -45,16 +42,16 @@ import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import rx.Subscription;
-import rx.functions.Action1;
 import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
 
 public class MeteogrammaFragment extends Fragment implements Observer {
+//public class MeteogrammaFragment extends Fragment {
 
     public static final String NUMBER_PAGE = "number_page";
     public final static int REQUEST_CODE = 0;
-    protected @BindView(R.id.text_location) AppCompatAutoCompleteTextView actvLocation;
+    //    protected @BindView(R.id.text_location) AppCompatAutoCompleteTextView actvLocation;
     protected @BindView(R.id.image_daySky) NetworkImageView imgDaySky;
     protected @BindView(R.id.text_sky) TextView tvDaySky;
     protected @BindView(R.id.text_temperature1) TextView tvTemperature1;
@@ -68,14 +65,14 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     protected @BindView(R.id.image_rain) ImageView imgRain;
     protected @BindView(R.id.image_snow) ImageView imgSnow;
     protected @BindView(R.id.image_wind) ImageView imgWind;
-    protected @BindView(R.id.save_location) Button btnSaveLocation;
+//    protected @BindView(R.id.save_location) Button btnSaveLocation;
     private Context context;
     private Unbinder unbinder;
     private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability;
     private int pageNumber;
-    private Subscription actvSub, actvSub2;
+//    private Subscription actvSub, actvSub2;
     private CurrentLocation currentLocation;
-//    private ActionTitle actionTitle;
+    //    private ActionTitle actionTitle;
     private TitlesCallBack titlesCallBack;
 
     @Override
@@ -105,41 +102,51 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
         unbinder = ButterKnife.bind(this, v);
 
-        Town town = currentLocation.getTown();
+                Town town = currentLocation.getTown();
 
         if (town == null) {
             String townName = getPrefsLocation();
             town = TownList.getInstance(context).getTown(townName);
             if (town != null) {
                 currentLocation.setTown(town);
-                actvLocation.setText(town.getName());
             }
-        } else {
-            actvLocation.setText(town.getName());
         }
 
-        String[] names = TownList.getInstance(getContext()).getNames();
+//        Town town = currentLocation.getTown();
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, names);
-        actvLocation.setAdapter(adapter);
+//        if (town == null) {
+//            String townName = getPrefsLocation();
+//            town = TownList.getInstance(context).getTown(townName);
+//            if (town != null) {
+//                currentLocation.setTown(town);
+//                actvLocation.setText(town.getName());
+//            }
+//        } else {
+//            actvLocation.setText(town.getName());
+//        }
 
-        actvSub2 = RxTextView.textChanges(actvLocation).subscribe(new Action1<CharSequence>() {
-            @Override
-            public void call(CharSequence charSequence) {
-            }
-        });
+//        String[] names = TownList.getInstance(getContext()).getNames();
+//
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, names);
+//        actvLocation.setAdapter(adapter);
 
-        actvSub = RxAutoCompleteTextView.itemClickEvents(actvLocation).subscribe(adapterViewItemClickEvent -> {
-            String name = actvLocation.getText().toString();
-
-            currentLocation.setTown(TownList.getInstance(context).getTown(name));
-
-            View view = getActivity().getCurrentFocus();
-            if (view != null) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-            }
-        });
+//        actvSub2 = RxTextView.textChanges(actvLocation).subscribe(new Action1<CharSequence>() {
+//            @Override
+//            public void call(CharSequence charSequence) {
+//            }
+//        });
+//
+//        actvSub = RxAutoCompleteTextView.itemClickEvents(actvLocation).subscribe(adapterViewItemClickEvent -> {
+//            String name = actvLocation.getText().toString();
+//
+//            currentLocation.setTown(TownList.getInstance(context).getTown(name));
+//
+//            View view = getActivity().getCurrentFocus();
+//            if (view != null) {
+//                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+//                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+//            }
+//        });
 
         loadData();
 
@@ -156,19 +163,19 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         }
     }
 
-    @OnClick(R.id.save_location)
-    protected void savePrefsLocation() {
-        String townName = actvLocation.getText().toString();
-
-        Town town = TownList.getInstance(context).getTown(townName);
-
-        if (town != null) {
-            SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString(getString(R.string.current_location), townName);
-            editor.commit();
-        }
-    }
+//    @OnClick(R.id.save_location)
+//    protected void savePrefsLocation() {
+//        String townName = actvLocation.getText().toString();
+//
+//        Town town = TownList.getInstance(context).getTown(townName);
+//
+//        if (town != null) {
+//            SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+//            SharedPreferences.Editor editor = sharedPref.edit();
+//            editor.putString(getString(R.string.current_location), townName);
+//            editor.commit();
+//        }
+//    }
 
     private String getPrefsLocation() {
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -350,6 +357,18 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 //                getActivity().startActivityForResult(intent, REQUEST_CODE);
 //                return true;
                 return false;
+            case R.id.action_save_location:
+                Town town = currentLocation.getTown();
+                if (town != null) {
+                    SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(getString(R.string.current_location), town.getName());
+                    editor.commit();
+                }
+                return true;
+            case R.id.action_find_location:
+
+                return false;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -359,7 +378,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     public void onDestroy() {
         super.onDestroy();
         currentLocation.deleteObserver(this);
-        Timber.d("fragment %s doesn't observe currentLocation", pageNumber);
 
         String tag = Integer.toString(pageNumber);
         final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
@@ -371,18 +389,18 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
-        actvSub.unsubscribe();
-        actvSub2.unsubscribe();
+//        actvSub.unsubscribe();
+//        actvSub2.unsubscribe();
     }
 
     @Override
     public void update(java.util.Observable o, Object arg) {
-        if (actvLocation != null)
-            try {
-                actvLocation.setText((String) arg);
-            } catch (NullPointerException e) {
-                Timber.e(e.toString());
-            }
+//        if (actvLocation != null)
+//            try {
+//                actvLocation.setText((String) arg);
+//            } catch (NullPointerException e) {
+//                Timber.e(e.toString());
+//            }
         loadData();
     }
 

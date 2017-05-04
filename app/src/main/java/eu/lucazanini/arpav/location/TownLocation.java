@@ -28,6 +28,8 @@ public interface TownLocation {
      */
     float distanceTo(TownLocation dest);
 
+    float gpsDistanceTo(double latitude, double longitude);
+
     /**
      * Get the name of the town of the location
      */

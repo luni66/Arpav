@@ -24,6 +24,8 @@
     <string name="attendibilita">Attendibilità previsioni</string>
 
     <string name="current_location">current_location</string>
+    <string name="save_location">Salva località</string>
+    <string name="find_location">gps</string>
 
     <!--<integer name="pages">6</integer>-->
 

@@ -90,6 +90,25 @@ public class Town implements TownLocation {
     }
 
     @Override
+    public float gpsDistanceTo(double gpsLatitude, double gpsLongitude) {
+
+        final double R = 6371000; // metres
+
+        double phi1 = Math.toRadians(latitude);
+        double phi2 = Math.toRadians(gpsLatitude);
+        double deltaPhi = Math.toRadians(gpsLatitude - latitude);
+        double deltaLambda = Math.toRadians(gpsLongitude - longitude);
+
+        double a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2)
+                + Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        double d = R * c;
+
+        return (float) d;
+    }
+
+    @Override
     public String getName() {
         return name;
     }
@@ -136,6 +155,23 @@ public class Town implements TownLocation {
         public int compare(Town o1, Town o2) {
             int result;
             result = (int) (center.distanceTo(o1) - center.distanceTo(o2));
+            return result;
+        }
+    }
+
+    public static class GpsDistanceComparator implements Comparator<Town> {
+
+        private double latitude, longitude;
+
+        public GpsDistanceComparator(double latitude, double longitude){
+            this.latitude=latitude;
+            this.longitude=longitude;
+        }
+
+        @Override
+        public int compare(Town o1, Town o2) {
+            int result;
+            result = (int) (o1.gpsDistanceTo(latitude, longitude) - o2.gpsDistanceTo(latitude, longitude));
             return result;
         }
     }

@@ -8,4 +8,16 @@
         android:title="@string/search_title"
         app:showAsAction="ifRoom"/>
 
+    <item
+        android:id="@+id/action_save_location"
+        android:icon="@drawable/ic_save_location"
+        android:title="@string/save_location"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_find_location"
+        android:icon="@drawable/ic_find_location"
+        android:title="@string/find_location"
+        app:showAsAction="ifRoom"/>
+
 </menu>

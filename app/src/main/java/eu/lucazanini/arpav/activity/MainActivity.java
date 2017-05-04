@@ -1,27 +1,45 @@
 package eu.lucazanini.arpav.activity;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
 import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
 import eu.lucazanini.arpav.location.CurrentLocation;
+import eu.lucazanini.arpav.location.GoogleLocator;
+import eu.lucazanini.arpav.location.Town;
+import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
 import timber.log.Timber;
 
@@ -31,6 +49,7 @@ import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
 
 // https://guides.codepath.com/android/ViewPager-with-FragmentPagerAdapter
 
+//public class MainActivity extends AppCompatActivity implements TitlesCallBack, Observer, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 public class MainActivity extends AppCompatActivity implements TitlesCallBack, Observer {
 
     private static final int PAGES = 7;
@@ -41,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private CollectionPagerAdapter collectionPagerAdapter;
     private CurrentLocation currentLocation;
     private ActionBar actionBar;
+    private  GoogleLocator googleLocator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,25 +80,37 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
         currentLocation = CurrentLocation.getInstance();
 
-        if(currentLocation.isDefined()){
+        Town town = currentLocation.getTown();
+
+//        if (town == null) {
+//            String townName = getPrefsLocation();
+//            town = TownList.getInstance(context).getTown(townName);
+//            if (town != null) {
+//                currentLocation.setTown(town);
+//            }
+//        }
+
+        if (currentLocation.isDefined()) {
             actionBar.setTitle(currentLocation.getTown().getName());
-        } else{
+        } else {
             actionBar.setTitle(defaultTitle);
         }
 
         currentLocation.addObserver(this);
 
+        googleLocator = new GoogleLocator(this);
+        googleLocator.connect();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Timber.d("onActivityResult requestCode "+requestCode);
+        Timber.d("onActivityResult requestCode " + requestCode);
 //        super.onActivityResult(requestCode, resultCode, data);
         // Check which request we're responding to
         if (requestCode == REQUEST_CODE) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
-                String town  = data.getStringExtra(SearchableActivity.TOWN_NAME);
+                String town = data.getStringExtra(SearchableActivity.TOWN_NAME);
                 currentLocation.setTown(town, this);
             }
         }
@@ -110,6 +142,25 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                 Intent intent = SearchableActivity.getIntent(this);
                 startActivityForResult(intent, REQUEST_CODE);
                 return true;
+            case R.id.action_find_location:
+                Timber.d("click on gps");
+
+                Location location = googleLocator.requestUpdates();
+
+                Timber.d("latitudine " + location.getLatitude());
+                Timber.d("longitudine " + location.getLongitude());
+                Timber.d("accuracy " + location.getAccuracy());
+
+                googleLocator.disconnect();
+
+                List<Town> towns = TownList.getInstance(this).getTowns();
+
+                Collections.sort(towns, new Town.GpsDistanceComparator(location.getLatitude(), location.getLongitude()));
+
+                currentLocation = CurrentLocation.getInstance();
+                currentLocation.setTown(towns.get(0));
+
+                return false;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -129,11 +180,11 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
     @Override
     public void update(Observable o, Object arg) {
-        if(o instanceof CurrentLocation) {
+        if (o instanceof CurrentLocation) {
             String title;
-            if(arg!=null) {
+            if (arg != null) {
                 title = arg.toString();
-            } else{
+            } else {
                 title = defaultTitle;
             }
             actionBar.setTitle(title);

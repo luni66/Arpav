@@ -10,6 +10,9 @@
     <!--per cache di volley ???-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
     <!--android:theme="@style/AppTheme"-->
 
     <application
