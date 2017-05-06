@@ -112,13 +112,13 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             }
         }
 
-//        Town town = currentLocation.getTown();
+//        Town town = upadatedLocation.getTown();
 
 //        if (town == null) {
 //            String townName = getPrefsLocation();
 //            town = TownList.getInstance(context).getTown(townName);
 //            if (town != null) {
-//                currentLocation.setTown(town);
+//                upadatedLocation.setTown(town);
 //                actvLocation.setText(town.getName());
 //            }
 //        } else {
@@ -139,7 +139,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 //        actvSub = RxAutoCompleteTextView.itemClickEvents(actvLocation).subscribe(adapterViewItemClickEvent -> {
 //            String name = actvLocation.getText().toString();
 //
-//            currentLocation.setTown(TownList.getInstance(context).getTown(name));
+//            upadatedLocation.setTown(TownList.getInstance(context).getTown(name));
 //
 //            View view = getActivity().getCurrentFocus();
 //            if (view != null) {

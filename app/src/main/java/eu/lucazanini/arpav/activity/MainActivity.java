@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -54,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
     private static final int PAGES = 7;
     private static final int PAGES_LIMIT = 7;
+    private final static int LOCATION_REQUEST=1;
+    private static boolean locationPermissionGranted = false;
     protected @BindView(R.id.pager) ViewPager pager;
     protected @BindView(R.id.my_toolbar) Toolbar myToolbar;
     protected @BindString(R.string.action_title) String defaultTitle;
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 //            String townName = getPrefsLocation();
 //            town = TownList.getInstance(context).getTown(townName);
 //            if (town != null) {
-//                currentLocation.setTown(town);
+//                upadatedLocation.setTown(town);
 //            }
 //        }
 
@@ -98,8 +101,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
         currentLocation.addObserver(this);
 
-        googleLocator = new GoogleLocator(this);
-        googleLocator.connect();
+//        checkPermission();
     }
 
     @Override
@@ -143,26 +145,95 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                 startActivityForResult(intent, REQUEST_CODE);
                 return true;
             case R.id.action_find_location:
-                Timber.d("click on gps");
+                Timber.d("click on gps with permission "+locationPermissionGranted);
 
-                Location location = googleLocator.requestUpdates();
+                if(locationPermissionGranted) {
 
-                Timber.d("latitudine " + location.getLatitude());
-                Timber.d("longitudine " + location.getLongitude());
-                Timber.d("accuracy " + location.getAccuracy());
+//                    googleLocator = new GoogleLocator(this);
+//                    googleLocator.connect();
 
-                googleLocator.disconnect();
+                    googleLocator.requestUpdates();
 
-                List<Town> towns = TownList.getInstance(this).getTowns();
+//                    googleLocator.removeUpdates();
 
-                Collections.sort(towns, new Town.GpsDistanceComparator(location.getLatitude(), location.getLongitude()));
+//                Timber.d("latitudine " + location.getLatitude());
+//                Timber.d("longitudine " + location.getLongitude());
+//                Timber.d("accuracy " + location.getAccuracy());
 
-                currentLocation = CurrentLocation.getInstance();
-                currentLocation.setTown(towns.get(0));
+//                    googleLocator.disconnect();
+
+//                    if (location != null) {
+//
+//                        List<Town> towns = TownList.getInstance(this).getTowns();
+//
+//                        Collections.sort(towns, new Town.GpsDistanceComparator(location.getLatitude(), location.getLongitude()));
+//
+//                        currentLocation = CurrentLocation.getInstance();
+//                        currentLocation.setTown(towns.get(0));
+//                    }
+                }
 
                 return false;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        googleLocator = new GoogleLocator(this);
+        googleLocator.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        googleLocator.disconnect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPermission();
+    }
+
+    private void checkPermission(){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                locationPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+                if (!locationPermissionGranted) {
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                }
+            } else {
+                locationPermissionGranted = true;
+            }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case LOCATION_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    locationPermissionGranted=true;
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    locationPermissionGranted=false;
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
         }
     }
 
