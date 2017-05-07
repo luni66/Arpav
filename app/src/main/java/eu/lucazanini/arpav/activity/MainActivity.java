@@ -3,32 +3,23 @@ package eu.lucazanini.arpav.activity;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-
-import java.util.Collections;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -40,7 +31,6 @@ import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.GoogleLocator;
 import eu.lucazanini.arpav.location.Town;
-import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
 import timber.log.Timber;
 
@@ -55,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
     private static final int PAGES = 7;
     private static final int PAGES_LIMIT = 7;
-    private final static int LOCATION_REQUEST=1;
+    private final static int LOCATION_REQUEST = 1;
     private static boolean locationPermissionGranted = false;
     protected @BindView(R.id.pager) ViewPager pager;
     protected @BindView(R.id.my_toolbar) Toolbar myToolbar;
@@ -63,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private CollectionPagerAdapter collectionPagerAdapter;
     private CurrentLocation currentLocation;
     private ActionBar actionBar;
-    private  GoogleLocator googleLocator;
+    private GoogleLocator googleLocator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,32 +135,10 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                 startActivityForResult(intent, REQUEST_CODE);
                 return true;
             case R.id.action_find_location:
-                Timber.d("click on gps with permission "+locationPermissionGranted);
+                Timber.d("click on gps with permission " + locationPermissionGranted);
 
-                if(locationPermissionGranted) {
-
-//                    googleLocator = new GoogleLocator(this);
-//                    googleLocator.connect();
-
+                if ( isGpsAvailable() && locationPermissionGranted) {
                     googleLocator.requestUpdates();
-
-//                    googleLocator.removeUpdates();
-
-//                Timber.d("latitudine " + location.getLatitude());
-//                Timber.d("longitudine " + location.getLongitude());
-//                Timber.d("accuracy " + location.getAccuracy());
-
-//                    googleLocator.disconnect();
-
-//                    if (location != null) {
-//
-//                        List<Town> towns = TownList.getInstance(this).getTowns();
-//
-//                        Collections.sort(towns, new Town.GpsDistanceComparator(location.getLatitude(), location.getLongitude()));
-//
-//                        currentLocation = CurrentLocation.getInstance();
-//                        currentLocation.setTown(towns.get(0));
-//                    }
                 }
 
                 return false;
@@ -198,16 +166,26 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
         checkPermission();
     }
 
-    private void checkPermission(){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                locationPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-                if (!locationPermissionGranted) {
-                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
-                }
-            } else {
-                locationPermissionGranted = true;
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            locationPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            if (!locationPermissionGranted) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
             }
+        } else {
+            locationPermissionGranted = true;
+        }
+    }
+
+    private boolean isGpsAvailable() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            return true;
+        } else {
+            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
     @Override
@@ -221,13 +199,13 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    locationPermissionGranted=true;
+                    locationPermissionGranted = true;
 
                 } else {
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    locationPermissionGranted=false;
+                    locationPermissionGranted = false;
                 }
                 return;
             }
