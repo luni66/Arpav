@@ -369,6 +369,9 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             case R.id.action_find_location:
 
                 return false;
+            case R.id.action_home:
+
+                return false;
             default:
                 return super.onOptionsItemSelected(item);
         }

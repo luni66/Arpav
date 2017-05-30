@@ -3,21 +3,27 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_home"
+        android:icon="@drawable/ic_action_home"
+        android:title="@string/home"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search"
         android:title="@string/search_title"
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_save_location"
-        android:icon="@drawable/ic_save_location"
-        android:title="@string/save_location"
-        app:showAsAction="ifRoom"/>
-
-    <item
         android:id="@+id/action_find_location"
         android:icon="@drawable/ic_find_location"
         android:title="@string/find_location"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_save_location"
+        android:icon="@drawable/ic_save_location"
+        android:title="@string/save_location"
         app:showAsAction="ifRoom"/>
 
 </menu>

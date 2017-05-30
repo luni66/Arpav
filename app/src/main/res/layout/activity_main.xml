@@ -5,11 +5,13 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+    <!--android:background="?attr/colorPrimary"-->
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/primary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
@@ -24,11 +26,12 @@
         slideTitles for adjacent pages.
         -->
         <android.support.v4.view.PagerTitleStrip android:id="@+id/pager_title_strip"
+                                                 style="@style/stylePagerTitleStrip"
                                                  android:layout_width="match_parent"
                                                  android:layout_height="wrap_content"
                                                  android:layout_gravity="top"
-                                                 android:background="#33b5e5"
-                                                 android:textColor="#fff"
+                                                 android:background="@color/item_background"
+                                                 android:textColor="@color/text_secondary"
                                                  android:paddingTop="4dp"
                                                  android:paddingBottom="4dp" />
 

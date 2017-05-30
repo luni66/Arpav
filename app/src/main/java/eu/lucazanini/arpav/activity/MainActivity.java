@@ -1,7 +1,9 @@
 package eu.lucazanini.arpav.activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
@@ -31,6 +33,7 @@ import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.GoogleLocator;
 import eu.lucazanini.arpav.location.Town;
+import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
 import timber.log.Timber;
 
@@ -141,7 +144,16 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                     googleLocator.requestUpdates();
                 }
 
-                return false;
+                return true;
+            case R.id.action_home:
+
+                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                String townName = sharedPref.getString(getString(R.string.current_location), "");
+                Town town = TownList.getInstance(this).getTown(townName);
+                if (town != null) {
+                    currentLocation.setTown(town);
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
