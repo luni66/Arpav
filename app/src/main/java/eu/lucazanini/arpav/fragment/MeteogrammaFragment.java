@@ -13,22 +13,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 
 import java.util.Observer;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.activity.TitlesCallBack;
@@ -41,7 +38,6 @@ import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import rx.Subscription;
 import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
@@ -65,12 +61,13 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     protected @BindView(R.id.image_rain) ImageView imgRain;
     protected @BindView(R.id.image_snow) ImageView imgSnow;
     protected @BindView(R.id.image_wind) ImageView imgWind;
-//    protected @BindView(R.id.save_location) Button btnSaveLocation;
+    protected @BindView(R.id.downloadProgressBar) ProgressBar progressBar;
+    //    protected @BindView(R.id.save_location) Button btnSaveLocation;
     private Context context;
     private Unbinder unbinder;
     private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability;
     private int pageNumber;
-//    private Subscription actvSub, actvSub2;
+    //    private Subscription actvSub, actvSub2;
     private CurrentLocation currentLocation;
     //    private ActionTitle actionTitle;
     private TitlesCallBack titlesCallBack;
@@ -102,7 +99,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
         unbinder = ButterKnife.bind(this, v);
 
-                Town town = currentLocation.getTown();
+        Town town = currentLocation.getTown();
 
         if (town == null) {
             String townName = getPrefsLocation();
@@ -189,6 +186,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 //    }
 
     private void loadData() {
+
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
 
         final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
         final ImageLoader mImageLoader = volleyApp.getImageLoader();
@@ -322,20 +323,32 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                                     } catch (NullPointerException e) {
                                         Timber.e(e.toString());
                                     }
+                                    if (progressBar != null) {
+                                        progressBar.setVisibility(View.GONE);
+                                    }
                                 }
 
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     Timber.e("Image Load Error: " + error.getMessage());
+                                    if (progressBar != null) {
+                                        progressBar.setVisibility(View.GONE);
+                                    }
                                 }
                             });
 
                         }
+//                        if(progressBar!=null) {
+//                            progressBar.setVisibility(View.GONE);
+//                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Timber.e(error);
+                if(progressBar!=null) {
+                    progressBar.setVisibility(View.GONE);
+                }
             }
         }, Integer.toString(pageNumber));
 
