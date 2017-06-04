@@ -106,7 +106,7 @@ public class Meteogramma implements Parcelable {
         public final static String PROBABILITA_PRECIPITAZIONE = "Probabilita' precipitazione";
         public final static String QUOTA_NEVE = "Quota neve";
         public final static String VENTO = "Vento";
-        public final static String ATTENDIBILITA = "Attendibilita";
+        public final static String ATTENDIBILITA = "Attendibilita'";
         public static final Creator<Scadenza> CREATOR = new Creator<Scadenza>() {
             @Override
             public Scadenza createFromParcel(Parcel in) {

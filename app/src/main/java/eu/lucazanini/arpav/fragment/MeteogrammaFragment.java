@@ -25,6 +25,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import java.util.Observer;
 
 import butterknife.BindView;
+import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.R;
@@ -45,6 +46,7 @@ import static android.app.Activity.RESULT_OK;
 public class MeteogrammaFragment extends Fragment implements Observer {
 //public class MeteogrammaFragment extends Fragment {
 
+    public final static String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet arcu ultricies, porttitor libero in, fringilla erat. Proin sollicitudin in lacus eu pharetra. Duis ultricies justo gravida ligula lacinia. ";
     public static final String NUMBER_PAGE = "number_page";
     public final static int REQUEST_CODE = 0;
     //    protected @BindView(R.id.text_location) AppCompatAutoCompleteTextView actvLocation;
@@ -62,10 +64,11 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     protected @BindView(R.id.image_snow) ImageView imgSnow;
     protected @BindView(R.id.image_wind) ImageView imgWind;
     protected @BindView(R.id.downloadProgressBar) ProgressBar progressBar;
+    protected @BindView(R.id.text_date) TextView tvDate;
     //    protected @BindView(R.id.save_location) Button btnSaveLocation;
     private Context context;
     private Unbinder unbinder;
-    private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability;
+    private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability, date;
     private int pageNumber;
     //    private Subscription actvSub, actvSub2;
     private CurrentLocation currentLocation;
@@ -214,11 +217,11 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                     private void setViewVisibility(TextView text, View image) {
                         String caption = (String) text.getText();
                         if (caption == null || caption.equals("")) {
-                            ButterKnife.apply(text, GONE);
                             ButterKnife.apply(image, GONE);
+                            ButterKnife.apply(text, GONE);
                         } else {
-                            ButterKnife.apply(text, VISIBLE);
                             ButterKnife.apply(image, VISIBLE);
+                            ButterKnife.apply(text, VISIBLE);
                         }
                     }
 
@@ -287,6 +290,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                             snow = scadenze[pageNumber].getQuotaNeve();
                             wind = scadenze[pageNumber].getProperty(Meteogramma.Scadenza.VENTO);
                             reliability = scadenze[pageNumber].getAttendibilita();
+                            date = response.getData();
 
                             for (int i = 0; i < SlideTitles.PAGES; i++) {
                                 SlideTitles slideTitles = titlesCallBack.getTitles();
@@ -302,7 +306,11 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                                 tvRain.setText(rain + " (" + probability + ")");
                                 tvSnow.setText(snow);
                                 tvWind.setText(wind);
-                                tvReliability.setText(reliability);
+                                if (reliability.length() > 0)
+                                    tvReliability.setText("Attendibilità: " + reliability);
+                                else
+                                    tvReliability.setText(reliability);
+                                tvDate.setText("Aggiornato il: "+date);
                             } catch (NullPointerException e) {
                                 Timber.e(e.toString());
                             }
@@ -313,6 +321,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                             setViewVisibility(tvSnow, imgSnow);
                             setViewVisibility(tvWind, imgWind);
                             setViewVisibility(tvReliability);
+                            setViewVisibility(tvDate);
 
                             daySkyUrl = scadenze[pageNumber].getSimbolo();
                             mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
@@ -346,7 +355,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Timber.e(error);
-                if(progressBar!=null) {
+                if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
             }

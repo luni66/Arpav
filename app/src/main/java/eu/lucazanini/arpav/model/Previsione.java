@@ -465,6 +465,13 @@ public class Previsione implements Parcelable {
         }
     }
 
+    public String getData() {
+        if (dataAggiornamento != null && dataAggiornamento.length() > 0)
+            return dataAggiornamento;
+        else
+            return dataEmissione;
+    }
+
     public Bollettino getMeteoVeneto() {
         return meteoVeneto;
     }
