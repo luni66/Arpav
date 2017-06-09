@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="eu.lucazanini.arpav">
+          package="eu.lucazanini.arpav">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
-    <!--per cache di volley ???-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <!-- per cache di volley ??? -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
-    <!--android:theme="@style/AppTheme"-->
-    <!--android:theme="@style/Theme.AppCompat.Light.NoActionBar"-->
-
+    <!-- android:theme="@style/AppTheme" -->
+    <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
     <application
         android:name=".ArpavApplication"
         android:allowBackup="true"
@@ -25,47 +23,60 @@
         android:theme="@style/AppTheme">
         <activity android:name=".activity.MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <meta-data android:name="android.app.default_searchable" android:value=".SearchableActivity" />
+            <meta-data
+                android:name="android.app.default_searchable"
+                android:value=".SearchableActivity"/>
 
-<!--            <meta-data android:name="android.app.searchable"
-                       android:resource="@xml/searchable" />-->
+            <!--
+                <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable" />
+            -->
         </activity>
-
-        <activity android:name=".activity.SearchableActivity"
-                  android:launchMode="singleTop">
+        <activity
+            android:name=".activity.SearchableActivity"
+            android:launchMode="singleTop">
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
 
-            <meta-data android:name="android.app.default_searchable" android:value=".SearchableActivity" />
-
-            <meta-data android:name="android.app.searchable"
-                       android:resource="@xml/searchable"/>
-
+            <meta-data
+                android:name="android.app.default_searchable"
+                android:value=".SearchableActivity"/>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
         </activity>
 
         <receiver
             android:name=".schedule.AlarmReceiver"
             android:enabled="true"
             android:exported="true">
-<!--            //TODO remove comment below and see
-            https://developer.android.com/training/scheduling/alarms.html#boot-->
+
+            <!--
+                //TODO remove comment below and see
+            https://developer.android.com/training/scheduling/alarms.html#boot
+            -->
             <!-- android:enabled="false"> -->
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <!-- TODO only for test -->
-                <action android:name="eu.lucazanini.arpav.UPDATE_TIME" />
+                <action android:name="eu.lucazanini.arpav.UPDATE_TIME"/>
             </intent-filter>
         </receiver>
 
         <service
             android:name=".task.ReportService"
-            android:exported="false" />
+            android:exported="false"/>
 
+        <activity android:name=".activity.SettingsActivity">
+        </activity>
+        <activity android:name=".activity.CreditsActivity">
+        </activity>
     </application>
 
 </manifest>

@@ -154,6 +154,16 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                     currentLocation.setTown(town);
                 }
                 return true;
+            case R.id.action_settings:
+                Intent settingsIntent = SettingsActivity.getIntent(this);
+                startActivity(settingsIntent);
+
+                return true;
+            case R.id.action_credits:
+                Intent creditsIntent = CreditsActivity.getIntent(this);
+                startActivity(creditsIntent);
+
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

@@ -26,4 +26,16 @@
         android:title="@string/save_location"
         app:showAsAction="ifRoom"/>
 
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_credits"
+        android:icon="@drawable/ic_credits"
+        android:title="@string/credits"
+        app:showAsAction="ifRoom"/>
+
 </menu>

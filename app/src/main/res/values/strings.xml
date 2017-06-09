@@ -27,6 +27,33 @@
     <string name="save_location">Salva località</string>
     <string name="find_location">gps</string>
     <string name="home">Località preferita</string>
+    <string name="settings">Preferenze</string>
+    <string name="credits">Crediti</string>
+
+    <string name="pref_language_key">language_key</string>
+    <string name="pref_language_title">Lingua</string>
+
+    <string-array
+        name="pref_language_entries">
+        <item>Italiano</item>
+        <item>English</item>
+        <item>Français</item>
+        <item>Deutsch</item>
+    </string-array>
+
+    <string-array
+        name="pref_language_values">
+        <item>it</item>
+        <item>en</item>
+        <item>fr</item>
+        <item>de</item>
+    </string-array>
+
+    <string name="pref_language_default">it</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <!--<string name="hello_blank_fragment">Hello blank fragment</string>-->
+
 
     <!--<integer name="pages">6</integer>-->
 
