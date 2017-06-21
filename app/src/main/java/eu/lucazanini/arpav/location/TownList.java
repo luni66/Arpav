@@ -19,18 +19,20 @@ import eu.lucazanini.arpav.database.TownContract.TownEntry;
 public class TownList {
 
     private static TownList instance;
-    private Context context;
+//    private Context context;
     private List<Town> towns;
 
-    protected TownList() {}
+//    protected TownList() {}
 
     protected TownList(Context context) {
-        this.context = context;
-        loadTowns();
+//        this.context = context;
+        loadTowns(context);
     }
 
     public synchronized static TownList getInstance(Context context) {
+//public synchronized static TownList getInstance() {
         if (instance == null) {
+//            instance = new TownList(context);
             instance = new TownList(context);
         }
         return instance;
@@ -59,9 +61,10 @@ public class TownList {
         return names;
     }
 
-    public List<Town> loadTowns() {
+//    public List<Town> loadTowns() {
+        private List<Town> loadTowns(Context context) {
 
-        towns = new ArrayList();
+        towns = new ArrayList<>();
 
         String[] paths = new String[]{"belluno.json", "padova.json", "rovigo.json", "treviso.json", "venezia.json", "verona.json", "vicenza.json"};
 
@@ -70,7 +73,7 @@ public class TownList {
 
             for (String path : paths
                     ) {
-                List townsPr = new ArrayList();
+//                List<Town> townsPr = new ArrayList<>();
                 InputStream is = context.getAssets().open(path);
                 int size = is.available();
                 byte[] buffer = new byte[size];
@@ -82,7 +85,7 @@ public class TownList {
                 Type fooType = new TypeToken<List<Town>>() {
                 }.getType();
 
-                townsPr = gson.fromJson(json, fooType);
+                List<Town> townsPr = gson.fromJson(json, fooType);
 
                 towns.addAll(townsPr);
             }

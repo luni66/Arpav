@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,8 +24,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 
+import java.util.Locale;
 import java.util.Observer;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
@@ -74,6 +78,8 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private CurrentLocation currentLocation;
     //    private ActionTitle actionTitle;
     private TitlesCallBack titlesCallBack;
+    protected @BindString(R.string.attendibilita) String AttendibilitaLabel;
+    protected @BindString(R.string.aggiornato) String AggiornatoLabel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,7 +89,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         Bundle args = getArguments();
         pageNumber = args.getInt(NUMBER_PAGE);
 
-        setHasOptionsMenu(true);
+//        setHasOptionsMenu(true);
 
         currentLocation = CurrentLocation.getInstance();
         currentLocation.addObserver(this);
@@ -183,6 +189,38 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         return townName;
     }
 
+    private Previsione.Language getDeviceLanguage(){
+        String languageValue = Locale.getDefault().getLanguage();
+        switch (languageValue) {
+            case "en":
+                return Previsione.Language.EN;
+            case "fr":
+                return Previsione.Language.FR;
+            case "de":
+                return Previsione.Language.DE;
+            case "it":
+            default:
+                return Previsione.Language.IT;
+        }
+    }
+
+    private Previsione.Language getPrefsLanguage(){
+        String defaultLanguage = getResources().getString(R.string.pref_language_default);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String languageValue = sharedPreferences.getString(getString(R.string.pref_language_key), defaultLanguage);
+        switch (languageValue) {
+            case "en":
+                return Previsione.Language.EN;
+            case "fr":
+                return Previsione.Language.FR;
+            case "de":
+                return Previsione.Language.DE;
+            case "it":
+                default:
+                return Previsione.Language.IT;
+        }
+    }
+
 //    private List<Town> loadTowns() {
 //        List<Town> towns = TownList.getInstance(getContext()).loadTowns();
 //        return towns;
@@ -197,19 +235,20 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
         final ImageLoader mImageLoader = volleyApp.getImageLoader();
 
-        BulletinRequest bulletinRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
+        //TODO passare url in base a impostazione device
+        BulletinRequest bulletinRequest = new BulletinRequest(Previsione.getUrl(getDeviceLanguage()),
                 new Response.Listener<Previsione>() {
 
                     final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
                         @Override
-                        public void apply(View view, int index) {
+                        public void apply(@NonNull View view, int index) {
                             view.setVisibility(View.GONE);
                         }
                     };
 
                     final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
                         @Override
-                        public void apply(View view, int index) {
+                        public void apply(@NonNull View view, int index) {
                             view.setVisibility(View.VISIBLE);
                         }
                     };
@@ -307,10 +346,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                                 tvSnow.setText(snow);
                                 tvWind.setText(wind);
                                 if (reliability.length() > 0)
-                                    tvReliability.setText("Attendibilità: " + reliability);
+                                    tvReliability.setText(AttendibilitaLabel +": " + reliability);
                                 else
                                     tvReliability.setText(reliability);
-                                tvDate.setText("Aggiornato il: "+date);
+                                tvDate.setText(AggiornatoLabel+": "+date);
                             } catch (NullPointerException e) {
                                 Timber.e(e.toString());
                             }
@@ -339,7 +378,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Timber.e("Image Load Error: " + error.getMessage());
+                                    Timber.e("Image Load Error: %s", error.getMessage());
                                     if (progressBar != null) {
                                         progressBar.setVisibility(View.GONE);
                                     }
@@ -371,7 +410,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         inflater.inflate(R.menu.meteogramma_menu, menu);
     }
 
-    @Override
+/*    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search:
@@ -403,7 +442,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
+    }*/
 
     @Override
     public void onDestroy() {

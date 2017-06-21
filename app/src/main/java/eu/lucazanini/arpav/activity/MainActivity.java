@@ -19,6 +19,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private CurrentLocation currentLocation;
     private ActionBar actionBar;
     private GoogleLocator googleLocator;
+//    private Town town=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,10 +75,13 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 //        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         actionBar = getSupportActionBar();
+//        if(actionBar!=null) {
+//            actionBar.setDisplayShowHomeEnabled(true);
+//        }
 
         currentLocation = CurrentLocation.getInstance();
 
-        Town town = currentLocation.getTown();
+//       town = currentLocation.getTown();
 
 //        if (town == null) {
 //            String townName = getPrefsLocation();
@@ -99,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Timber.d("onActivityResult requestCode " + requestCode);
 //        super.onActivityResult(requestCode, resultCode, data);
         // Check which request we're responding to
         if (requestCode == REQUEST_CODE) {
@@ -112,7 +116,15 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.meteogramma_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Town town = null;
         switch (item.getItemId()) {
             case android.R.id.home:
                 // This is called when the Home (Up) button is pressed in the action bar.
@@ -138,18 +150,25 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                 startActivityForResult(intent, REQUEST_CODE);
                 return true;
             case R.id.action_find_location:
-                Timber.d("click on gps with permission " + locationPermissionGranted);
-
                 if ( isGpsAvailable() && locationPermissionGranted) {
                     googleLocator.requestUpdates();
                 }
 
                 return true;
+            case R.id.action_save_location:
+town = currentLocation.getTown();
+                if (town != null) {
+                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(getString(R.string.current_location), town.getName());
+                    editor.commit();
+                }
+                return true;
             case R.id.action_home:
-
-                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-                String townName = sharedPref.getString(getString(R.string.current_location), "");
-                Town town = TownList.getInstance(this).getTown(townName);
+//                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+//                String townName = sharedPref.getString(getString(R.string.current_location), "");
+//                Town town = TownList.getInstance(this).getTown(townName);
+                town = currentLocation.getTown();
                 if (town != null) {
                     currentLocation.setTown(town);
                 }
@@ -229,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                     // functionality that depends on this permission.
                     locationPermissionGranted = false;
                 }
+                //TODO return eliminabile?
                 return;
             }
 

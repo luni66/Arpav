@@ -6,6 +6,9 @@ import android.os.Parcelable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static eu.lucazanini.arpav.model.Previsione.*;
+import static eu.lucazanini.arpav.model.Previsione.Language.*;
+
 /**
  * Contains scadenza that it is the forecast for the 18 zones of Veneto
  */
@@ -158,6 +161,13 @@ public class Meteogramma implements Parcelable {
         public String getData() {
             return data;
         }
+
+//        public String getData(Language language){
+//            switch (language){
+//                case EN:
+//
+//            }
+//        }
 
         public void setData(String data) {
             this.data = data;

@@ -138,7 +138,7 @@ public class TownDbHelper extends SQLiteOpenHelper {
     public List<String> getTownNames() {
         Cursor cursor = getTowns();
 
-        List<String> townNames = new ArrayList<String>();
+        List<String> townNames = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             townNames.add(cursor.getString(cursor.getColumnIndex(TownEntry.COL_NAME)));
@@ -153,7 +153,7 @@ public class TownDbHelper extends SQLiteOpenHelper {
     public List<String> getTownNames(String like) {
         Cursor cursor = getTowns(like);
 
-        List<String> townNames = new ArrayList<String>();
+        List<String> townNames = new ArrayList<>();
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             townNames.add(cursor.getString(cursor.getColumnIndex(TownEntry.COL_NAME)));

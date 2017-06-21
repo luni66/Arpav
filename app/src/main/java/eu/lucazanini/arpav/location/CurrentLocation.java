@@ -16,7 +16,7 @@ import timber.log.Timber;
     private static CurrentLocation instance = new CurrentLocation();
     private Town town;
 
-    protected CurrentLocation() {}
+    private CurrentLocation() {}
 
     public static CurrentLocation getInstance() {
         return instance;

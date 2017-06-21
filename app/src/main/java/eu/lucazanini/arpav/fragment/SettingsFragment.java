@@ -67,10 +67,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(languageKey)) {
-            Preference connectionPref = findPreference(key);
+            Preference languagePref = findPreference(key);
             String languageValue = sharedPreferences.getString(key, defaultLanguage);
             // Set summary to be the user-description for the selected value
-            connectionPref.setSummary(getEntry(languageEntries, languageValues, languageValue));
+            languagePref.setSummary(getEntry(languageEntries, languageValues, languageValue));
         }
     }
 

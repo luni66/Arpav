@@ -42,7 +42,6 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
     }
 
     public void requestUpdates() {
-        Timber.d("connection is " + googleApiClient.isConnected());
         if (googleApiClient.isConnected()) {
             Timber.d("connected");
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -67,7 +66,6 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
     }
 
-    @DebugLog
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 //        requestUpdates();
@@ -119,7 +117,6 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
     @DebugLog
     public void connect() {
         googleApiClient.connect();
-        Timber.d(" method connection is " + googleApiClient.isConnected());
     }
 
     public void disconnect() {

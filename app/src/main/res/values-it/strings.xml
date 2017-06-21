@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="search_hint">Inserisci il comune</string>
+    <string name="search_title">Inserisci il comune</string>
+
+    <string name="cielo">Cielo</string>
+    <string name="temperatura">Temperatura</string>
+    <string name="temperatura_1500">Temperatura 1500 m.</string>
+    <string name="temperatura_2000">Temperatura 2000 m.</string>
+    <string name="temperatura_3000">Temperatura 3000 m.</string>
+    <string name="precipitazioni">Precipitazioni</string>
+    <string name="probabilita">Probabiltà precipitazioni</string>
+    <string name="quota_neve">Quota neve</string>
+    <string name="attendibilita">Attendibilità previsioni</string>
+    <string name="aggiornato">Aggiornato il</string>
+
+    <string name="save_location">Salva località</string>
+    <string name="find_location">Trova la località</string>
+    <string name="home">Località preferita</string>
+    <string name="settings">Preferenze</string>
+    <string name="credits">Crediti</string>
+
+    <string name="pref_language_title">Lingua</string>
+
+    <string name="developer_title">Sviluppatore</string>
+    <string name="developer_body">Meteo Veneto è sviluppata da Luca Zanini</string>
+    <!--<string name="developer_body">Meteo Veneto è sviluppata da <a href="http://www.lucazanini.eu">Luca Zanini</a></string>-->
+
+</resources>

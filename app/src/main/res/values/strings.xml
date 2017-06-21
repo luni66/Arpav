@@ -7,31 +7,32 @@
     <string name="first_update_time">16:00</string>
     <string name="second_update_time">09:00</string>
 
-    <string name="search_hint">Inserisci il comune</string>
-    <string name="search_title">Inserisci il comune</string>
+    <string name="search_hint">Insert the town</string>
+    <string name="search_title">Insert the town</string>
     <!--    <string name="clear_search">Cancella il comune</string>-->
 
     <string name="notFound">not found</string>
 
-    <string name="cielo">Cielo</string>
-    <string name="temperatura">Temperatura</string>
-    <string name="temperatura_1500">Temperatura 1500 m.</string>
-    <string name="temperatura_2000">Temperatura 2000 m.</string>
-    <string name="temperatura_3000">Temperatura 3000 m.</string>
-    <string name="precipitazioni">Precipitazioni</string>
-    <string name="probabilita">Probabiltà precipitazioni</string>
-    <string name="quota_neve">Quota neve</string>
-    <string name="attendibilita">Attendibilità previsioni</string>
+    <string name="cielo">Sky</string>
+    <string name="temperatura">Temperature</string>
+    <string name="temperatura_1500">Temperature 1500 m.</string>
+    <string name="temperatura_2000">Temperature 2000 m.</string>
+    <string name="temperatura_3000">Temperature 3000 m.</string>
+    <string name="precipitazioni">Rain</string>
+    <string name="probabilita">Rain probability</string>
+    <string name="quota_neve">Snow level</string>
+    <string name="attendibilita">Forecast reliability</string>
+    <string name="aggiornato">Updated</string>
 
     <string name="current_location">current_location</string>
-    <string name="save_location">Salva località</string>
-    <string name="find_location">gps</string>
-    <string name="home">Località preferita</string>
-    <string name="settings">Preferenze</string>
-    <string name="credits">Crediti</string>
+    <string name="save_location">Save the location</string>
+    <string name="find_location">Find location</string>
+    <string name="home">Favorite location</string>
+    <string name="settings">Preferences</string>
+    <string name="credits">Credits</string>
 
     <string name="pref_language_key">language_key</string>
-    <string name="pref_language_title">Lingua</string>
+    <string name="pref_language_title">Language</string>
 
     <string-array
         name="pref_language_entries">
@@ -50,6 +51,12 @@
     </string-array>
 
     <string name="pref_language_default">it</string>
+
+    <string name="developer_title">Developer</string>
+    <string name="developer_body">Meteo Veneto is developed by Luca Zanini</string>
+    <string name="developer_name">Luca Zanini</string>
+    <string name="developer_site">http://www.lucazanini.eu</string>
+    <!--<string name="developer_body">Meteo Veneto is developed by <a href="http://www.lucazanini.eu">Luca Zanini</a></string>-->
 
     <!-- TODO: Remove or change this placeholder text -->
     <!--<string name="hello_blank_fragment">Hello blank fragment</string>-->

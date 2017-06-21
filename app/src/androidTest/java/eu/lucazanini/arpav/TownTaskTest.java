@@ -30,7 +30,9 @@ public class TownTaskTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
 //        List<Town> towns = Town.loadTowns(appContext);
-        List<Town> towns = TownList.getInstance(appContext).loadTowns();
+//        List<Town> towns = TownList.getInstance(appContext).loadTowns(appContext);
+
+        List<Town> towns = TownList.getInstance(appContext).getTowns();
 
         Collections.sort(towns, new Town.NameComparator());
 
