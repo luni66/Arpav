@@ -1,5 +1,6 @@
 package eu.lucazanini.arpav.preference;
 
+import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.Previsione;
 
 /**
@@ -8,6 +9,12 @@ import eu.lucazanini.arpav.model.Previsione;
 
 public interface Preferences {
 
-    Previsione.Language getDefaultLanguage();
+    Previsione.Language getDeviceLanguage();
+    Previsione.Language getLanguage();
+    Town getLocation();
+    void saveLocation(Town town);
+    boolean isDefaultLanguageSelected();
+
+//    Previsione.Language getDefaultLanguage();
 
 }

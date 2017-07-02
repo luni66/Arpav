@@ -9,6 +9,8 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,6 +45,8 @@ import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
+import eu.lucazanini.arpav.preference.Preferences;
+import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
 
 import static android.app.Activity.RESULT_OK;
@@ -72,7 +76,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     //    protected @BindView(R.id.save_location) Button btnSaveLocation;
     private Context context;
     private Unbinder unbinder;
-    private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability, date;
+    private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability, date, description;
     private int pageNumber;
     //    private Subscription actvSub, actvSub2;
     private CurrentLocation currentLocation;
@@ -80,6 +84,8 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private TitlesCallBack titlesCallBack;
     protected @BindString(R.string.attendibilita) String AttendibilitaLabel;
     protected @BindString(R.string.aggiornato) String AggiornatoLabel;
+    protected @BindView(R.id.text_description) TextView tvDescription;
+private Preferences preferences;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,8 +97,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
 //        setHasOptionsMenu(true);
 
-        currentLocation = CurrentLocation.getInstance();
+        currentLocation = CurrentLocation.getInstance(context);
         currentLocation.addObserver(this);
+
+        preferences = new UserPreferences(context);
 
 //        actionTitle = new ActionTitle();
 //        actionTitle.addObserver(this);
@@ -111,12 +119,25 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         Town town = currentLocation.getTown();
 
         if (town == null) {
-            String townName = getPrefsLocation();
-            town = TownList.getInstance(context).getTown(townName);
+//            String townName = preferences.getLocation();
+//            town = TownList.getInstance(context).getTown(townName);
+            town = preferences.getLocation();
             if (town != null) {
                 currentLocation.setTown(town);
             }
         }
+
+/*        Town town = currentLocation.getTown();
+//        Timber.d("town %s", town.getName());
+
+        if (town == null) {
+//            String townName = getPrefsLocation();
+            String townName = preferences.getLocation();
+            town = TownList.getInstance(context).getTown(townName);
+            if (town != null) {
+                currentLocation.setTown(town);
+            }
+        }*/
 
 //        Town town = upadatedLocation.getTown();
 
@@ -183,43 +204,45 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 //        }
 //    }
 
-    private String getPrefsLocation() {
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String townName = sharedPref.getString(getString(R.string.current_location), "");
-        return townName;
-    }
+//    private String getPrefsLocation() {
+//        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+//        String townName = sharedPref.getString(getString(R.string.current_location), "");
+//        return townName;
+//    }
 
-    private Previsione.Language getDeviceLanguage(){
-        String languageValue = Locale.getDefault().getLanguage();
-        switch (languageValue) {
-            case "en":
-                return Previsione.Language.EN;
-            case "fr":
-                return Previsione.Language.FR;
-            case "de":
-                return Previsione.Language.DE;
-            case "it":
-            default:
-                return Previsione.Language.IT;
-        }
-    }
+//    private Previsione.Language getDeviceLanguage(){
+//        String languageValue = Locale.getDefault().getLanguage();
+//        switch (languageValue) {
+//            case "en":
+//                return Previsione.Language.EN;
+//            case "fr":
+//                return Previsione.Language.FR;
+//            case "de":
+//                return Previsione.Language.DE;
+//            case "it":
+//            default:
+//                return Previsione.Language.IT;
+//        }
+//    }
 
-    private Previsione.Language getPrefsLanguage(){
-        String defaultLanguage = getResources().getString(R.string.pref_language_default);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String languageValue = sharedPreferences.getString(getString(R.string.pref_language_key), defaultLanguage);
-        switch (languageValue) {
-            case "en":
-                return Previsione.Language.EN;
-            case "fr":
-                return Previsione.Language.FR;
-            case "de":
-                return Previsione.Language.DE;
-            case "it":
-                default:
-                return Previsione.Language.IT;
-        }
-    }
+//    private Previsione.Language getPrefsLanguage(){
+//        String defaultLanguage = getResources().getString(R.string.pref_language_default);
+//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+//        String languageValue = sharedPreferences.getString(getString(R.string.pref_language_key), defaultLanguage);
+//        switch (languageValue) {
+//            case "en":
+//                return Previsione.Language.EN;
+//            case "fr":
+//                return Previsione.Language.FR;
+//            case "de":
+//                return Previsione.Language.DE;
+//            case "it":
+//                return Previsione.Language.IT;
+//            case "default":
+//            default:
+//                return Previsione.Language.DEFAULT;
+//        }
+//    }
 
 //    private List<Town> loadTowns() {
 //        List<Town> towns = TownList.getInstance(getContext()).loadTowns();
@@ -235,8 +258,21 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
         final ImageLoader mImageLoader = volleyApp.getImageLoader();
 
-        //TODO passare url in base a impostazione device
-        BulletinRequest bulletinRequest = new BulletinRequest(Previsione.getUrl(getDeviceLanguage()),
+//        Previsione.Language languageApp = null;
+////        Previsione.Language languagePreference = getPrefsLanguage();
+//        Previsione.Language languagePreference = preferences.getLanguage();
+//        if(languagePreference== Previsione.Language.DEFAULT){
+//            languageApp = preferences.getDeviceLanguage();
+//        }else {
+//            languageApp = languagePreference;
+//        }
+
+        Previsione.Language appLanguage = preferences.getLanguage();
+
+        Timber.d("language in preferences is %s", appLanguage);
+        Timber.d("file is %s", Previsione.getUrl(appLanguage));
+
+        BulletinRequest bulletinRequest = new BulletinRequest(Previsione.getUrl(appLanguage),
                 new Response.Listener<Previsione>() {
 
                     final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
@@ -275,6 +311,8 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
                     @Override
                     public void onResponse(Previsione response) {
+
+//                        CurrentLocation currentLocation = CurrentLocation.getInstance();
 
                         if (currentLocation.isDefined()) {
                             Town town = currentLocation.getTown();
@@ -362,6 +400,38 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                             setViewVisibility(tvReliability);
                             setViewVisibility(tvDate);
 
+                            if(appLanguage== Previsione.Language.IT) {
+                                int dayIdx=0;
+                                switch (pageNumber){
+                                    case 0:
+                                        dayIdx=0;
+                                        break;
+                                    case 1:
+                                    case 2:
+                                        dayIdx = 1;
+                                        break;
+                                    case 3:
+                                        case 4:
+                                        dayIdx=2;
+                                            break;
+                                    case 5:
+                                        dayIdx=3;
+                                        break;
+                                    case 6:
+                                        dayIdx=4;
+                                        break;
+
+                                }
+                                description = giorni[dayIdx].getTesto();
+                                Timber.d("description %s", description);
+                                            tvDescription.setText(Html.fromHtml(description));
+            tvDescription.setMovementMethod(LinkMovementMethod.getInstance());
+            tvDescription.setLinksClickable(true);
+                                tvDescription.setVisibility(View.VISIBLE);
+//                                tvDescription.setText(description);
+//                                setViewVisibility(tvDescription);
+                            }
+
                             daySkyUrl = scadenze[pageNumber].getSimbolo();
                             mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
                                 @Override
@@ -385,6 +455,8 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                                 }
                             });
 
+                        } else {
+                            Timber.d("LOCATION NOT DEFINED");
                         }
 //                        if(progressBar!=null) {
 //                            progressBar.setVisibility(View.GONE);
@@ -400,15 +472,97 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             }
         }, Integer.toString(pageNumber));
 
+/*        BulletinRequest bulletinRequestIt = null;
+        if(appLanguage!=Previsione.Language.IT){
+            bulletinRequestIt = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
+                    new Response.Listener<Previsione>() {
+
+                        final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
+                            @Override
+                            public void apply(@NonNull View view, int index) {
+                                view.setVisibility(View.GONE);
+                            }
+                        };
+
+                        final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
+                            @Override
+                            public void apply(@NonNull View view, int index) {
+                                view.setVisibility(View.VISIBLE);
+                            }
+                        };
+
+                        private void setViewVisibility(TextView text, View image) {
+                            String caption = (String) text.getText();
+                            if (caption == null || caption.equals("")) {
+                                ButterKnife.apply(image, GONE);
+                                ButterKnife.apply(text, GONE);
+                            } else {
+                                ButterKnife.apply(image, VISIBLE);
+                                ButterKnife.apply(text, VISIBLE);
+                            }
+                        }
+
+                        private void setViewVisibility(TextView text) {
+                            String caption = (String) text.getText();
+                            if (caption == null || caption.equals("")) {
+                                ButterKnife.apply(text, GONE);
+                            } else {
+                                ButterKnife.apply(text, VISIBLE);
+                            }
+                        }
+
+                        @Override
+                        public void onResponse(Previsione response) {
+
+                            if (currentLocation.isDefined()) {
+                                Town town = currentLocation.getTown();
+                                int zoneIdx = town.getZone() - 1;
+
+//                                Meteogramma[] meteogrammi = null;
+//                                Meteogramma.Scadenza[] scadenze = null;
+                                Bollettino bollettino = null;
+                                Bollettino.Giorno[] giorni = null;
+
+//                                meteogrammi = response.getMeteogramma();
+//                                Meteogramma meteogramma = meteogrammi[zoneIdx];
+//                                scadenze = meteogramma.getScadenza();
+
+                                //TODO add bollettino
+                                if (response.getLanguage() == Previsione.Language.IT) {
+                                    bollettino = response.getMeteoVeneto();
+                                    giorni = bollettino.getGiorni();
+                                    Timber.d("TEST " + giorni[0].getTesto());
+                                }
+
+                                description = giorni[pageNumber].getTesto();
+                                tvDescription.setText(description);
+                                setViewVisibility(tvDescription);
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Timber.e(error);
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                }
+            }, Integer.toString(pageNumber));
+        }*/
+
         volleyApp.addToRequestQueue(bulletinRequest);
+
+//        if(bulletinRequestIt!=null) {
+//            volleyApp.addToRequestQueue(bulletinRequestIt);
+//        }
     }
 
-    //    http://stackoverflow.com/questions/34291453/adding-searchview-in-fragment
+/*    //    http://stackoverflow.com/questions/34291453/adding-searchview-in-fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.meteogramma_menu, menu);
-    }
+    }*/
 
 /*    @Override
     public boolean onOptionsItemSelected(MenuItem item) {

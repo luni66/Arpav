@@ -36,6 +36,7 @@
 
     <string-array
         name="pref_language_entries">
+        <item>Default (recommended)</item>
         <item>Italiano</item>
         <item>English</item>
         <item>Français</item>
@@ -44,13 +45,14 @@
 
     <string-array
         name="pref_language_values">
+        <item>default</item>
         <item>it</item>
         <item>en</item>
         <item>fr</item>
         <item>de</item>
     </string-array>
 
-    <string name="pref_language_default">it</string>
+    <string name="pref_language_default">default</string>
 
     <string name="developer_title">Developer</string>
     <string name="developer_body">Meteo Veneto is developed by Luca Zanini</string>

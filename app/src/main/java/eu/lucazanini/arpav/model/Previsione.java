@@ -162,7 +162,7 @@ public class Previsione implements Parcelable {
 
     @Deprecated
     public Previsione(Preferences preferences) {
-        this.language = preferences.getDefaultLanguage();
+        this.language = preferences.getLanguage();
         uri = URI_IT;
         url = URL_IT;
         isTest = false;
@@ -589,7 +589,7 @@ public class Previsione implements Parcelable {
     }
 
     public enum Language {
-        IT, EN, FR, DE
+        IT, EN, FR, DE, DEFAULT
     }
 
     public static class UpdateTime {

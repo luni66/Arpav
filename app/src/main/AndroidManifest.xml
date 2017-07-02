@@ -73,7 +73,12 @@
             android:name=".task.ReportService"
             android:exported="false"/>
 
-        <activity android:name=".activity.SettingsActivity">
+        <activity android:name=".activity.SettingsActivity"
+                  android:parentActivityName=".activity.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.MainActivity" />
         </activity>
         <activity android:name=".activity.CreditsActivity">
         </activity>

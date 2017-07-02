@@ -129,7 +129,7 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
 
         Collections.sort(towns, new Town.GpsDistanceComparator(location.getLatitude(), location.getLongitude()));
 
-        currentLocation = CurrentLocation.getInstance();
+        currentLocation = CurrentLocation.getInstance(context);
         currentLocation.setTown(towns.get(0));
     }
 }

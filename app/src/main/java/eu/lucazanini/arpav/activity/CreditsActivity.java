@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -28,6 +29,7 @@ public class CreditsActivity extends AppCompatActivity {
     protected @BindString(R.string.developer_body) String developerBody;
     protected @BindString(R.string.developer_site) String developerSite;
     protected @BindString(R.string.developer_name) String developerName;
+    protected @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,9 @@ public class CreditsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_credits);
 
         ButterKnife.bind(this);
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         tvDeveloperTitle.setText(developerTitle);
 //        tvDeveloperBody.setText(developerBody);

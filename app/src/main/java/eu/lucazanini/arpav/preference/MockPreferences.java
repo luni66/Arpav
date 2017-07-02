@@ -2,6 +2,7 @@ package eu.lucazanini.arpav.preference;
 
 import android.content.Context;
 
+import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.Previsione;
 
 /**
@@ -16,8 +17,33 @@ public class MockPreferences implements Preferences {
         this.context = context;
     }
 
+//    @Override
+//    public Previsione.Language getDefaultLanguage() {
+//        return Previsione.Language.IT;
+//    }
+
     @Override
-    public Previsione.Language getDefaultLanguage() {
-        return Previsione.Language.IT;
+    public Previsione.Language getDeviceLanguage() {
+        return null;
+    }
+
+    @Override
+    public Previsione.Language getLanguage() {
+        return null;
+    }
+
+    @Override
+    public Town getLocation() {
+        return null;
+    }
+
+    @Override
+    public void saveLocation(Town town) {
+
+    }
+
+    @Override
+    public boolean isDefaultLanguageSelected() {
+        return false;
     }
 }

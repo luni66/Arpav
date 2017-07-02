@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -36,6 +39,8 @@ import eu.lucazanini.arpav.location.GoogleLocator;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
+import eu.lucazanini.arpav.preference.Preferences;
+import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
 
 import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
@@ -58,7 +63,8 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private CurrentLocation currentLocation;
     private ActionBar actionBar;
     private GoogleLocator googleLocator;
-//    private Town town=null;
+    private Town town=null;
+    private Preferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +72,15 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
+
+/*        String languageToLoad  = "it"; // your language
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.locale = locale;
+//        config.getLocales().get(0)  = locale;
+        getBaseContext().getResources().updateConfiguration(config,
+                getBaseContext().getResources().getDisplayMetrics());*/
 
         collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
@@ -79,17 +94,21 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 //            actionBar.setDisplayShowHomeEnabled(true);
 //        }
 
-        currentLocation = CurrentLocation.getInstance();
+        preferences = new UserPreferences(this);
 
-//       town = currentLocation.getTown();
+        currentLocation = CurrentLocation.getInstance(this);
+        currentLocation.addObserver(this);
 
-//        if (town == null) {
-//            String townName = getPrefsLocation();
-//            town = TownList.getInstance(context).getTown(townName);
-//            if (town != null) {
-//                upadatedLocation.setTown(town);
-//            }
-//        }
+       town = currentLocation.getTown();
+
+        if (town == null) {
+//            String townName = preferences.getLocation();
+//            town = TownList.getInstance(this).getTown(townName);
+            town = preferences.getLocation();
+            if (town != null) {
+                currentLocation.setTown(town);
+            }
+        }
 
         if (currentLocation.isDefined()) {
             actionBar.setTitle(currentLocation.getTown().getName());
@@ -97,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
             actionBar.setTitle(defaultTitle);
         }
 
-        currentLocation.addObserver(this);
+
 
 //        checkPermission();
     }
@@ -126,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     public boolean onOptionsItemSelected(MenuItem item) {
         Town town = null;
         switch (item.getItemId()) {
-            case android.R.id.home:
+/*            case android.R.id.home:
                 // This is called when the Home (Up) button is pressed in the action bar.
                 // Create a simple intent that starts the hierarchical parent activity and
                 // use NavUtils in the Support Package to ensure proper handling of Up.
@@ -144,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                     // navigate up to the hierarchical parent activity.
                     NavUtils.navigateUpTo(this, upIntent);
                 }
-                return true;
+                return true;*/
             case R.id.action_search:
                 Intent intent = SearchableActivity.getIntent(this);
                 startActivityForResult(intent, REQUEST_CODE);
@@ -157,18 +176,20 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
                 return true;
             case R.id.action_save_location:
 town = currentLocation.getTown();
+                Timber.d("saving town %s", town.getName());
                 if (town != null) {
-                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString(getString(R.string.current_location), town.getName());
-                    editor.commit();
+                    preferences.saveLocation(town);
+//                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+//                    SharedPreferences.Editor editor = sharedPref.edit();
+//                    editor.putString(getString(R.string.current_location), town.getName());
+//                    editor.commit();
                 }
                 return true;
             case R.id.action_home:
 //                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 //                String townName = sharedPref.getString(getString(R.string.current_location), "");
 //                Town town = TownList.getInstance(this).getTown(townName);
-                town = currentLocation.getTown();
+                town = preferences.getLocation();
                 if (town != null) {
                     currentLocation.setTown(town);
                 }
