@@ -1,24 +1,6 @@
 package eu.lucazanini.arpav.location;
 
-import android.content.Context;
-import android.database.MatrixCursor;
-import android.location.Location;
-import android.support.v4.widget.SimpleCursorAdapter;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  *
@@ -163,9 +145,9 @@ public class Town implements TownLocation {
 
         private double latitude, longitude;
 
-        public GpsDistanceComparator(double latitude, double longitude){
-            this.latitude=latitude;
-            this.longitude=longitude;
+        public GpsDistanceComparator(double latitude, double longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
         }
 
         @Override

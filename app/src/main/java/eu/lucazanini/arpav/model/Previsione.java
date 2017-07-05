@@ -244,7 +244,7 @@ public class Previsione implements Parcelable {
         boolean insideGiorno = false;
         String bollettinoId = null;
         String zoneId = null;
-        String lastData=null;
+        String lastData = null;
 
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -267,31 +267,31 @@ public class Previsione implements Parcelable {
                             zoneId = parser.getAttributeValue(null, Meteogramma.ATTR_ZONE_ID);
                             meteogramma = newMeteogramma(zoneId);
                             meteogramma.setName(parser.getAttributeValue(null, Meteogramma.ATTR_NOME));
-                            lastData=null;
+                            lastData = null;
                         } else if (meteogramma != null && tagName.equalsIgnoreCase(Meteogramma.TAG_SCADENZA)) {
                             scadenza = meteogramma.newScadenza();
                             String data = parser.getAttributeValue(null, Meteogramma.Scadenza.ATTR_DATA);
-                            if(data.endsWith(" ")) {
+                            if (data.endsWith(" ")) {
                                 switch (language) {
                                     case EN:
-                                        if(lastData==null || lastData.equals(data)){
-                                            scadenza.setData(data+"afternoon");
+                                        if (lastData == null || lastData.equals(data)) {
+                                            scadenza.setData(data + "afternoon");
                                         } else {
-                                            scadenza.setData(data+"morning");
+                                            scadenza.setData(data + "morning");
                                         }
                                         break;
                                     case FR:
-                                        if(lastData==null || lastData.equals(data)){
-                                            scadenza.setData(data+"après-midi");
+                                        if (lastData == null || lastData.equals(data)) {
+                                            scadenza.setData(data + "après-midi");
                                         } else {
-                                            scadenza.setData(data+"matin");
+                                            scadenza.setData(data + "matin");
                                         }
                                         break;
                                     case DE:
-                                        if(lastData==null || lastData.equals(data)){
-                                            scadenza.setData(data+"nachmittag");
+                                        if (lastData == null || lastData.equals(data)) {
+                                            scadenza.setData(data + "nachmittag");
                                         } else {
-                                            scadenza.setData(data+"morgen");
+                                            scadenza.setData(data + "morgen");
                                         }
                                         break;
                                     case IT:

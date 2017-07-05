@@ -10,8 +10,8 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import eu.lucazanini.arpav.task.ReportService;
 import eu.lucazanini.arpav.model.Previsione;
+import eu.lucazanini.arpav.task.ReportService;
 import timber.log.Timber;
 
 /**
@@ -56,7 +56,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             alarmMgr[i] = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             //only to test
             alarmMgr[i].setRepeating(AlarmManager.RTC_WAKEUP,
-                    alarmTimes[i].getTimeInMillis(), 1000*60, alarmIntent);
+                    alarmTimes[i].getTimeInMillis(), 1000 * 60, alarmIntent);
 //            alarmMgr[i].setInexactRepeating(AlarmManager.RTC_WAKEUP,
 //                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
 

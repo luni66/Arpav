@@ -7,55 +7,61 @@ import java.util.Observable;
  */
 public class SlideTitles extends Observable {
 
-    public static int PAGES = 7;
-    private String[] sideTitles;
+    private int pages;
+    private String[] titles;
 
-    public SlideTitles() {
-        sideTitles = new String[PAGES];
-        for (int i = 0; i < PAGES; i++) {
-            sideTitles[i] = Integer.toString(i);
+
+    public SlideTitles(int pages) {
+        this.pages = pages;
+        titles = new String[pages];
+        for (int i = 0; i < pages; i++) {
+            titles[i] = Integer.toString(i);
         }
     }
 
-    public SlideTitles(String[] sideTitles) {
-        this.sideTitles = new String[PAGES];
-        for (int i = 0; i < PAGES; i++) {
-            if (i < sideTitles.length) {
-                this.sideTitles[i] = sideTitles[i];
+    public SlideTitles(String[] slideTitles) {
+        this.pages = slideTitles.length;
+        this.titles = new String[pages];
+        for (int i = 0; i < pages; i++) {
+            if (i < slideTitles.length) {
+                this.titles[i] = slideTitles[i];
             } else {
-                this.sideTitles[i] = null;
+                this.titles[i] = null;
             }
         }
         update();
     }
 
-    public String[] getSideTitles() {
-        return sideTitles;
+    public String[] getTitles() {
+        return titles;
     }
 
-    public void setSideTitles(String[] sideTitles) {
-        this.sideTitles = sideTitles;
+    public void setTitles(String[] titles) {
+        this.pages = titles.length;
+        this.titles = titles;
         update();
     }
 
     public String getSlideTitle(int index) {
-        if (index > -1 && index < PAGES) {
-            return sideTitles[index];
+        if (index > -1 && index < pages) {
+            return titles[index];
         } else {
             return null;
         }
     }
 
     public void setSlideTitle(String title, int index) {
-        if (index > -1 && index < PAGES) {
-            sideTitles[index] = title;
-            update();
+        if (index > -1 && index < pages) {
+            if(!titles[index].equals(title)) {
+                titles[index] = title;
+                update();
+            }
         }
     }
 
     private void update() {
         setChanged();
-        notifyObservers(sideTitles);
+        notifyObservers(titles);
     }
 
 }

@@ -88,7 +88,6 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
     public void onConnectionSuspended(int i) {
     }
 
-    @DebugLog
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
@@ -114,7 +113,6 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
 //        locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
     }
 
-    @DebugLog
     public void connect() {
         googleApiClient.connect();
     }
@@ -123,7 +121,6 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
         googleApiClient.disconnect();
     }
 
-    @DebugLog
     private void updateCurrentLocation(Location location) {
         List<Town> towns = TownList.getInstance(context).getTowns();
 

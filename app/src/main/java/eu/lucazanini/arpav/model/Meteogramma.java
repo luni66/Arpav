@@ -6,9 +6,6 @@ import android.os.Parcelable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static eu.lucazanini.arpav.model.Previsione.*;
-import static eu.lucazanini.arpav.model.Previsione.Language.*;
-
 /**
  * Contains scadenza that it is the forecast for the 18 zones of Veneto
  */

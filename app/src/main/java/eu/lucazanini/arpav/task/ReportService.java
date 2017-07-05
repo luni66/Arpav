@@ -4,8 +4,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
-import eu.lucazanini.arpav.model.Previsione;
-
 public class ReportService extends IntentService {
 
     private final static String TAG = "Download Service";
@@ -18,16 +16,16 @@ public class ReportService extends IntentService {
         super(name);
     }
 
+    public static Intent getIntent(Context context) {
+        Intent intent = new Intent(context, ReportService.class);
+        return intent;
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         // deprecated
 /*        ReportTask reportTask = new ReportTask(this);
         //TODO custom language
         reportTask.doTask(Previsione.Language.IT);*/
-    }
-
-    public static Intent getIntent(Context context) {
-        Intent intent = new Intent(context, ReportService.class);
-        return intent;
     }
 }

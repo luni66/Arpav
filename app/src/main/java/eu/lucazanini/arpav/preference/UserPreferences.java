@@ -28,10 +28,10 @@ public class UserPreferences implements Preferences {
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public boolean isDefaultLanguageSelected(){
+    public boolean isDefaultLanguageSelected() {
         String defaultLanguage = resources.getString(R.string.pref_language_default);
         String languageValue = sharedPreferences.getString(resources.getString(R.string.pref_language_key), defaultLanguage);
-        if(languageValue.equals(defaultLanguage)){
+        if (languageValue.equals(defaultLanguage)) {
             return true;
         } else {
             return false;
@@ -83,8 +83,8 @@ public class UserPreferences implements Preferences {
 
     @Override
     public void saveLocation(Town town) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(resources.getString(R.string.current_location), town.getName());
-            editor.commit();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(resources.getString(R.string.current_location), town.getName());
+        editor.commit();
     }
 }

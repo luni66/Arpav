@@ -23,11 +23,14 @@ import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.adapter.TownAdapter;
 import eu.lucazanini.arpav.database.TownDataSource;
-import timber.log.Timber;
 
+/**
+ * It shows the list of towns in Veneto
+ */
 public class SearchableActivity extends AppCompatActivity {
 
     public final static String TOWN_NAME = "town_name";
+    protected @BindView(R.id.searchableToolbar) Toolbar searchableToolbar;
     protected @BindView(R.id.search_list) RecyclerView recyclerView;
     private TownAdapter townAdapter;
 
@@ -51,8 +54,8 @@ public class SearchableActivity extends AppCompatActivity {
 
         AsyncTask<Void, Void, List<String>> readTowns = new ReadTowns(this).execute();
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+        setSupportActionBar(searchableToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -89,6 +92,9 @@ public class SearchableActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * It manages the town list
+     */
     private class ReadTowns extends AsyncTask<Void, Void, List<String>> {
 
         private final WeakReference<SearchableActivity> weakActivity;
@@ -129,6 +135,9 @@ public class SearchableActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * It manages the towns matching the text in the searc ciew widget
+     */
     private class ReadFilteredTowns extends AsyncTask<String, Void, List<String>> {
 
         private final WeakReference<SearchableActivity> weakActivity;
@@ -155,9 +164,6 @@ public class SearchableActivity extends AppCompatActivity {
             final SearchableActivity activity = weakActivity.get();
             if (activity != null && townNames != null) {
                 activity.townAdapter.update(townNames);
-//                activity.townAdapter = new TownAdapter(townNames);
-//                activity.recyclerView.setAdapter(townAdapter);
-//                activity.townAdapter.notifyDataSetChanged();
             }
             TownDataSource townDataSource = new TownDataSource(activity);
             townDataSource.close();

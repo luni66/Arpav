@@ -13,7 +13,7 @@ public class MockPreferences implements Preferences {
 
     private Context context;
 
-    public MockPreferences(Context context){
+    public MockPreferences(Context context) {
         this.context = context;
     }
 

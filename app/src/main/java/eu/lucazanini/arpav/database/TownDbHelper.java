@@ -34,8 +34,6 @@ public class TownDbHelper extends SQLiteOpenHelper {
     private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
     private final Lock readLock = rwl.readLock();
     private final Lock writeLock = rwl.writeLock();
-    //    private volatile SQLiteDatabase readDb;
-//    private volatile SQLiteDatabase writeDb;
     private Context context;
     private volatile SQLiteDatabase db;
 
@@ -117,18 +115,8 @@ public class TownDbHelper extends SQLiteOpenHelper {
 
         try {
             String[] projection = {TownEntry.COL_NAME};
-
             String sortOrder = TownEntry.COL_NAME + " ASC";
-
-            cursor = db.query(
-                    TownEntry.TABLE_NAME,                     // The table to query
-                    projection,                               // The columns to return
-                    null,                                // The columns for the WHERE clause
-                    null,                            // The values for the WHERE clause
-                    null,                                     // don't group the rows
-                    null,                                     // don't filter by row groups
-                    sortOrder                                 // The sort order
-            );
+            cursor = db.query(TownEntry.TABLE_NAME, projection, null, null, null, null, sortOrder);
         } finally {
             readLock.unlock();
         }
@@ -175,25 +163,17 @@ public class TownDbHelper extends SQLiteOpenHelper {
 
             String[] projection = {TownEntry.COL_NAME};
 
-            String selection = TownEntry.COL_NAME+ " LIKE ?";
+            String selection = TownEntry.COL_NAME + " LIKE ?";
 
             String[] selectionArgs = new String[]{like + "%"};
 
             String sortOrder = TownEntry.COL_NAME + " ASC";
 
             cursor = db.query(
-                    TownEntry.TABLE_NAME,                     // The table to query
-                    projection,                               // The columns to return
-                    selection,                                // The columns for the WHERE clause
-                    selectionArgs,                            // The values for the WHERE clause
-                    null,                                     // don't group the rows
-                    null,                                     // don't filter by row groups
-                    sortOrder                                 // The sort order
-            );
+                    TownEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
         } finally {
             readLock.unlock();
         }
         return cursor;
     }
-
 }

@@ -8,9 +8,10 @@ import android.provider.BaseColumns;
 
 public final class TownContract {
 
-    private TownContract(){}
+    private TownContract() {
+    }
 
-    public static class TownEntry implements BaseColumns{
+    public static class TownEntry implements BaseColumns {
         public static final String TABLE_NAME = "towns";
         public static final String COL_NAME = "name";
         public static final String COL_ZONE = "zone";

@@ -10,8 +10,11 @@ import java.util.List;
 
 import eu.lucazanini.arpav.R;
 
-//https://antonioleiva.com/recyclerview-listener/
-//http://stackoverflow.com/questions/33845846/why-is-adding-an-onclicklistener-inside-onbindviewholder-of-a-recyclerview-adapt leggi link in risposta
+//TODO click in RecyclerView
+
+/**
+ * Adapter for towns in SearchableActivity
+ */
 public class TownAdapter extends RecyclerView.Adapter<TownAdapter.ViewHolder> {
 
     private List<String> townNames;
@@ -39,7 +42,6 @@ public class TownAdapter extends RecyclerView.Adapter<TownAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         String townName = townNames.get(position);
         viewHolder.getTextView().setText(townName);
-//        viewHolder.bind(townNames.get(position), listener);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,14 +70,5 @@ public class TownAdapter extends RecyclerView.Adapter<TownAdapter.ViewHolder> {
         public TextView getTextView() {
             return textView;
         }
-
-/*        public void bind(final String town, final OnItemClickListener listener) {
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    listener.onItemClick(town);
-                }
-            });
-        }*/
     }
 }

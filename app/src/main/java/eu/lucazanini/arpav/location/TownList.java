@@ -1,8 +1,6 @@
 package eu.lucazanini.arpav.location;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -13,13 +11,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.lucazanini.arpav.database.TownDbHelper;
-import eu.lucazanini.arpav.database.TownContract.TownEntry;
-
 public class TownList {
 
     private static TownList instance;
-//    private Context context;
+    //    private Context context;
     private List<Town> towns;
 
 //    protected TownList() {}
@@ -61,8 +56,8 @@ public class TownList {
         return names;
     }
 
-//    public List<Town> loadTowns() {
-        private List<Town> loadTowns(Context context) {
+    //    public List<Town> loadTowns() {
+    private List<Town> loadTowns(Context context) {
 
         towns = new ArrayList<>();
 
@@ -98,7 +93,7 @@ public class TownList {
         return towns;
     }
 
-    public Town getTown(double latitude, double longitude){
+    public Town getTown(double latitude, double longitude) {
         towns.sort(new Town.GpsDistanceComparator(latitude, longitude));
         return towns.get(0);
     }

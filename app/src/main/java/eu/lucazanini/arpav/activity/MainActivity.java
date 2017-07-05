@@ -1,12 +1,8 @@
 package eu.lucazanini.arpav.activity;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,8 +11,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.NavUtils;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -37,19 +30,20 @@ import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.GoogleLocator;
 import eu.lucazanini.arpav.location.Town;
-import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import timber.log.Timber;
+import hugo.weaving.DebugLog;
 
 import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
 
-// http://stackoverflow.com/questions/23133912/android-viewpager-update-off-screen-but-cached-fragments-in-viewpager
-
-// https://guides.codepath.com/android/ViewPager-with-FragmentPagerAdapter
-
-//public class MainActivity extends AppCompatActivity implements TitlesCallBack, Observer, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+/**
+ * The main activity containing the fragments with data populated from xml files downloaded from Arpav site
+ * <p>
+ * It extends {@link eu.lucazanini.arpav.activity.TitlesCallBack TitlesCallBack} interface to manage title labels with the dates
+ * and {@link java.util.Observer Observer} interface to manage the app title containing the name of the town
+ * <p>
+ */
 public class MainActivity extends AppCompatActivity implements TitlesCallBack, Observer {
 
     private static final int PAGES = 7;
@@ -57,14 +51,15 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private final static int LOCATION_REQUEST = 1;
     private static boolean locationPermissionGranted = false;
     protected @BindView(R.id.pager) ViewPager pager;
-    protected @BindView(R.id.my_toolbar) Toolbar myToolbar;
+    protected @BindView(R.id.mainToolbar) Toolbar mainToolbar;
     protected @BindString(R.string.action_title) String defaultTitle;
     private CollectionPagerAdapter collectionPagerAdapter;
     private CurrentLocation currentLocation;
     private ActionBar actionBar;
     private GoogleLocator googleLocator;
-    private Town town=null;
+    private Town town = null;
     private Preferences preferences;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,60 +68,33 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
         ButterKnife.bind(this);
 
-/*        String languageToLoad  = "it"; // your language
-        Locale locale = new Locale(languageToLoad);
-        Locale.setDefault(locale);
-        Configuration config = new Configuration();
-        config.locale = locale;
-//        config.getLocales().get(0)  = locale;
-        getBaseContext().getResources().updateConfiguration(config,
-                getBaseContext().getResources().getDisplayMetrics());*/
-
         collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
 
         pager.setOffscreenPageLimit(PAGES_LIMIT);
         pager.setAdapter(collectionPagerAdapter);
 
-//        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+        setSupportActionBar(mainToolbar);
         actionBar = getSupportActionBar();
-//        if(actionBar!=null) {
-//            actionBar.setDisplayShowHomeEnabled(true);
-//        }
 
         preferences = new UserPreferences(this);
 
         currentLocation = CurrentLocation.getInstance(this);
         currentLocation.addObserver(this);
 
-       town = currentLocation.getTown();
-
-        if (town == null) {
-//            String townName = preferences.getLocation();
-//            town = TownList.getInstance(this).getTown(townName);
-            town = preferences.getLocation();
-            if (town != null) {
-                currentLocation.setTown(town);
-            }
-        }
-
+        // set the app title the first time
         if (currentLocation.isDefined()) {
             actionBar.setTitle(currentLocation.getTown().getName());
         } else {
             actionBar.setTitle(defaultTitle);
         }
-
-
-
-//        checkPermission();
     }
 
+    /**
+     * This method run after the user selects a town in {@link SearchableActivity}
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-        // Check which request we're responding to
         if (requestCode == REQUEST_CODE) {
-            // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 String town = data.getStringExtra(SearchableActivity.TOWN_NAME);
                 currentLocation.setTown(town, this);
@@ -136,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.meteogramma_menu, menu);
         return true;
     }
@@ -145,50 +112,22 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     public boolean onOptionsItemSelected(MenuItem item) {
         Town town = null;
         switch (item.getItemId()) {
-/*            case android.R.id.home:
-                // This is called when the Home (Up) button is pressed in the action bar.
-                // Create a simple intent that starts the hierarchical parent activity and
-                // use NavUtils in the Support Package to ensure proper handling of Up.
-                Intent upIntent = new Intent(this, MainActivity.class);
-                if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
-                    // This activity is not part of the application's task, so create a new task
-                    // with a synthesized back stack.
-                    TaskStackBuilder.from(this)
-                            // If there are ancestor activities, they should be added here.
-                            .addNextIntent(upIntent)
-                            .startActivities();
-                    finish();
-                } else {
-                    // This activity is part of the application's task, so simply
-                    // navigate up to the hierarchical parent activity.
-                    NavUtils.navigateUpTo(this, upIntent);
-                }
-                return true;*/
             case R.id.action_search:
                 Intent intent = SearchableActivity.getIntent(this);
                 startActivityForResult(intent, REQUEST_CODE);
                 return true;
             case R.id.action_find_location:
-                if ( isGpsAvailable() && locationPermissionGranted) {
+                if (isGpsAvailable() && locationPermissionGranted) {
                     googleLocator.requestUpdates();
                 }
-
                 return true;
             case R.id.action_save_location:
-town = currentLocation.getTown();
-                Timber.d("saving town %s", town.getName());
+                town = currentLocation.getTown();
                 if (town != null) {
                     preferences.saveLocation(town);
-//                    SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-//                    SharedPreferences.Editor editor = sharedPref.edit();
-//                    editor.putString(getString(R.string.current_location), town.getName());
-//                    editor.commit();
                 }
                 return true;
             case R.id.action_home:
-//                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-//                String townName = sharedPref.getString(getString(R.string.current_location), "");
-//                Town town = TownList.getInstance(this).getTown(townName);
                 town = preferences.getLocation();
                 if (town != null) {
                     currentLocation.setTown(town);
@@ -197,12 +136,10 @@ town = currentLocation.getTown();
             case R.id.action_settings:
                 Intent settingsIntent = SettingsActivity.getIntent(this);
                 startActivity(settingsIntent);
-
                 return true;
             case R.id.action_credits:
                 Intent creditsIntent = CreditsActivity.getIntent(this);
                 startActivity(creditsIntent);
-
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -286,8 +223,23 @@ town = currentLocation.getTown();
     }
 
     @Override
-    public SlideTitles getTitles() {
-        return SLIDE_TITLES;
+    public SlideTitles getSlideTitles() {
+        return collectionPagerAdapter.getSlideTitles();
+    }
+
+    @Override
+    public String getTitle(int page) {
+        return collectionPagerAdapter.getSlideTitles().getSlideTitle(page);
+    }
+
+    @Override
+    public void setTitles(String[] titles) {
+        collectionPagerAdapter.getSlideTitles().setTitles(titles);
+    }
+
+    @Override
+    public void setTitle(String title, int page) {
+        collectionPagerAdapter.getSlideTitles().setSlideTitle(title, page);
     }
 
     @Override
@@ -305,9 +257,13 @@ town = currentLocation.getTown();
 
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter implements Observer {
 
+        private SlideTitles slideTitles;
+
+        @DebugLog
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
-            SLIDE_TITLES.addObserver(this);
+            slideTitles = new SlideTitles(PAGES);
+            slideTitles.addObserver(this);
         }
 
         @Override
@@ -316,15 +272,17 @@ town = currentLocation.getTown();
         }
 
         public void stopObserving() {
-            SLIDE_TITLES.deleteObserver(this);
+            slideTitles.deleteObserver(this);
         }
 
+        @DebugLog
         @Override
         public Fragment getItem(int i) {
 
             MeteogrammaFragment fragment = new MeteogrammaFragment();
             Bundle args = new Bundle();
-            args.putInt(MeteogrammaFragment.NUMBER_PAGE, i);
+            args.putInt(MeteogrammaFragment.PAGE_NUMBER, i);
+            args.putInt(MeteogrammaFragment.PAGES, PAGES);
             fragment.setArguments(args);
 
             return fragment;
@@ -335,9 +293,18 @@ town = currentLocation.getTown();
             return PAGES;
         }
 
+        @DebugLog
         @Override
         public CharSequence getPageTitle(int position) {
-            return SLIDE_TITLES.getSlideTitle(position);
+            return slideTitles.getSlideTitle(position);
+        }
+
+        public SlideTitles getSlideTitles() {
+            return slideTitles;
+        }
+
+        public void setSlideTitles(SlideTitles slideTitles) {
+            this.slideTitles = slideTitles;
         }
     }
 }

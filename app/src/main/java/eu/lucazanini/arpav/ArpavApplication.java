@@ -1,6 +1,7 @@
 package eu.lucazanini.arpav;
 
 import android.app.Application;
+
 import timber.log.Timber;
 
 public class ArpavApplication extends Application {

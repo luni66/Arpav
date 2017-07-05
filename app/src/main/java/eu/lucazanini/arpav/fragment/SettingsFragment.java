@@ -13,11 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import butterknife.BindString;
-import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -74,10 +71,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         }
     }
 
-    private String getValue(String[] entries, String[] values, String entry){
-        int i=0;
-        for (String e: entries) {
-            if(entry.equals(e)){
+    private String getValue(String[] entries, String[] values, String entry) {
+        int i = 0;
+        for (String e : entries) {
+            if (entry.equals(e)) {
                 return values[i];
             }
             i++;
@@ -85,10 +82,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         return null;
     }
 
-    private String getEntry(String[] entries, String[] values, String value){
-        int i=0;
-        for (String v: values) {
-            if(value.equals(v)){
+    private String getEntry(String[] entries, String[] values, String value) {
+        int i = 0;
+        for (String v : values) {
+            if (value.equals(v)) {
                 return entries[i];
             }
             i++;

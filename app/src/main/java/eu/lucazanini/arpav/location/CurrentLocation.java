@@ -5,16 +5,14 @@ import android.content.Context;
 
 import java.util.Observable;
 
-import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
  * Contains the current location
  */
-    public class CurrentLocation extends Observable {
+public class CurrentLocation extends Observable {
 
     private static CurrentLocation instance;
     private Town town;
@@ -26,11 +24,11 @@ import timber.log.Timber;
 //        Timber.d("TOWN IN PREFERENCES %s", townName);
 //            Town prefsTown = TownList.getInstance(context).getTown(townName);
         Town prefsTown = preferences.getLocation();
-            if (prefsTown != null) {
-                town = prefsTown;
-            } else {
-                Timber.d("LOCATION CREATED BUT NOT DEFINED");
-            }
+        if (prefsTown != null) {
+            town = prefsTown;
+        } else {
+            Timber.d("LOCATION CREATED BUT NOT DEFINED");
+        }
     }
 
     public static synchronized CurrentLocation getInstance(Context context) {

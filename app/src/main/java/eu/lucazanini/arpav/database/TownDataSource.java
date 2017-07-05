@@ -7,7 +7,6 @@ import java.util.List;
 public class TownDataSource {
 
     private TownDbHelper townDbHelper;
-//    private SQLiteDatabase db;
 
     public TownDataSource(Context context) {
         townDbHelper = TownDbHelper.getInstance(context);
