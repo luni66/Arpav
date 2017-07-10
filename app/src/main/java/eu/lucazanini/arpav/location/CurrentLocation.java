@@ -20,9 +20,6 @@ public class CurrentLocation extends Observable {
     private CurrentLocation(Context context) {
         Preferences preferences = new UserPreferences(context);
 
-//            String townName = preferences.getLocation();
-//        Timber.d("TOWN IN PREFERENCES %s", townName);
-//            Town prefsTown = TownList.getInstance(context).getTown(townName);
         Town prefsTown = preferences.getLocation();
         if (prefsTown != null) {
             town = prefsTown;

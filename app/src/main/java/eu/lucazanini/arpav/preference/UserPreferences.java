@@ -12,10 +12,6 @@ import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.Previsione;
 
-/**
- * Created by luke on 25/06/17.
- */
-
 public class UserPreferences implements Preferences {
 
     private Context context;
@@ -56,7 +52,6 @@ public class UserPreferences implements Preferences {
 
     public Previsione.Language getLanguage() {
         String defaultLanguage = resources.getString(R.string.pref_language_default);
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String languageValue = sharedPreferences.getString(resources.getString(R.string.pref_language_key), defaultLanguage);
         switch (languageValue) {
             case "en":
@@ -69,13 +64,11 @@ public class UserPreferences implements Preferences {
                 return Previsione.Language.IT;
             case "default":
             default:
-//                return Previsione.Language.DEFAULT;
                 return getDeviceLanguage();
         }
     }
 
     public Town getLocation() {
-//        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
         String townName = sharedPreferences.getString(resources.getString(R.string.current_location), "");
         Town town = TownList.getInstance(context).getTown(townName);
         return town;

@@ -25,13 +25,11 @@ public class BitmapLruImageCache extends LruCache<String, Bitmap> implements Ima
 
     @Override
     public Bitmap getBitmap(String url) {
-//        Log.v(TAG, "Retrieved item from Mem Cache");
         return get(url);
     }
 
     @Override
     public void putBitmap(String url, Bitmap bitmap) {
-//        Log.v(TAG, "Added item to Mem Cache");
         put(url, bitmap);
     }
 }

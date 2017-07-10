@@ -11,23 +11,21 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * List of all towns in Veneto
+ *
+ */
 public class TownList {
 
     private static TownList instance;
-    //    private Context context;
     private List<Town> towns;
 
-//    protected TownList() {}
-
     protected TownList(Context context) {
-//        this.context = context;
         loadTowns(context);
     }
 
     public synchronized static TownList getInstance(Context context) {
-//public synchronized static TownList getInstance() {
         if (instance == null) {
-//            instance = new TownList(context);
             instance = new TownList(context);
         }
         return instance;
@@ -56,7 +54,6 @@ public class TownList {
         return names;
     }
 
-    //    public List<Town> loadTowns() {
     private List<Town> loadTowns(Context context) {
 
         towns = new ArrayList<>();
@@ -68,7 +65,6 @@ public class TownList {
 
             for (String path : paths
                     ) {
-//                List<Town> townsPr = new ArrayList<>();
                 InputStream is = context.getAssets().open(path);
                 int size = is.available();
                 byte[] buffer = new byte[size];
@@ -97,11 +93,4 @@ public class TownList {
         towns.sort(new Town.GpsDistanceComparator(latitude, longitude));
         return towns.get(0);
     }
-
-//    public void save(){
-//        TownDbHelper townDbHelper = new TownDbHelper(context);
-//        townDbHelper.open();
-//        townDbHelper.save(towns);
-//    }
-
 }

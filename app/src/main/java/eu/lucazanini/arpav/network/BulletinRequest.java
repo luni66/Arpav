@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import eu.lucazanini.arpav.model.Previsione;
+import timber.log.Timber;
 
 /**
  * Volley request for Bulettin
@@ -32,6 +33,7 @@ public class BulletinRequest extends Request<Previsione> {
     public BulletinRequest(String url, Response.Listener<Previsione> listener, Response.ErrorListener errorListener, String tag) {
         this(url, listener, errorListener);
         setTag(tag);
+        Timber.d("URL %s", url);
     }
 
     @Override

@@ -14,9 +14,6 @@ import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.task.ReportService;
 import timber.log.Timber;
 
-/**
- * Created by luke on 09/11/16.
- */
 
 public class AlarmReceiver extends BroadcastReceiver {
 

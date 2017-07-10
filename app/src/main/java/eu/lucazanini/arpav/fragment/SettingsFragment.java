@@ -16,9 +16,6 @@ import android.view.ViewGroup;
 import eu.lucazanini.arpav.R;
 import hugo.weaving.DebugLog;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private String languageKey;
@@ -26,15 +23,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     private SharedPreferences sharedPref;
     private String[] languageEntries, languageValues;
 
-//    public SettingsFragment() {
-//        // Required empty public constructor
-//    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
 
         Resources resources = getResources();
@@ -49,24 +41,20 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onResume() {
         super.onResume();
-//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         sharedPref.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    @DebugLog
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(languageKey)) {
             Preference languagePref = findPreference(key);
             String languageValue = sharedPreferences.getString(key, defaultLanguage);
-            // Set summary to be the user-description for the selected value
             languagePref.setSummary(getEntry(languageEntries, languageValues, languageValue));
         }
     }
@@ -102,13 +90,4 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
         return super.onCreateView(inflater, container, savedInstanceState);
     }
-
-    /*    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
-
-    }*/
-
 }

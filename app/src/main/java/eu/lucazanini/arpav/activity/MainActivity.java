@@ -259,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
         private SlideTitles slideTitles;
 
-        @DebugLog
         public CollectionPagerAdapter(FragmentManager fm) {
             super(fm);
             slideTitles = new SlideTitles(PAGES);
@@ -275,7 +274,6 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
             slideTitles.deleteObserver(this);
         }
 
-        @DebugLog
         @Override
         public Fragment getItem(int i) {
 
@@ -293,7 +291,6 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
             return PAGES;
         }
 
-        @DebugLog
         @Override
         public CharSequence getPageTitle(int position) {
             return slideTitles.getSlideTitle(position);

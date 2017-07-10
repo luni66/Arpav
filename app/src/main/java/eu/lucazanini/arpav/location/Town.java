@@ -3,6 +3,7 @@ package eu.lucazanini.arpav.location;
 import java.util.Comparator;
 
 /**
+ * Contains data for towns in Veneto
  *
  */
 public class Town implements TownLocation {
@@ -55,7 +56,7 @@ public class Town implements TownLocation {
     @Override
     public float distanceTo(TownLocation dest) {
 
-        final double R = 6371000; // metres
+        final double R = 6371000;
 
         double phi1 = Math.toRadians(latitude);
         double phi2 = Math.toRadians(dest.getLatitude());
@@ -74,7 +75,7 @@ public class Town implements TownLocation {
     @Override
     public float gpsDistanceTo(double gpsLatitude, double gpsLongitude) {
 
-        final double R = 6371000; // metres
+        final double R = 6371000;
 
         double phi1 = Math.toRadians(latitude);
         double phi2 = Math.toRadians(gpsLatitude);

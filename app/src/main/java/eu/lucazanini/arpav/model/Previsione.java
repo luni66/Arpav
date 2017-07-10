@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import eu.lucazanini.arpav.preference.Preferences;
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
@@ -621,6 +622,5 @@ public class Previsione implements Parcelable {
         }
 
     }
-
 }
 

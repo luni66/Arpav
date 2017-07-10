@@ -17,9 +17,6 @@ public class ArpavApplication extends Application {
                     return super.createStackElementTag(element) + ":" + element.getLineNumber();
                 }
             });
-
-//        } else {
-//            Timber.plant(new CrashReportingTree());
         }
     }
 

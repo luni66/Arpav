@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-//import com.captechconsulting.captechbuzz.BuildConfig;
-
 /**
  * Implementation of DiskLruCache by Jake Wharton
  * modified from http://stackoverflow.com/questions/10185898/using-disklrucache-in-android-4-0-does-not-provide-for-opencache-method
@@ -44,7 +42,6 @@ public class DiskLruImageCache implements ImageCache {
 
     private boolean writeBitmapToFile(Bitmap bitmap, DiskLruCache.Editor editor)
             throws IOException {
-//            throws IOException, FileNotFoundException {
         OutputStream out = null;
         try {
             out = new BufferedOutputStream(editor.newOutputStream(0), IO_BUFFER_SIZE);
@@ -75,19 +72,10 @@ public class DiskLruImageCache implements ImageCache {
             if (writeBitmapToFile(data, editor)) {
                 mDiskCache.flush();
                 editor.commit();
-//                if (BuildConfig.DEBUG) {
-//                    Log.d("cache_test_DISK_", "image put on disk cache " + key);
-//                }
             } else {
                 editor.abort();
-//                if (BuildConfig.DEBUG) {
-//                    Log.d("cache_test_DISK_", "ERROR on: image put on disk cache " + key);
-//                }
             }
         } catch (IOException e) {
-//            if (BuildConfig.DEBUG) {
-//                Log.d("cache_test_DISK_", "ERROR on: image put on disk cache " + key);
-//            }
             try {
                 if (editor != null) {
                     editor.abort();
@@ -123,12 +111,7 @@ public class DiskLruImageCache implements ImageCache {
             }
         }
 
-//        if (BuildConfig.DEBUG) {
-//            Log.d("cache_test_DISK_", bitmap == null ? "" : "image read from disk " + key);
-//        }
-
         return bitmap;
-
     }
 
     public boolean containsKey(String key) {
@@ -151,9 +134,6 @@ public class DiskLruImageCache implements ImageCache {
     }
 
     public void clearCache() {
-//        if (BuildConfig.DEBUG) {
-//            Log.d("cache_test_DISK_", "disk cache CLEARED");
-//        }
         try {
             mDiskCache.delete();
         } catch (IOException e) {
@@ -164,5 +144,4 @@ public class DiskLruImageCache implements ImageCache {
     public File getCacheFolder() {
         return mDiskCache.getDirectory();
     }
-
 }

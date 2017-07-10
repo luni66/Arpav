@@ -10,7 +10,6 @@ public class SlideTitles extends Observable {
     private int pages;
     private String[] titles;
 
-
     public SlideTitles(int pages) {
         this.pages = pages;
         titles = new String[pages];
@@ -63,5 +62,4 @@ public class SlideTitles extends Observable {
         setChanged();
         notifyObservers(titles);
     }
-
 }

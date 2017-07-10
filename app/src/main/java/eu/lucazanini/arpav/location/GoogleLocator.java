@@ -21,13 +21,14 @@ import java.util.List;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
+/**
+ * Handles google api to get the location
+ *
+ */
 public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private static final long UPDATE_INTERVAL = 60 * 1000;
-    private static final long FASTEST_UPDATE_INTERVAL = 10 * 1000;
     private static final int UPDATE_NUMBER = 1;
     private static final int EXPIRATION_TIME = 30000;
-    private static boolean locationPermissionGranted = false;
     protected GoogleApiClient googleApiClient;
     protected Location lastLocation;
     protected LocationRequest locationRequest;
@@ -36,22 +37,14 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
     private CurrentLocation currentLocation;
 
     public GoogleLocator(Context context) {
-        Timber.d("locator constructor");
         buildGoogleApiClient(context);
         this.context = context;
     }
 
     public void requestUpdates() {
         if (googleApiClient.isConnected()) {
-            Timber.d("connected");
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
@@ -67,30 +60,13 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-//        requestUpdates();
-/*        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        if(lastLocation!=null){
-        updateCurrentLocation(lastLocation);}*/
-    }
+    public void onConnected(@Nullable Bundle bundle) {}
 
     @Override
-    public void onConnectionSuspended(int i) {
-    }
+    public void onConnectionSuspended(int i) {}
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-    }
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {}
 
     @Override
     public void onLocationChanged(Location location) {
@@ -109,8 +85,6 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         locationRequest.setNumUpdates(UPDATE_NUMBER);
         locationRequest.setExpirationDuration(EXPIRATION_TIME);
-//        locationRequest.setInterval(UPDATE_INTERVAL);
-//        locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL);
     }
 
     public void connect() {

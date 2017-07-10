@@ -159,13 +159,6 @@ public class Meteogramma implements Parcelable {
             return data;
         }
 
-//        public String getData(Language language){
-//            switch (language){
-//                case EN:
-//
-//            }
-//        }
-
         public void setData(String data) {
             this.data = data;
         }
@@ -261,5 +254,4 @@ public class Meteogramma implements Parcelable {
             }
         }
     }
-
 }
