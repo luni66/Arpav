@@ -1,6 +1,11 @@
 package eu.lucazanini.arpav.model;
 
+import android.content.Context;
+import android.content.res.Resources;
+
 import java.util.Observable;
+
+import eu.lucazanini.arpav.R;
 
 /**
  * SlideTitles of the fragments
@@ -10,10 +15,14 @@ public class SlideTitles extends Observable {
     private int pages;
     private String[] titles;
 
-    public SlideTitles(int pages) {
+    public SlideTitles(Context context, int pages) {
         this.pages = pages;
         titles = new String[pages];
-        for (int i = 0; i < pages; i++) {
+
+        Resources resources = context.getResources();
+        titles[0]= resources.getString(R.string.evoluzione);
+
+        for (int i = 1; i < pages; i++) {
             titles[i] = Integer.toString(i);
         }
     }

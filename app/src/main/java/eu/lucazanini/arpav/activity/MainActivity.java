@@ -1,6 +1,7 @@
 package eu.lucazanini.arpav.activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -27,13 +28,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
+import eu.lucazanini.arpav.fragment.PreviewFragment;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.GoogleLocator;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import hugo.weaving.DebugLog;
 
 import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
 
@@ -46,7 +47,7 @@ import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
  */
 public class MainActivity extends AppCompatActivity implements TitlesCallBack, Observer {
 
-    private static final int PAGES = 7;
+    private static final int PAGES = 8;
     private static final int PAGES_LIMIT = 7;
     private final static int LOCATION_REQUEST = 1;
     private static boolean locationPermissionGranted = false;
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
         ButterKnife.bind(this);
 
-        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager(), this);
 
         pager.setOffscreenPageLimit(PAGES_LIMIT);
         pager.setAdapter(collectionPagerAdapter);
@@ -259,9 +260,9 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
 
         private SlideTitles slideTitles;
 
-        public CollectionPagerAdapter(FragmentManager fm) {
+        public CollectionPagerAdapter(FragmentManager fm, Context context) {
             super(fm);
-            slideTitles = new SlideTitles(PAGES);
+            slideTitles = new SlideTitles(context, PAGES);
             slideTitles.addObserver(this);
         }
 
@@ -277,11 +278,26 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
         @Override
         public Fragment getItem(int i) {
 
-            MeteogrammaFragment fragment = new MeteogrammaFragment();
+            Fragment fragment;
             Bundle args = new Bundle();
-            args.putInt(MeteogrammaFragment.PAGE_NUMBER, i);
-            args.putInt(MeteogrammaFragment.PAGES, PAGES);
-            fragment.setArguments(args);
+
+            switch (i) {
+                case 0:
+                    fragment = new PreviewFragment();
+//                    Bundle args = new Bundle();
+                    args.putInt(MeteogrammaFragment.PAGE_NUMBER, i);
+                    args.putInt(MeteogrammaFragment.PAGES, PAGES);
+                    fragment.setArguments(args);
+                    break;
+                default:
+//                  MeteogrammaFragment fragment = new MeteogrammaFragment();
+                    fragment = new MeteogrammaFragment();
+//                    Bundle args = new Bundle();
+                    args.putInt(MeteogrammaFragment.PAGE_NUMBER, i);
+                    args.putInt(MeteogrammaFragment.PAGES, PAGES);
+                    fragment.setArguments(args);
+            }
+
 
             return fragment;
         }

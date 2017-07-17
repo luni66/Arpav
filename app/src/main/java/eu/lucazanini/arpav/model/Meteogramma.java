@@ -3,8 +3,19 @@ package eu.lucazanini.arpav.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Contains scadenza that it is the forecast for the 18 zones of Veneto
@@ -158,6 +169,51 @@ public class Meteogramma implements Parcelable {
         public String getData() {
             return data;
         }
+
+/*        public Calendar getShortDate() {
+            try {
+            Pattern p = Pattern.compile("\\d+[ ]\\w+");
+            Matcher m = p.matcher(data);
+            if (m.find()) {
+                String match = m.group();
+                DateFormat df = new SimpleDateFormat("dd MMMM");
+
+                Date  date = df.parse(match);
+
+                Calendar scadenzaDate = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+                scadenzaDate.setTime(date);
+
+                return scadenzaDate;
+
+            } else {
+                return null;
+            }
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }*/
+
+        public String getShortDate() {
+            Pattern p = Pattern.compile("\\d+[ ]\\w+");
+            Matcher m = p.matcher(data);
+            if (m.find()) {
+                return m.group();
+            } else {
+                return data;
+            }
+        }
+
+/*        public String getLongDate() {
+            Pattern p = Pattern.compile("(\\d+[ ]\\w+)([ ])(\\w+)");
+            Matcher m = p.matcher(data);
+            if (m.find()) {
+                String eol = System.getProperty("line.separator");
+                return m.group(1)+eol+m.group(3);
+            } else {
+                return data;
+            }
+        }*/
 
         public void setData(String data) {
             this.data = data;

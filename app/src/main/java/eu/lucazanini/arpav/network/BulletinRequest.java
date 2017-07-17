@@ -33,7 +33,6 @@ public class BulletinRequest extends Request<Previsione> {
     public BulletinRequest(String url, Response.Listener<Previsione> listener, Response.ErrorListener errorListener, String tag) {
         this(url, listener, errorListener);
         setTag(tag);
-        Timber.d("URL %s", url);
     }
 
     @Override

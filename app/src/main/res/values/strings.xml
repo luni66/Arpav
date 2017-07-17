@@ -24,6 +24,8 @@
     <string name="attendibilita">Forecast reliability</string>
     <string name="aggiornato">Updated</string>
 
+    <string name="evoluzione">General evolution</string>
+
     <string name="current_location">current_location</string>
     <string name="save_location">Save the location</string>
     <string name="find_location">Find location</string>

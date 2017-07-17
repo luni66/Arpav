@@ -37,6 +37,7 @@ import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 public class MeteogrammaFragment extends Fragment implements Observer {
@@ -68,12 +69,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private Unbinder unbinder;
     private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability, date, description;
     private String scadenzaDate;
-    //    private SlideTitles slideTitles;
-    private int pageNumber, pages;
+    private int pageNumber, pages, meteogrammaIndex;
     private CurrentLocation currentLocation;
     private TitlesCallBack titlesCallBack;
     private Preferences preferences;
-
     private VolleySingleton volleyApp;
     private ImageLoader mImageLoader;
     private Previsione.Language appLanguage;
@@ -86,6 +85,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         Bundle args = getArguments();
         pageNumber = args.getInt(PAGE_NUMBER);
         pages = args.getInt(PAGES);
+        meteogrammaIndex = getMeteogrammaIndex();
 
         currentLocation = CurrentLocation.getInstance(context);
         currentLocation.addObserver(this);
@@ -253,6 +253,14 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         }
     }
 
+    private int getMeteogrammaIndex() {
+        if (pageNumber > 0 && pageNumber < pages) {
+            return pageNumber - 1;
+        } else {
+            return -1;
+        }
+    }
+
     private void loadMeteogrammaData(Previsione response) {
         Town town = currentLocation.getTown();
         int zoneIdx = town.getZone() - 1;
@@ -264,12 +272,12 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         Meteogramma meteogramma = meteogrammi[zoneIdx];
         scadenze = meteogramma.getScadenza();
 
-        daySky = scadenze[pageNumber].getCielo();
+        daySky = scadenze[meteogrammaIndex].getCielo();
         String[] temperatures = new String[4];
-        temperatures[0] = scadenze[pageNumber].getProperty(Meteogramma.Scadenza.TEMPERATURA);
-        temperatures[1] = scadenze[pageNumber].getProperty(Meteogramma.Scadenza.TEMPERATURA_1500);
-        temperatures[2] = scadenze[pageNumber].getProperty(Meteogramma.Scadenza.TEMPERATURA_2000);
-        temperatures[3] = scadenze[pageNumber].getProperty(Meteogramma.Scadenza.TEMPERATURA_3000);
+        temperatures[0] = scadenze[meteogrammaIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA);
+        temperatures[1] = scadenze[meteogrammaIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA_1500);
+        temperatures[2] = scadenze[meteogrammaIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA_2000);
+        temperatures[3] = scadenze[meteogrammaIndex].getProperty(Meteogramma.Scadenza.TEMPERATURA_3000);
         String[] level = new String[4];
         level[0] = "";
         level[1] = " (1500 m.)";
@@ -290,16 +298,16 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             }
             index++;
         }
-        rain = scadenze[pageNumber].getPrecipitazioni();
-        probability = scadenze[pageNumber].getProbabilitaPrecipitazione();
-        snow = scadenze[pageNumber].getQuotaNeve();
-        wind = scadenze[pageNumber].getProperty(Meteogramma.Scadenza.VENTO);
-        reliability = scadenze[pageNumber].getAttendibilita();
+        rain = scadenze[meteogrammaIndex].getPrecipitazioni();
+        probability = scadenze[meteogrammaIndex].getProbabilitaPrecipitazione();
+        snow = scadenze[meteogrammaIndex].getQuotaNeve();
+        wind = scadenze[meteogrammaIndex].getProperty(Meteogramma.Scadenza.VENTO);
+        reliability = scadenze[meteogrammaIndex].getAttendibilita();
         date = response.getData();
 
-        daySkyUrl = scadenze[pageNumber].getSimbolo();
+        daySkyUrl = scadenze[meteogrammaIndex].getSimbolo();
 
-        scadenzaDate = scadenze[pageNumber].getData();
+        scadenzaDate = scadenze[meteogrammaIndex].getData();
     }
 
     private void loadBollettinoData(Previsione response) {
