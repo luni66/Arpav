@@ -320,21 +320,21 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         if (response.getLanguage() == Previsione.Language.IT) {
             int dayIdx = 0;
             switch (pageNumber) {
-                case 0:
+                case 1:
                     dayIdx = 0;
                     break;
-                case 1:
                 case 2:
+                case 3:
                     dayIdx = 1;
                     break;
-                case 3:
                 case 4:
+                case 5:
                     dayIdx = 2;
                     break;
-                case 5:
+                case 6:
                     dayIdx = 3;
                     break;
-                case 6:
+                case 7:
                     dayIdx = 4;
                     break;
 

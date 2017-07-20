@@ -5,7 +5,8 @@
     <!--<color name="colorAccent">#FF4081</color>-->
     <color name="primary">#ff5722</color>
     <color name="primary_dark">#c41c00</color>
-    <color name="accent">#ffc400</color>
+    <!--<color name="accent">#ffc400</color>-->
+    <color name="accent">#e65100</color>
     <color name="text_primary">#D9FFFFFF</color>
     <color name="text_secondary">#D9000000</color>
 

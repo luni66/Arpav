@@ -41,7 +41,7 @@ import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
 /**
  * The main activity containing the fragments with data populated from xml files downloaded from Arpav site
  * <p>
- * It extends {@link eu.lucazanini.arpav.activity.TitlesCallBack TitlesCallBack} interface to manage title labels with the dates
+ * It extends {@link eu.lucazanini.arpav.activity.TitlesCallBack TitlesCallBack} interface to manage title labels with the tvDates
  * and {@link java.util.Observer Observer} interface to manage the app title containing the name of the town
  * <p>
  */

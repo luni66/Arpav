@@ -5,9 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +32,7 @@ import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 public class PreviewFragment extends Fragment implements Observer {
@@ -43,24 +41,29 @@ public class PreviewFragment extends Fragment implements Observer {
     public static final String PAGES = "pages";
     protected @BindView(R.id.text_avviso) TextView tvAvviso;
     protected @BindView(R.id.text_fenomeni) TextView tvFenomeni;
-//    protected @BindView(R.id.image_daySky1) NetworkImageView imgDaySky1;
-//    protected @BindView(R.id.image_daySky2a) NetworkImageView imgDaySky2a;
-//    protected @BindView(R.id.image_daySky2b) NetworkImageView imgDaySky2b;
-//    protected @BindView(R.id.image_daySky3a) NetworkImageView imgDaySky3a;
-//    protected @BindView(R.id.image_daySky3b) NetworkImageView imgDaySky3b;
-//    protected @BindView(R.id.image_daySky4) NetworkImageView imgDaySky4;
-//    protected @BindView(R.id.image_daySky5) NetworkImageView imgDaySky5;
+    /**
+     * The seven day image views
+     */
     protected @BindViews({R.id.image_daySky1, R.id.image_daySky2a,R.id.image_daySky2b,R.id.image_daySky3a,R.id.image_daySky3b,R.id.image_daySky4,R.id.image_daySky5}) NetworkImageView[] imgDays;
-    protected @BindViews({R.id.text_date1, R.id.text_date2, R.id.text_date3, R.id.text_date4, R.id.text_date5}) TextView[] dates;
+    /**
+     * The five date text views (the second and third dates have two images)
+     */
+    protected @BindViews({R.id.text_date1, R.id.text_date2, R.id.text_date3, R.id.text_date4, R.id.text_date5}) TextView[] tvDates;
     protected @BindView((R.id.text_evolution)) TextView tvEvolution;
     protected @BindView(R.id.evolutionProgressBar) ProgressBar progressBar;
     private Unbinder unbinder;
     private CurrentLocation currentLocation;
     private Context context;
+    /**
+     * The seven urls where there are images
+     */
     private String[] daySkyUrl;
-    private String[] scadenzaDate;
+    /**
+     * The five dates
+     */
+    private String[] dates;
     private String avviso, fenomeni, date, evoluzione;
-    private int pageNumber, pages, meteogrammaIndex;
+    private int pageNumber, pages;
     private Preferences preferences;
     private VolleySingleton volleyApp;
     private ImageLoader mImageLoader;
@@ -74,7 +77,7 @@ public class PreviewFragment extends Fragment implements Observer {
         Bundle args = getArguments();
         pageNumber = args.getInt(PAGE_NUMBER);
         pages = args.getInt(PAGES);
-        meteogrammaIndex = getMeteogrammaIndex();
+//        meteogrammaIndex = getMeteogrammaIndex();
 
         currentLocation = CurrentLocation.getInstance(context);
         currentLocation.addObserver(this);
@@ -98,7 +101,7 @@ public class PreviewFragment extends Fragment implements Observer {
         unbinder = ButterKnife.bind(this, v);
 
         daySkyUrl = new String[imgDays.length];
-        scadenzaDate = new String[imgDays.length];
+        dates = new String[tvDates.length];
 
         Town town = currentLocation.getTown();
 
@@ -173,7 +176,26 @@ public class PreviewFragment extends Fragment implements Observer {
 
         for(int i = 0; i<imgDays.length; i++) {
             daySkyUrl[i] = scadenze[i].getSimbolo();
-            scadenzaDate[i] = scadenze[i].getShortDate();
+        }
+        for(int i = 0; i< tvDates.length; i++) {
+            dates[i] = scadenze[toDateIndex(i)].getShortDate();
+        }
+    }
+
+    private int toDateIndex(int meteogrammaIndex){
+        switch (meteogrammaIndex){
+            case 0:
+                return 0;
+            case 1:
+                return 1;
+            case 2:
+                return 3;
+            case 3:
+                return 5;
+            case 4:
+                return 6;
+            default:
+                return -1;
         }
     }
 
@@ -191,8 +213,8 @@ public class PreviewFragment extends Fragment implements Observer {
 
     private void setMeteogrammaViews() {
         try {
-            for(int i =0; i<dates.length; i++) {
-                dates[i].setText(scadenzaDate[i]);
+            for(int i = 0; i< tvDates.length; i++) {
+                tvDates[i].setText(dates[i]);
             }
 
 //            tvDate.setText(AggiornatoLabel + ": " + date);
@@ -231,13 +253,13 @@ public class PreviewFragment extends Fragment implements Observer {
         tvEvolution.setText(evoluzione);
     }
 
-    private int getMeteogrammaIndex() {
-        if (pageNumber > 0 && pageNumber < pages) {
-            return pageNumber - 1;
-        } else {
-            return -1;
-        }
-    }
+//    private int getMeteogrammaIndex() {
+//        if (pageNumber > 0 && pageNumber < pages) {
+//            return pageNumber - 1;
+//        } else {
+//            return -1;
+//        }
+//    }
 
 
     private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
@@ -252,12 +274,13 @@ public class PreviewFragment extends Fragment implements Observer {
                 setDayImageView(daySkyUrl[i], imgDays[i]);
             }
 
-            setViewVisibility(tvAvviso);
-            setViewVisibility(tvFenomeni);
-
             if (appLanguage == Previsione.Language.IT) {
                 loadBollettinoData(response);
                 setBollettinoViews();
+
+                setViewVisibility(tvAvviso);
+                setViewVisibility(tvFenomeni);
+                setViewVisibility(tvEvolution);
             }
         }
 
@@ -303,6 +326,8 @@ public class PreviewFragment extends Fragment implements Observer {
             loadBollettinoData(response);
             setBollettinoViews();
 
+            setViewVisibility(tvAvviso);
+            setViewVisibility(tvFenomeni);
             setViewVisibility(tvEvolution);
         }
     }
