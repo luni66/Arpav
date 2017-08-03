@@ -15,4 +15,8 @@ public interface Preferences {
 
     boolean isDefaultLanguageSelected();
 
+    boolean isAlertActivated();
+
+    boolean useGps();
+
 }

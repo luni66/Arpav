@@ -35,6 +35,8 @@ import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
 
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private static final int PAGES = 8;
     private static final int PAGES_LIMIT = 7;
     private final static int LOCATION_REQUEST = 1;
-    private static boolean locationPermissionGranted = false;
+    private boolean locationPermissionGranted = false;
     protected @BindView(R.id.pager) ViewPager pager;
     protected @BindView(R.id.mainToolbar) Toolbar mainToolbar;
     protected @BindString(R.string.action_title) String defaultTitle;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private Town town = null;
     private Preferences preferences;
 
-
+    @DebugLog
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,8 +79,11 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
         setSupportActionBar(mainToolbar);
         actionBar = getSupportActionBar();
 
+        googleLocator = new GoogleLocator(this);
+
         preferences = new UserPreferences(this);
 
+        Timber.d("adding observer");
         currentLocation = CurrentLocation.getInstance(this);
         currentLocation.addObserver(this);
 
@@ -147,23 +152,30 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
         }
     }
 
+    @DebugLog
     @Override
     protected void onStart() {
         super.onStart();
-        googleLocator = new GoogleLocator(this);
+//        googleLocator = new GoogleLocator(this);
         googleLocator.connect();
     }
 
+    @DebugLog
     @Override
     protected void onStop() {
         super.onStop();
         googleLocator.disconnect();
     }
 
+    @DebugLog
     @Override
     protected void onResume() {
         super.onResume();
         checkPermission();
+        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
+            Timber.d("calling GoogleLocator");
+            googleLocator.requestUpdates();
+        }
     }
 
     private void checkPermission() {

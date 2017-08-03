@@ -1,37 +1,22 @@
 package eu.lucazanini.arpav.schedule;
 
-import android.content.BroadcastReceiver;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import eu.lucazanini.arpav.preference.Preferences;
-import eu.lucazanini.arpav.preference.UserPreferences;
-import eu.lucazanini.arpav.task.ReportService;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import eu.lucazanini.arpav.model.Previsione;
 import timber.log.Timber;
 
+public class AlarmHandler {
 
-public class AlarmReceiver extends BroadcastReceiver {
+    public final static String RECEIVER_ACTION = "eu.lucazanini.arpav.UPDATE_TIME";
 
-//    public final static String RECEIVER_ACTION = "eu.lucazanini.arpav.UPDATE_TIME";
-//    public final static String ALERT_ACTION = "eu.lucazanini.arpav.ALERT";
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        Timber.i("Received broadcast intent: %s", action);
-
-        Preferences preferences = new UserPreferences(context);
-
-        if (preferences.isAlertActivated() && action.equals("android.intent.action.BOOT_COMPLETED")) {
-//            setAlarm(context);
-            AlarmHandler alarmHandler = new AlarmHandler();
-            alarmHandler.setAlarm(context);
-        } else if (action.equals(AlarmHandler.RECEIVER_ACTION)) { // only for test
-            context.startService(ReportService.getIntent(context));
-        }
-    }
-
-/*    private void setAlarm(Context context) {
+    public void setAlarm(Context context) {
         Timber.d("setting alarms");
 
 //        AlarmManager[] alarmMgr = new AlarmManager[3];
@@ -63,10 +48,9 @@ public class AlarmReceiver extends BroadcastReceiver {
 //                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
 
         }
-    }*/
+    }
 
-/*
-    private void removeAlarm(Context context) {
+    public void removeAlarm(Context context) {
         Timber.d("removing alarms");
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -77,6 +61,4 @@ public class AlarmReceiver extends BroadcastReceiver {
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
         alarmManager.cancel(alarmIntent);
     }
-*/
-
 }

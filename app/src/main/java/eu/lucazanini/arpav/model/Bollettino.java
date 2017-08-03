@@ -94,7 +94,11 @@ public class Bollettino implements Parcelable {
     }
 
     public String getAvviso() {
-        return avviso;
+        if (avviso == null) {
+            return "";
+        } else {
+            return avviso;
+        }
     }
 
     public void setAvviso(String avviso) {
@@ -102,7 +106,11 @@ public class Bollettino implements Parcelable {
     }
 
     public String getFenomeniParticolari() {
-        return fenomeniParticolari;
+        if (fenomeniParticolari == null) {
+            return null;
+        } else {
+            return fenomeniParticolari;
+        }
     }
 
     public void setFenomeniParticolari(String fenomeniParticolari) {

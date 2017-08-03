@@ -36,6 +36,12 @@
     <string name="pref_language_key">language_key</string>
     <string name="pref_language_title">Language</string>
 
+    <string name="pref_location_key">location_key</string>
+    <string name="pref_location_title">Location</string>
+
+    <string name="pref_gps_key">gps_key</string>
+    <string name="pref_gps_title">Use GPS if available</string>
+
     <string name="pref_notifications_key">notifications_key</string>
     <string name="pref_notifications_title">Notifications</string>
 
@@ -66,6 +72,13 @@
     <string name="developer_body">Meteo Veneto is developed by Luca Zanini</string>
     <string name="developer_name">Luca Zanini</string>
     <string name="developer_site">http://www.lucazanini.eu</string>
+
+    <string name="report_file">report_file.json</string>
+    <string name="report_date">date</string>
+    <string name="report_alert">alert</string>
+
+    <string name="alert_title">Weather warning</string>
+
     <!--<string name="developer_body">Meteo Veneto is developed by <a href="http://www.lucazanini.eu">Luca Zanini</a></string>-->
 
     <!-- TODO: Remove or change this placeholder text -->

@@ -20,9 +20,9 @@ public class CurrentLocation extends Observable {
     private CurrentLocation(Context context) {
         Preferences preferences = new UserPreferences(context);
 
-        Town prefsTown = preferences.getLocation();
-        if (prefsTown != null) {
-            town = prefsTown;
+        Town town = preferences.getLocation();
+        if (town != null) {
+            this.town = town;
         } else {
             Timber.d("LOCATION CREATED BUT NOT DEFINED");
         }

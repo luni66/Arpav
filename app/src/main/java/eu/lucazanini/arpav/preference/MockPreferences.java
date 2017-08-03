@@ -46,4 +46,14 @@ public class MockPreferences implements Preferences {
     public boolean isDefaultLanguageSelected() {
         return false;
     }
+
+    @Override
+    public boolean isAlertActivated() {
+        return false;
+    }
+
+    @Override
+    public boolean useGps() {
+        return false;
+    }
 }

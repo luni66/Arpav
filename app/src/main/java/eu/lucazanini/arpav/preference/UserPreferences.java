@@ -34,6 +34,16 @@ public class UserPreferences implements Preferences {
         }
     }
 
+    @Override
+    public boolean isAlertActivated() {
+        return sharedPreferences.getBoolean(resources.getString(R.string.pref_notifications_key), false);
+    }
+
+    @Override
+    public boolean useGps() {
+        return sharedPreferences.getBoolean(resources.getString(R.string.pref_gps_key), true);
+    }
+
     public Previsione.Language getDeviceLanguage() {
         String languageValue = Locale.getDefault().getLanguage();
         switch (languageValue) {

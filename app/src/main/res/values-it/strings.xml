@@ -31,4 +31,6 @@
     <string name="developer_body">Meteo Veneto è sviluppata da Luca Zanini</string>
     <!--<string name="developer_body">Meteo Veneto è sviluppata da <a href="http://www.lucazanini.eu">Luca Zanini</a></string>-->
 
+    <string name="alert_title">Avviso meteo</string>
+
 </resources>
