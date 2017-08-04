@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +33,6 @@ import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 public class PreviewFragment extends Fragment implements Observer {
@@ -44,7 +44,7 @@ public class PreviewFragment extends Fragment implements Observer {
     /**
      * The seven day image views
      */
-    protected @BindViews({R.id.image_daySky1, R.id.image_daySky2a,R.id.image_daySky2b,R.id.image_daySky3a,R.id.image_daySky3b,R.id.image_daySky4,R.id.image_daySky5}) NetworkImageView[] imgDays;
+    protected @BindViews({R.id.image_daySky1, R.id.image_daySky2a, R.id.image_daySky2b, R.id.image_daySky3a, R.id.image_daySky3b, R.id.image_daySky4, R.id.image_daySky5}) NetworkImageView[] imgDays;
     /**
      * The five date text views (the second and third dates have two images)
      */
@@ -69,6 +69,8 @@ public class PreviewFragment extends Fragment implements Observer {
     private ImageLoader mImageLoader;
     private Previsione.Language appLanguage;
 
+    protected @BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefreshLayout;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +92,7 @@ public class PreviewFragment extends Fragment implements Observer {
         mImageLoader = volleyApp.getImageLoader();
     }
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -99,6 +102,8 @@ public class PreviewFragment extends Fragment implements Observer {
         View v = inflater.inflate(R.layout.fragment_preview, container, false);
 
         unbinder = ButterKnife.bind(this, v);
+
+//        currentLocation.addObserver(this);
 
         daySkyUrl = new String[imgDays.length];
         dates = new String[tvDates.length];
@@ -112,9 +117,29 @@ public class PreviewFragment extends Fragment implements Observer {
             }
         }
 
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Timber.d("onRefresh called from SwipeRefreshLayout");
+                loadData();
+                mSwipeRefreshLayout.setRefreshing(false);
+//                initiateRefresh();
+            }
+        });
+
         loadData();
 
         return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        currentLocation.deleteObserver(this);
+
+        String tag = Integer.toString(pageNumber);
+        final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
+        volleyApp.getRequestQueue().cancelAll(tag);
     }
 
     @Override
@@ -174,16 +199,20 @@ public class PreviewFragment extends Fragment implements Observer {
 
         date = response.getData();
 
-        for(int i = 0; i<imgDays.length; i++) {
-            daySkyUrl[i] = scadenze[i].getSimbolo();
-        }
-        for(int i = 0; i< tvDates.length; i++) {
-            dates[i] = scadenze[toDateIndex(i)].getShortDate();
-        }
+//        try {
+            for (int i = 0; i < imgDays.length; i++) {
+                daySkyUrl[i] = scadenze[i].getSimbolo();
+            }
+            for (int i = 0; i < tvDates.length; i++) {
+                dates[i] = scadenze[toDateIndex(i)].getShortDate();
+            }
+//        } catch (NullPointerException e) {
+//            Timber.e(e.toString());
+//        }
     }
 
-    private int toDateIndex(int meteogrammaIndex){
-        switch (meteogrammaIndex){
+    private int toDateIndex(int meteogrammaIndex) {
+        switch (meteogrammaIndex) {
             case 0:
                 return 0;
             case 1:
@@ -212,39 +241,38 @@ public class PreviewFragment extends Fragment implements Observer {
     }
 
     private void setMeteogrammaViews() {
-        try {
-            for(int i = 0; i< tvDates.length; i++) {
+//        try {
+            for (int i = 0; i < tvDates.length; i++) {
                 tvDates[i].setText(dates[i]);
             }
 
-//            tvDate.setText(AggiornatoLabel + ": " + date);
-        } catch (NullPointerException e) {
-            Timber.e(e.toString());
-        }
+//        } catch (NullPointerException e) {
+//            Timber.e(e.toString());
+//        }
     }
 
     private void setDayImageView(String daySkyUrl, NetworkImageView imgDay) {
-            mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
-                @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    try {
-                        imgDay.setImageUrl(daySkyUrl, mImageLoader);
-                    } catch (NullPointerException e) {
-                        Timber.e(e.toString());
-                    }
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
+        mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+//                try {
+                    imgDay.setImageUrl(daySkyUrl, mImageLoader);
+//                } catch (NullPointerException e) {
+//                    Timber.e(e.toString());
+//                }
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
                 }
+            }
 
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Timber.e("Image Load Error: %s", error.getMessage());
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Timber.e("Image Load Error: %s", error.getMessage());
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
                 }
-            });
+            }
+        });
     }
 
     private void setBollettinoViews() {
@@ -270,8 +298,12 @@ public class PreviewFragment extends Fragment implements Observer {
             loadMeteogrammaData(response);
 //            setTitleSlides();
             setMeteogrammaViews();
-            for(int i = 0; i<imgDays.length; i++) {
-                setDayImageView(daySkyUrl[i], imgDays[i]);
+            try {
+                for (int i = 0; i < imgDays.length; i++) {
+                    setDayImageView(daySkyUrl[i], imgDays[i]);
+                }
+            } catch (NullPointerException e) {
+                Timber.e(e.toString());
             }
 
             if (appLanguage == Previsione.Language.IT) {

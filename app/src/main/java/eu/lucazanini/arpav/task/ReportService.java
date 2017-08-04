@@ -29,6 +29,7 @@ import eu.lucazanini.arpav.activity.MainActivity;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 public class ReportService extends IntentService {
@@ -77,31 +78,37 @@ public class ReportService extends IntentService {
     }
 
     private class ServiceResponseListener implements Response.Listener<Previsione> {
-
         @Override
         public void onResponse(Previsione response) {
-
+            // read the file containg tha last alert
             Map<String, String> lastData = getLast();
 
+            // download the current alert
             Map<String, String> currentData = new HashMap<>();
             currentData.put(reportDate, response.getUpdateDate().toString());
             currentData.put(reportAlert, response.getMeteoVeneto().getAvviso());
 
+            if(isNewNotification(currentData, lastData)){
+                createNotification(currentData);
+            }
 
+            // save the current alert in the file
             setLast(currentData);
-
         }
     }
 
     private boolean isNewNotification(Map<String, String> currentData, Map<String, String> lastData) {
         String currentAlert, lastAlert;
+        if(lastData == null){
+            return true;
+        }
         if (currentData.get(reportAlert) != null) {
             currentAlert = currentData.get(reportAlert);
         } else {
             currentAlert = "";
         }
-        if (currentData.get(reportAlert) != null) {
-            lastAlert = currentData.get(reportAlert);
+        if (lastData.get(reportAlert) != null) {
+            lastAlert = lastData.get(reportAlert);
         } else {
             lastAlert = "";
         }

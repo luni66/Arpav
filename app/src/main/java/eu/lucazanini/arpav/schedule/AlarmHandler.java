@@ -38,14 +38,11 @@ public class AlarmHandler {
             alarmTimes[i].set(Calendar.HOUR_OF_DAY, Previsione.UPDATE_TIMES[i].getHours());
             alarmTimes[i].set(Calendar.MINUTE, Previsione.UPDATE_TIMES[i].getMinutes());
 
-//            alarmManager[i] = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            //only to test
-//            alarmManager[i].setRepeating(AlarmManager.RTC_WAKEUP,
+//              only to test
+//            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
 //                    alarmTimes[i].getTimeInMillis(), 1000 * 60, alarmIntent);
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                    alarmTimes[i].getTimeInMillis(), 1000 * 60, alarmIntent);
-//            alarmMgr[i].setInexactRepeating(AlarmManager.RTC_WAKEUP,
-//                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
+            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
+                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent);
 
         }
     }

@@ -1,6 +1,7 @@
 package eu.lucazanini.arpav.fragment;
 
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Build;
@@ -13,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.OutputStream;
+
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.schedule.AlarmHandler;
 import timber.log.Timber;
@@ -23,6 +26,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     private String defaultLanguage;
     private SharedPreferences sharedPref;
     private String[] languageEntries, languageValues;
+    private String reportFile;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         languageEntries = resources.getStringArray(R.array.pref_language_entries);
         languageValues = resources.getStringArray(R.array.pref_language_values);
         alertKey = resources.getString(R.string.pref_alert_key);
+        reportFile = resources.getString(R.string.report_file);
     }
 
     @Override
@@ -67,6 +72,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             Timber.d("Alarm is %s", isAlertActivated);
             AlarmHandler alarmHandler = new AlarmHandler();
             if (isAlertActivated) {
+                boolean success = getActivity().deleteFile(reportFile);
+                Timber.d("deletion file %s is %s", reportFile, success);
                 alarmHandler.setAlarm(getActivity());
             } else {
                 alarmHandler.removeAlarm(getActivity());

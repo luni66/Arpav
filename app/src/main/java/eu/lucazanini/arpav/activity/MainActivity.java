@@ -12,12 +12,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import java.util.Observable;
@@ -35,7 +37,6 @@ import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.SlideTitles;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
@@ -63,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     private Town town = null;
     private Preferences preferences;
 
-    @DebugLog
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,9 +79,18 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
         setSupportActionBar(mainToolbar);
         actionBar = getSupportActionBar();
 
-        googleLocator = new GoogleLocator(this);
-
         preferences = new UserPreferences(this);
+        checkPermission();
+
+        Timber.d("isGpsAvailable() %s", isGpsAvailable());
+        Timber.d("locationPermissionGranted %s", locationPermissionGranted);
+        Timber.d("preferences.useGps() %s", preferences.useGps());
+
+        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
+            googleLocator = new GoogleLocator(this);
+            googleLocator.connect();
+//            googleLocator.requestUpdates();
+        }
 
         Timber.d("adding observer");
         currentLocation = CurrentLocation.getInstance(this);
@@ -94,6 +103,35 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
             actionBar.setTitle(defaultTitle);
         }
     }
+
+/*
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        int action = MotionEventCompat.getActionMasked(event);
+
+        switch (action) {
+            case (MotionEvent.ACTION_DOWN):
+                Timber.d("Action was DOWN");
+                return true;
+            case (MotionEvent.ACTION_MOVE):
+                Timber.d("Action was MOVE");
+                return true;
+            case (MotionEvent.ACTION_UP):
+                Timber.d("Action was UP");
+                return true;
+            case (MotionEvent.ACTION_CANCEL):
+                Timber.d("Action was CANCEL");
+                return true;
+            case (MotionEvent.ACTION_OUTSIDE):
+                Timber.d("Movement occurred outside bounds " +
+                        "of current screen element");
+                return true;
+            default:
+                return super.onTouchEvent(event);
+        }
+    }
+*/
 
     /**
      * This method run after the user selects a town in {@link SearchableActivity}
@@ -152,30 +190,27 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
         }
     }
 
-    @DebugLog
     @Override
     protected void onStart() {
         super.onStart();
 //        googleLocator = new GoogleLocator(this);
-        googleLocator.connect();
+//        googleLocator.connect();
     }
 
-    @DebugLog
     @Override
     protected void onStop() {
         super.onStop();
-        googleLocator.disconnect();
+//        googleLocator.disconnect();
     }
 
-    @DebugLog
     @Override
     protected void onResume() {
         super.onResume();
         checkPermission();
-        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
-            Timber.d("calling GoogleLocator");
-            googleLocator.requestUpdates();
-        }
+//        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
+//            Timber.d("calling GoogleLocator");
+//            googleLocator.requestUpdates();
+//        }
     }
 
     private void checkPermission() {
@@ -231,6 +266,9 @@ public class MainActivity extends AppCompatActivity implements TitlesCallBack, O
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (googleLocator != null) {
+            googleLocator.disconnect();
+        }
         currentLocation.deleteObserver(this);
         collectionPagerAdapter.stopObserving();
     }

@@ -32,6 +32,7 @@
     <string name="home">Favorite location</string>
     <string name="settings">Preferences</string>
     <string name="credits">Credits</string>
+    <string name="refresh">Refresh</string>
 
     <string name="pref_language_key">language_key</string>
     <string name="pref_language_title">Language</string>
