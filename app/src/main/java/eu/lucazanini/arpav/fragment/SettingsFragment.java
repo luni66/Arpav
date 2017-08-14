@@ -70,13 +70,13 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         } else if (key.equals(alertKey)) {
             boolean isAlertActivated = sharedPreferences.getBoolean(alertKey, false);
             Timber.d("Alarm is %s", isAlertActivated);
-            AlarmHandler alarmHandler = new AlarmHandler();
+            AlarmHandler alarmHandler = new AlarmHandler(getActivity().getApplicationContext());
             if (isAlertActivated) {
                 boolean success = getActivity().deleteFile(reportFile);
                 Timber.d("deletion file %s is %s", reportFile, success);
-                alarmHandler.setAlarm(getActivity());
+                alarmHandler.setAlarm();
             } else {
-                alarmHandler.removeAlarm(getActivity());
+                alarmHandler.removeAlarm();
             }
         }
     }

@@ -43,7 +43,8 @@ public class Previsione implements Parcelable {
     public final static String TAG_METEOGRAMMA = "meteogramma";
     public final static String ATTR_DATA = "date";
 
-    public final static UpdateTime[] UPDATE_TIMES = new UpdateTime[3];
+    public final static int UPDATE_TIME_COUNT=3;
+    public final static UpdateTime[] UPDATE_TIMES;
     public final static String RELEASE_TIME = "13:00";
     public final static String FIRST_UPDATE_TIME = "16:00";
     public final static String SECOND_UPDATE_TIME = "09:00";
@@ -61,6 +62,7 @@ public class Previsione implements Parcelable {
     };
 
     static {
+        UPDATE_TIMES = new UpdateTime[UPDATE_TIME_COUNT];
         UPDATE_TIMES[0] = new UpdateTime(RELEASE_TIME);
         UPDATE_TIMES[1] = new UpdateTime(FIRST_UPDATE_TIME);
         UPDATE_TIMES[2] = new UpdateTime(SECOND_UPDATE_TIME);

@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -27,7 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.R;
-import eu.lucazanini.arpav.activity.TitlesCallBack;
+import eu.lucazanini.arpav.activity.ActivityCallBack;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.Bollettino;
@@ -37,7 +39,6 @@ import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 public class MeteogrammaFragment extends Fragment implements Observer {
@@ -65,13 +66,14 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     protected @BindString(R.string.attendibilita) String AttendibilitaLabel;
     protected @BindString(R.string.aggiornato) String AggiornatoLabel;
     protected @BindView(R.id.text_description) TextView tvDescription;
+    protected @BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefreshLayout;
     private Context context;
     private Unbinder unbinder;
     private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability, date, description;
     private String scadenzaDate;
     private int pageNumber, pages, meteogrammaIndex;
     private CurrentLocation currentLocation;
-    private TitlesCallBack titlesCallBack;
+    private ActivityCallBack activityCallBack;
     private Preferences preferences;
     private VolleySingleton volleyApp;
     private ImageLoader mImageLoader;
@@ -81,6 +83,8 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getContext();
+
+        setHasOptionsMenu(true);
 
         Bundle args = getArguments();
         pageNumber = args.getInt(PAGE_NUMBER);
@@ -117,17 +121,39 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             }
         }
 
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Timber.d("onRefresh called from SwipeRefreshLayout");
+                loadData();
+                activityCallBack.keepFragments(pageNumber);
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         loadData();
 
         return v;
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.menu_refresh) {
+            Timber.d("refresh in fragment");
+            loadData();
+            activityCallBack.keepFragments(pageNumber);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         Activity activity = getActivity();
-        if (activity instanceof TitlesCallBack) {
-            titlesCallBack = (TitlesCallBack) activity;
+        if (activity instanceof ActivityCallBack) {
+            activityCallBack = (ActivityCallBack) activity;
         }
     }
 
@@ -345,7 +371,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     private void setTitleSlides() {
-        titlesCallBack.setTitle(scadenzaDate, pageNumber);
+        activityCallBack.setTitle(scadenzaDate, pageNumber);
     }
 
     private void setDayImageView() {

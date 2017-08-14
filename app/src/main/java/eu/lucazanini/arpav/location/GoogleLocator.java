@@ -25,9 +25,10 @@ import timber.log.Timber;
  * Handles google api to get the location
  *
  */
+@Deprecated
 public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private static final int UPDATE_NUMBER = 1;
+    private static final int UPDATE_NUMBER = 2;
     private static final int EXPIRATION_TIME = 30000;
     protected GoogleApiClient googleApiClient;
     protected Location lastLocation;
@@ -41,14 +42,17 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
         this.context = context;
     }
 
+    @DebugLog
     public void requestUpdates() {
         if (googleApiClient.isConnected()) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Timber.d("no permission to location");
                 return;
             }
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             if (lastLocation != null) {
+                Timber.d("last location is not null");
                 updateCurrentLocation(lastLocation);
             }
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
@@ -70,8 +74,11 @@ public class GoogleLocator implements GoogleApiClient.ConnectionCallbacks, Googl
     public void onConnectionSuspended(int i) {}
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {}
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Timber.d("onConnectionFailed");
+    }
 
+    @DebugLog
     @Override
     public void onLocationChanged(Location location) {
         upadatedLocation = location;

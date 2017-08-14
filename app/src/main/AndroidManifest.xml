@@ -64,6 +64,9 @@
             <!-- android:enabled="false"> -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="eu.lucazanini.arpav.UPDATE_TIME_1"/>
+                <action android:name="eu.lucazanini.arpav.UPDATE_TIME_2"/>
+                <action android:name="eu.lucazanini.arpav.UPDATE_TIME_3"/>
                 <!-- TODO only for test -->
                 <action android:name="eu.lucazanini.arpav.UPDATE_TIME"/>
             </intent-filter>

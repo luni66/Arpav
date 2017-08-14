@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
+@Deprecated
 public class LocatorSensor {
 
     protected boolean isGpsAvailable(Context context) {

@@ -90,6 +90,8 @@ public class ReportService extends IntentService {
 
             if(isNewNotification(currentData, lastData)){
                 createNotification(currentData);
+            } else {
+                createTestNotification("Test notification "+response.getUpdateDate().getTime());
             }
 
             // save the current alert in the file
@@ -177,6 +179,25 @@ public class ReportService extends IntentService {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(alertTitle)
                 .setContentText(data.get(reportAlert));
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        int mNotificationId = 0;
+        mNotificationManager.notify(mNotificationId, mBuilder.build());
+    }
+
+    private void createTestNotification(String message){
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(alertTitle)
+                .setContentText(message);
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);

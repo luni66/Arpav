@@ -1,12 +1,17 @@
 package eu.lucazanini.arpav.fragment;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -24,6 +29,8 @@ import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.activity.ActivityCallBack;
+import eu.lucazanini.arpav.activity.SearchableActivity;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.Bollettino;
@@ -34,6 +41,8 @@ import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
+
+import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
 
 public class PreviewFragment extends Fragment implements Observer {
 
@@ -68,6 +77,7 @@ public class PreviewFragment extends Fragment implements Observer {
     private VolleySingleton volleyApp;
     private ImageLoader mImageLoader;
     private Previsione.Language appLanguage;
+    private ActivityCallBack activityCallBack;
 
     protected @BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -75,6 +85,8 @@ public class PreviewFragment extends Fragment implements Observer {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getContext();
+
+        setHasOptionsMenu(true);
 
         Bundle args = getArguments();
         pageNumber = args.getInt(PAGE_NUMBER);
@@ -122,14 +134,35 @@ public class PreviewFragment extends Fragment implements Observer {
             public void onRefresh() {
                 Timber.d("onRefresh called from SwipeRefreshLayout");
                 loadData();
+                activityCallBack.keepFragments(pageNumber);
                 mSwipeRefreshLayout.setRefreshing(false);
-//                initiateRefresh();
             }
         });
 
         loadData();
 
         return v;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.menu_refresh) {
+            Timber.d("refresh in fragment");
+            loadData();
+            activityCallBack.keepFragments(pageNumber);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Activity activity = getActivity();
+        if (activity instanceof ActivityCallBack) {
+            activityCallBack = (ActivityCallBack) activity;
+        }
     }
 
     @Override

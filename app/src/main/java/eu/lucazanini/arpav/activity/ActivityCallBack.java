@@ -5,7 +5,7 @@ import eu.lucazanini.arpav.model.SlideTitles;
 /**
  * Interface for callback methods in activities
  */
-public interface TitlesCallBack {
+public interface ActivityCallBack {
 
     SlideTitles getSlideTitles();
 
@@ -14,5 +14,7 @@ public interface TitlesCallBack {
     void setTitles(String[] titles);
 
     void setTitle(String title, int page);
+
+    void keepFragments(int page);
 
 }
