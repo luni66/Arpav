@@ -3,7 +3,6 @@ package eu.lucazanini.arpav.activity;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -23,19 +22,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +42,6 @@ import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
 import eu.lucazanini.arpav.fragment.PreviewFragment;
 import eu.lucazanini.arpav.location.CurrentLocation;
-import eu.lucazanini.arpav.location.GoogleLocator;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
@@ -57,7 +49,7 @@ import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
 
-import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
+import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
 
 /**
  * The main activity containing the fragments with data populated from xml files downloaded from Arpav site
@@ -71,18 +63,20 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
     private static final int PAGES = 8;
     private static final int PAGES_LIMIT = 7;
     private final static int LOCATION_REQUEST = 1;
-    private boolean locationPermissionGranted = false;
+    private static final int EXPIRATION_TIME = 30000;
+    private final static int UPDATE_LIMIT = 1;
     protected @BindView(R.id.pager) ViewPager pager;
     protected @BindView(R.id.mainToolbar) Toolbar mainToolbar;
     protected @BindString(R.string.action_title) String defaultTitle;
     private CollectionPagerAdapter collectionPagerAdapter;
-    private CurrentLocation currentLocation;
     private ActionBar actionBar;
-    private GoogleLocator googleLocator;
     private Town town = null;
     private Preferences preferences;
-    private FusedLocationProviderClient mFusedLocationClient;
-    private final static int REQUEST_CHECK_SETTINGS = 1;
+    private CurrentLocation currentLocation;
+    private LocationRequest locationRequest;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationCallback locationCallback;
+    private boolean locationPermissionGranted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,34 +94,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         actionBar = getSupportActionBar();
 
         preferences = new UserPreferences(this);
-        checkPermission();
 
-        Timber.d("isGpsAvailable() %s", isGpsAvailable());
-        Timber.d("locationPermissionGranted %s", locationPermissionGranted);
-        Timber.d("preferences.useGpsuseGps() %s", preferences.useGps());
-
-        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            mFusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                Timber.d("TEST for new location");
-                                updateCurrentLocation(location);
-
-                            }
-                        }
-                    });
-
-            createLocationRequest();
-
-            googleLocator = new GoogleLocator(this);
-            googleLocator.connect();
-        }
-
-        Timber.d("adding observer");
         currentLocation = CurrentLocation.getInstance(this);
         currentLocation.addObserver(this);
 
@@ -137,95 +104,26 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         } else {
             actionBar.setTitle(defaultTitle);
         }
-    }
 
-    protected void createLocationRequest() {
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-
-// ...
-
-        SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // All location settings are satisfied. The client can initialize
-                // location requests here.
-                // ...
-//                Timber.d("TEST found new location")
-            }
-        });
-
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                int statusCode = ((ApiException) e).getStatusCode();
-                switch (statusCode) {
-                    case CommonStatusCodes.RESOLUTION_REQUIRED:
-                        // Location settings are not satisfied, but this can be fixed
-                        // by showing the user a dialog.
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            ResolvableApiException resolvable = (ResolvableApiException) e;
-                            resolvable.startResolutionForResult(MainActivity.this,
-                                    REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException sendEx) {
-                            // Ignore the error.
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way
-                        // to fix the settings so we won't show the dialog.
-                        break;
-                }
-            }
-        });
-    }
-
-    private synchronized void updateCurrentLocation(Location location) {
-        List<Town> towns = TownList.getInstance(this).getTowns();
-
-        Collections.sort(towns, new Town.GpsDistanceComparator(location.getLatitude(), location.getLongitude()));
-
-        currentLocation = CurrentLocation.getInstance(this);
-        currentLocation.setTown(towns.get(0));
-    }
-/*
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-
-        int action = MotionEventCompat.getActionMasked(event);
-
-        switch (action) {
-            case (MotionEvent.ACTION_DOWN):
-                Timber.d("Action was DOWN");
-                return true;
-            case (MotionEvent.ACTION_MOVE):
-                Timber.d("Action was MOVE");
-                return true;
-            case (MotionEvent.ACTION_UP):
-                Timber.d("Action was UP");
-                return true;
-            case (MotionEvent.ACTION_CANCEL):
-                Timber.d("Action was CANCEL");
-                return true;
-            case (MotionEvent.ACTION_OUTSIDE):
-                Timber.d("Movement occurred outside bounds " +
-                        "of current screen element");
-                return true;
-            default:
-                return super.onTouchEvent(event);
+        checkPermission();
+        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
+            startLocationUpdates();
         }
     }
-*/
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPermission();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopLocationUpdates();
+        currentLocation.deleteObserver(this);
+        collectionPagerAdapter.stopObserving();
+    }
 
     /**
      * This method run after the user selects a town in {@link SearchableActivity}
@@ -256,7 +154,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
                 return true;
             case R.id.action_find_location:
                 if (isGpsAvailable() && locationPermissionGranted) {
-                    googleLocator.requestUpdates();
+//                    googleLocator.requestUpdates();
+                    startLocationUpdates();
                 }
                 return true;
             case R.id.action_save_location:
@@ -281,58 +180,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        googleLocator = new GoogleLocator(this);
-//        googleLocator.connect();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-//        googleLocator.disconnect();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        checkPermission();
-        startLocationUpdates();
-//        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
-//            Timber.d("calling GoogleLocator");
-//            googleLocator.requestUpdates();
-//        }
-    }
-
-    private void startLocationUpdates() {
-        mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                mLocationCallback,
-                null /* Looper */);
-    }
-
-    private void checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            locationPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-            if (!locationPermissionGranted) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
-            }
-        } else {
-            locationPermissionGranted = true;
-        }
-    }
-
-    private boolean isGpsAvailable() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            return true;
-        } else {
-            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
-            return false;
         }
     }
 
@@ -364,14 +211,93 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (googleLocator != null) {
-            googleLocator.disconnect();
+    // Trigger new location updates at interval
+    protected void startLocationUpdates() {
+        // Create the location request to start receiving updates
+        createLocationRequest();
+
+        // Create LocationSettingsRequest object using location request
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(locationRequest);
+        LocationSettingsRequest locationSettingsRequest = builder.build();
+
+        // TODO servono? non c'è bisogno di Task?
+        // Check whether location settings are satisfied
+        // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
+        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
+        settingsClient.checkLocationSettings(locationSettingsRequest);
+
+        // new Google API SDK v11 uses getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
         }
-        currentLocation.deleteObserver(this);
-        collectionPagerAdapter.stopObserving();
+        createLocationCallback();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+    private void createLocationRequest() {
+        locationRequest = new LocationRequest();
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        locationRequest.setNumUpdates(UPDATE_LIMIT);
+        locationRequest.setExpirationDuration(EXPIRATION_TIME);
+    }
+
+    private void createLocationCallback() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                Location lastLocation = locationResult.getLastLocation();
+                if (lastLocation != null) {
+                    updateCurrentLocation(locationResult.getLastLocation());
+                }
+                for (Location currentLocation : locationResult.getLocations()) {
+                    updateCurrentLocation(currentLocation);
+                }
+            }
+        };
+    }
+
+    private synchronized void updateCurrentLocation(Location location) {
+        List<Town> towns = TownList.getInstance(this).getTowns();
+        Collections.sort(towns, new Town.GpsDistanceComparator(location.getLatitude(), location.getLongitude()));
+        currentLocation.setTown(towns.get(0));
+    }
+
+    private void stopLocationUpdates() {
+        if (fusedLocationProviderClient != null) {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        }
+    }
+
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            locationPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+            if (!locationPermissionGranted) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+            }
+        } else {
+            locationPermissionGranted = true;
+        }
+    }
+
+    private boolean isGpsAvailable() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            return true;
+        } else {
+            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 
     @Override
@@ -432,13 +358,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
             slideTitles.addObserver(this);
         }
 
+        public void stopObserving() {
+            slideTitles.deleteObserver(this);
+        }
+
         @Override
         public void update(Observable o, Object arg) {
             notifyDataSetChanged();
-        }
-
-        public void stopObserving() {
-            slideTitles.deleteObserver(this);
         }
 
         @Override
@@ -450,15 +376,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
             switch (i) {
                 case 0:
                     fragment = new PreviewFragment();
-//                    Bundle args = new Bundle();
                     args.putInt(MeteogrammaFragment.PAGE_NUMBER, i);
                     args.putInt(MeteogrammaFragment.PAGES, PAGES);
                     fragment.setArguments(args);
                     break;
                 default:
-//                  MeteogrammaFragment fragment = new MeteogrammaFragment();
                     fragment = new MeteogrammaFragment();
-//                    Bundle args = new Bundle();
                     args.putInt(MeteogrammaFragment.PAGE_NUMBER, i);
                     args.putInt(MeteogrammaFragment.PAGES, PAGES);
                     fragment.setArguments(args);
@@ -485,5 +408,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         public void setSlideTitles(SlideTitles slideTitles) {
             this.slideTitles = slideTitles;
         }
+
+
     }
 }

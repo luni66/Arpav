@@ -13,6 +13,10 @@
         android:title="@string/pref_location_title"
         android:key="@string/pref_location_key">
 
+        <Preference
+            android:key="@string/pref_town_key"
+            android:title="@string/pref_town_title" />
+
         <SwitchPreference
             android:key="@string/pref_gps_key"
             android:title="@string/pref_gps_title"

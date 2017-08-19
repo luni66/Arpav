@@ -40,6 +40,9 @@
     <string name="pref_location_key">location_key</string>
     <string name="pref_location_title">Location</string>
 
+    <string name="pref_town_key">town_key</string>
+    <string name="pref_town_title">Favorite location</string>
+
     <string name="pref_gps_key">gps_key</string>
     <string name="pref_gps_title">Use GPS if available</string>
 

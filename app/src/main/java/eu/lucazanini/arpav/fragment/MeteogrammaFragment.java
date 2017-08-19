@@ -47,7 +47,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     public final static String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet arcu ultricies, porttitor libero in, fringilla erat. Proin sollicitudin in lacus eu pharetra. Duis ultricies justo gravida ligula lacinia. ";
     public static final String PAGE_NUMBER = "page_number";
     public static final String PAGES = "pages";
-    public final static int REQUEST_CODE = 0;
+//    public final static int REQUEST_CODE = 0;
     protected @BindView(R.id.image_daySky) NetworkImageView imgDaySky;
     protected @BindView(R.id.text_sky) TextView tvDaySky;
     protected @BindView(R.id.text_temperature1) TextView tvTemperature1;

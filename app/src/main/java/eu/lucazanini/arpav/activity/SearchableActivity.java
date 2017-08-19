@@ -29,6 +29,7 @@ import eu.lucazanini.arpav.database.TownDataSource;
  */
 public class SearchableActivity extends AppCompatActivity {
 
+    public final static int REQUEST_CODE = 0;
     public final static String TOWN_NAME = "town_name";
     protected @BindView(R.id.searchableToolbar) Toolbar searchableToolbar;
     protected @BindView(R.id.search_list) RecyclerView recyclerView;
@@ -136,7 +137,7 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     /**
-     * It manages the towns matching the text in the searc ciew widget
+     * It manages the towns matching the text in the search view widget
      */
     private class ReadFilteredTowns extends AsyncTask<String, Void, List<String>> {
 

@@ -42,8 +42,6 @@ import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
 
-import static eu.lucazanini.arpav.fragment.MeteogrammaFragment.REQUEST_CODE;
-
 public class PreviewFragment extends Fragment implements Observer {
 
     public static final String PAGE_NUMBER = "page_number";

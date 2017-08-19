@@ -1,7 +1,8 @@
 package eu.lucazanini.arpav.fragment;
 
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Build;
@@ -14,15 +15,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.OutputStream;
-
 import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.activity.SearchableActivity;
+import eu.lucazanini.arpav.location.CurrentLocation;
+import eu.lucazanini.arpav.location.Town;
+import eu.lucazanini.arpav.location.TownList;
+import eu.lucazanini.arpav.preference.Preferences;
+import eu.lucazanini.arpav.preference.UserPreferences;
 import eu.lucazanini.arpav.schedule.AlarmHandler;
 import timber.log.Timber;
 
+import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
+
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private String languageKey, alertKey;
+    private String languageKey, alertKey, townKey;
+    private String savedLocation;
     private String defaultLanguage;
     private SharedPreferences sharedPref;
     private String[] languageEntries, languageValues;
@@ -47,6 +55,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         languageValues = resources.getStringArray(R.array.pref_language_values);
         alertKey = resources.getString(R.string.pref_alert_key);
         reportFile = resources.getString(R.string.report_file);
+        townKey = resources.getString(R.string.pref_town_key);
+        savedLocation = resources.getString(R.string.current_location);
     }
 
     @Override
@@ -106,10 +116,45 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        Preference connectionPref = findPreference(languageKey);
+        Preference languagePref = findPreference(languageKey);
         String languageValue = sharedPref.getString(languageKey, defaultLanguage);
-        connectionPref.setSummary(getEntry(languageEntries, languageValues, languageValue));
+        languagePref.setSummary(getEntry(languageEntries, languageValues, languageValue));
+
+        Preference townPref = findPreference(townKey);
+        String townName = sharedPref.getString(savedLocation, "");
+        townPref.setSummary(townName);
+
+        townPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = SearchableActivity.getIntent(getActivity());
+                startActivityForResult(intent, REQUEST_CODE);
+                return true;
+            }
+        });
 
         return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    /**
+     * This method run after the user selects a town in {@link SearchableActivity}
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                String townName = data.getStringExtra(SearchableActivity.TOWN_NAME);
+                CurrentLocation currentLocation = CurrentLocation.getInstance();
+                currentLocation.setTown(townName, getActivity());
+
+                Town town = TownList.getInstance(getActivity()).getTown(townName);
+
+                Preferences preferences = new UserPreferences(getActivity());
+                preferences.saveLocation(town);
+
+                Preference townPref = findPreference(townKey);
+                townPref.setSummary(townName);
+            }
+        }
     }
 }

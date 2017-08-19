@@ -43,14 +43,14 @@ public class CurrentLocation extends Observable {
         return town;
     }
 
-    public void setTown(Town town) {
+    public synchronized void setTown(Town town) {
         this.town = town;
 
         setChanged();
         notifyObservers(town.getName());
     }
 
-    public void setTown(String name, Context context) {
+    public synchronized void setTown(String name, Context context) {
         TownList townList = TownList.getInstance(context);
         Town town = townList.getTown(name);
         setTown(town);
