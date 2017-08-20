@@ -29,6 +29,7 @@ import eu.lucazanini.arpav.activity.MainActivity;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
+import eu.lucazanini.arpav.schedule.AlarmHandler;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
@@ -71,6 +72,8 @@ public class ReportService extends IntentService {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Timber.e(error);
+                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
+                alarmHandler.setNextAlarm();
             }
         }, "SERVICE TAG");
         volleyApp.addToRequestQueue(serviceRequest);
@@ -96,6 +99,9 @@ public class ReportService extends IntentService {
 
             // save the current alert in the file
             setLast(currentData);
+
+            AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
+            alarmHandler.setNextAlarm();
         }
     }
 

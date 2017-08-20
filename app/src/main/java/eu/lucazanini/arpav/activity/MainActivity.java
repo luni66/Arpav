@@ -106,9 +106,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         }
 
         checkPermission();
-        if (isGpsAvailable() && locationPermissionGranted && preferences.useGps()) {
-            startLocationUpdates();
-        }
+        checkGps();
+        startLocationUpdates();
     }
 
     @Override
@@ -288,6 +287,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         } else {
             locationPermissionGranted = true;
         }
+    }
+
+    private boolean checkGps() {
+        return preferences.useGps() && isGpsAvailable() && locationPermissionGranted;
     }
 
     private boolean isGpsAvailable() {

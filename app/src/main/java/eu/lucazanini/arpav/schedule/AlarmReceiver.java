@@ -23,11 +23,9 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         if (preferences.isAlertActivated() && action.equals("android.intent.action.BOOT_COMPLETED")) {
             AlarmHandler alarmHandler = new AlarmHandler(context.getApplicationContext());
-            alarmHandler.setAlarm();
+            alarmHandler.setNextAlarm();
         } else if(action.startsWith(AlarmHandler.RECEIVER_ACTION)){
-            Timber.d("onReive for %s", action);
-            context.startService(ReportService.getIntent(context));
-        } else if (action.equals(AlarmHandler.RECEIVER_ACTION)) { // only for test
+            Timber.d("onReceive for %s", action);
             context.startService(ReportService.getIntent(context));
         }
     }

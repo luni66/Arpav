@@ -84,7 +84,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             if (isAlertActivated) {
                 boolean success = getActivity().deleteFile(reportFile);
                 Timber.d("deletion file %s is %s", reportFile, success);
-                alarmHandler.setAlarm();
+                alarmHandler.setNextAlarm();
             } else {
                 alarmHandler.removeAlarm();
             }

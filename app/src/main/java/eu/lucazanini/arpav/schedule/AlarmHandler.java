@@ -4,7 +4,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -15,55 +17,75 @@ import timber.log.Timber;
 public class AlarmHandler {
 
     public final static String RECEIVER_ACTION = "eu.lucazanini.arpav.UPDATE_TIME";
-    public final static String RECEIVER_ACTION_1 = "eu.lucazanini.arpav.UPDATE_TIME_1";
-    public final static String RECEIVER_ACTION_2 = "eu.lucazanini.arpav.UPDATE_TIME_2";
-    public final static String RECEIVER_ACTION_3 = "eu.lucazanini.arpav.UPDATE_TIME_3";
     private AlarmManager alarmManager;
-    private PendingIntent[] alarmIntent;
-    private Calendar[] alarmTimes;
+    private PendingIntent alarmIntent;
 
-    public AlarmHandler(Context context){
+    public AlarmHandler(Context context) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//        Calendar[] alarmTimes = new Calendar[3];
 
-        alarmIntent = new PendingIntent[Previsione.UPDATE_TIME_COUNT];
-        Intent[] intent = new Intent[Previsione.UPDATE_TIME_COUNT];
-        for(int i=0; i<Previsione.UPDATE_TIME_COUNT; i++){
-            intent[i]=new Intent(context, AlarmReceiver.class);
-            intent[i].setAction(RECEIVER_ACTION+"_"+Integer.toString(i));
-            alarmIntent[i] = PendingIntent.getBroadcast(context, 0, intent[i], 0);
-            //        intent.setPackage(context.getPackageName());
-        }
-
-        alarmTimes = new Calendar[Previsione.UPDATE_TIME_COUNT];
-        for(int i=0; i<3; i++) {
-            alarmTimes[i] = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
-            alarmTimes[i].setTimeInMillis(System.currentTimeMillis());
-            alarmTimes[i].set(Calendar.HOUR_OF_DAY, Previsione.UPDATE_TIMES[i].getHours());
-            alarmTimes[i].set(Calendar.MINUTE, Previsione.UPDATE_TIMES[i].getMinutes());
-            Timber.d("time is %s", alarmTimes[i].getTime());
-        }
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        intent.setAction(RECEIVER_ACTION);
+        alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 
-    public void setAlarm() {
-        Timber.d("setting alarms");
-
-        for (int i = 0; i < Previsione.UPDATE_TIME_COUNT; i++) {
-/*//          only to test
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                    alarmTimes[i].getTimeInMillis(), 1000 * 60, alarmIntent);*/
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent[i]);
-//            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,
-//                    alarmTimes[i].getTimeInMillis(), AlarmManager.INTERVAL_DAY, alarmIntent[i]);
+    public void setNextAlarm() {
+        Calendar alarmTime = getNextAlarmTime();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmIntent);
+        } else {
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmIntent);
         }
     }
 
     public void removeAlarm() {
         Timber.d("removing alarms");
+        alarmManager.cancel(alarmIntent);
+    }
 
+    private Calendar getNextAlarmTime() {
+        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+        Calendar nextTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+
+        double currentHour = currentTime.get(Calendar.HOUR_OF_DAY) + currentTime.get(Calendar.MINUTE) / 60D;
+
+        final double startDay = 0D;
+        final double endDay = 24D;
+        double[] updateHour = new double[Previsione.UPDATE_TIME_COUNT];
         for (int i = 0; i < Previsione.UPDATE_TIME_COUNT; i++) {
-            alarmManager.cancel(alarmIntent[i]);
+            updateHour[i] = Previsione.UPDATE_TIMES[i].getHours() + Previsione.UPDATE_TIMES[i].getMinutes() / 60D;
         }
+        Arrays.sort(updateHour);
+
+        if (currentHour >= startDay && currentHour < updateHour[0]) {
+            nextTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[0]));
+            nextTime.set(Calendar.MINUTE, getFrac(updateHour[0]));
+            nextTime.set(Calendar.SECOND, 0);
+            nextTime.set(Calendar.MILLISECOND, 0);
+        } else if (currentHour >= updateHour[updateHour.length - 1] && currentHour < endDay) {
+            nextTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[0]));
+            nextTime.set(Calendar.MINUTE, getFrac(updateHour[0]));
+            nextTime.set(Calendar.SECOND, 0);
+            nextTime.set(Calendar.MILLISECOND, 0);
+        } else {
+            for (int i = 1; i < updateHour.length; i++) {
+                if (currentHour >= updateHour[i - 1] && currentHour < updateHour[i]) {
+                    nextTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[i]));
+                    nextTime.set(Calendar.MINUTE, getFrac(updateHour[i]));
+                    nextTime.set(Calendar.SECOND, 0);
+                    nextTime.set(Calendar.MILLISECOND, 0);
+                }
+            }
+        }
+
+        return nextTime;
+
+    }
+
+    private int getInt(double d) {
+        return (int) d;
+    }
+
+    private int getFrac(double d) {
+        return (int) ((d - getInt(d)) * 100D / 60D);
     }
 }
