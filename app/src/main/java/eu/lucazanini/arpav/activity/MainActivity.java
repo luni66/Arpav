@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -18,6 +19,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -32,6 +34,7 @@ import com.google.android.gms.location.SettingsClient;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -39,15 +42,16 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.fragment.EvolutionFragment;
 import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
-import eu.lucazanini.arpav.fragment.PreviewFragment;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
+import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.model.SlideTitles;
+import eu.lucazanini.arpav.preference.LocaleHelper;
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import timber.log.Timber;
 
 import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
 
@@ -108,6 +112,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         checkPermission();
         checkGps();
         startLocationUpdates();
+
+        if(preferences.getLanguage().equals(Previsione.Language.IT)){
+            Context context = LocaleHelper.setLocale(this, "it");
+        }
     }
 
     @Override
@@ -208,6 +216,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
     }
 
     // Trigger new location updates at interval
@@ -351,6 +364,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         }
     }
 
+    private void changeLocale(String languageCode){
+        Resources res = this.getResources();
+        // Change locale settings in the app.
+        DisplayMetrics dm = res.getDisplayMetrics();
+        android.content.res.Configuration conf = res.getConfiguration();
+        conf.setLocale(new Locale(languageCode.toLowerCase())); // API 17+ only.
+        // Use conf.locale = new Locale(...) if targeting lower versions
+        res.updateConfiguration(conf, dm);
+    }
+
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter implements Observer {
 
         private SlideTitles slideTitles;
@@ -378,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
 
             switch (i) {
                 case 0:
-                    fragment = new PreviewFragment();
+                    fragment = new EvolutionFragment();
                     args.putInt(MeteogrammaFragment.PAGE_NUMBER, i);
                     args.putInt(MeteogrammaFragment.PAGES, PAGES);
                     fragment.setArguments(args);
@@ -411,7 +434,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         public void setSlideTitles(SlideTitles slideTitles) {
             this.slideTitles = slideTitles;
         }
-
 
     }
 }

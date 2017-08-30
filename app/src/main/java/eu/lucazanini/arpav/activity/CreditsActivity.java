@@ -14,6 +14,7 @@ import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.preference.LocaleHelper;
 
 public class CreditsActivity extends AppCompatActivity {
 
@@ -48,5 +49,10 @@ public class CreditsActivity extends AppCompatActivity {
         styledString.setSpan(new URLSpan(developerSite), start, end, 0);
         tvDeveloperBody.setMovementMethod(LinkMovementMethod.getInstance());
         tvDeveloperBody.setText(styledString);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
     }
 }

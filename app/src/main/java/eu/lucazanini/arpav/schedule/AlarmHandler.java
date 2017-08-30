@@ -12,7 +12,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import eu.lucazanini.arpav.model.Previsione;
-import timber.log.Timber;
+import hugo.weaving.DebugLog;
 
 public class AlarmHandler {
 
@@ -33,15 +33,15 @@ public class AlarmHandler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             alarmManager.setWindow(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmIntent);
         } else {
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmIntent);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), alarmIntent);
         }
     }
 
     public void removeAlarm() {
-        Timber.d("removing alarms");
         alarmManager.cancel(alarmIntent);
     }
 
+    @DebugLog
     private Calendar getNextAlarmTime() {
         Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
         Calendar nextTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
@@ -51,7 +51,7 @@ public class AlarmHandler {
         final double startDay = 0D;
         final double endDay = 24D;
         double[] updateHour = new double[Previsione.UPDATE_TIME_COUNT];
-        for (int i = 0; i < Previsione.UPDATE_TIME_COUNT; i++) {
+        for (int i = 0; i < updateHour.length; i++) {
             updateHour[i] = Previsione.UPDATE_TIMES[i].getHours() + Previsione.UPDATE_TIMES[i].getMinutes() / 60D;
         }
         Arrays.sort(updateHour);
@@ -62,6 +62,7 @@ public class AlarmHandler {
             nextTime.set(Calendar.SECOND, 0);
             nextTime.set(Calendar.MILLISECOND, 0);
         } else if (currentHour >= updateHour[updateHour.length - 1] && currentHour < endDay) {
+            nextTime.add(Calendar.DAY_OF_YEAR, 1);
             nextTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[0]));
             nextTime.set(Calendar.MINUTE, getFrac(updateHour[0]));
             nextTime.set(Calendar.SECOND, 0);
@@ -78,7 +79,6 @@ public class AlarmHandler {
         }
 
         return nextTime;
-
     }
 
     private int getInt(double d) {
@@ -88,4 +88,5 @@ public class AlarmHandler {
     private int getFrac(double d) {
         return (int) ((d - getInt(d)) * 100D / 60D);
     }
+
 }

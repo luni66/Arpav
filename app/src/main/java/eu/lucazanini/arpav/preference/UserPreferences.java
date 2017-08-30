@@ -24,7 +24,7 @@ public class UserPreferences implements Preferences {
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public boolean isDefaultLanguageSelected() {
+    public boolean isDefaultLanguage() {
         String defaultLanguage = resources.getString(R.string.pref_language_default);
         String languageValue = sharedPreferences.getString(resources.getString(R.string.pref_language_key), defaultLanguage);
         if (languageValue.equals(defaultLanguage)) {
@@ -75,6 +75,21 @@ public class UserPreferences implements Preferences {
             case "default":
             default:
                 return getDeviceLanguage();
+        }
+    }
+
+    public String getLanguageCode(){
+        String defaultLanguage = resources.getString(R.string.pref_language_default);
+        String languageValue = sharedPreferences.getString(resources.getString(R.string.pref_language_key), defaultLanguage);
+        switch (languageValue) {
+            case "en":
+            case "fr":
+            case "de":
+            case "it":
+                return languageValue;
+            case "default":
+            default:
+                return "en";
         }
     }
 

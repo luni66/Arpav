@@ -1,7 +1,9 @@
 package eu.lucazanini.arpav;
 
 import android.app.Application;
+import android.content.Context;
 
+import eu.lucazanini.arpav.preference.LocaleHelper;
 import timber.log.Timber;
 
 public class ArpavApplication extends Application {
@@ -18,5 +20,10 @@ public class ArpavApplication extends Application {
                 }
             });
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
     }
 }

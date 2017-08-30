@@ -23,6 +23,7 @@ import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.adapter.TownAdapter;
 import eu.lucazanini.arpav.database.TownDataSource;
+import eu.lucazanini.arpav.preference.LocaleHelper;
 
 /**
  * It shows the list of towns in Veneto
@@ -91,6 +92,11 @@ public class SearchableActivity extends AppCompatActivity {
         });
 
         return true;
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
     }
 
     /**

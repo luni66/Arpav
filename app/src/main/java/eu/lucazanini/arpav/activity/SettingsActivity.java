@@ -10,6 +10,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.fragment.SettingsFragment;
+import eu.lucazanini.arpav.preference.LocaleHelper;
 
 /**
  * It manages the settings of app
@@ -38,4 +39,8 @@ public class SettingsActivity extends AppCompatActivity {
                 .commit();
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
+    }
 }

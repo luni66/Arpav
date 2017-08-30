@@ -33,6 +33,16 @@ public class MockPreferences implements Preferences {
     }
 
     @Override
+    public String getLanguageCode() {
+        return null;
+    }
+
+    @Override
+    public boolean isDefaultLanguage() {
+        return false;
+    }
+
+    @Override
     public Town getLocation() {
         return null;
     }
@@ -40,11 +50,6 @@ public class MockPreferences implements Preferences {
     @Override
     public void saveLocation(Town town) {
 
-    }
-
-    @Override
-    public boolean isDefaultLanguageSelected() {
-        return false;
     }
 
     @Override

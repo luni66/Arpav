@@ -6,9 +6,8 @@ import android.content.Intent;
 
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
-import eu.lucazanini.arpav.task.ReportService;
+import eu.lucazanini.arpav.service.NotificationService;
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 
 public class AlarmReceiver extends BroadcastReceiver {
@@ -17,16 +16,14 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        Timber.i("Received broadcast intent: %s", action);
 
         Preferences preferences = new UserPreferences(context);
 
         if (preferences.isAlertActivated() && action.equals("android.intent.action.BOOT_COMPLETED")) {
-            AlarmHandler alarmHandler = new AlarmHandler(context.getApplicationContext());
+            AlarmHandler alarmHandler = new AlarmHandler(context);
             alarmHandler.setNextAlarm();
-        } else if(action.startsWith(AlarmHandler.RECEIVER_ACTION)){
-            Timber.d("onReceive for %s", action);
-            context.startService(ReportService.getIntent(context));
+        } else if (action.startsWith(AlarmHandler.RECEIVER_ACTION)) {
+            context.startService(NotificationService.getIntent(context));
         }
     }
 }

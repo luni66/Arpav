@@ -2,13 +2,13 @@ package eu.lucazanini.arpav.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,13 +41,13 @@ import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
 
+import static android.text.Html.FROM_HTML_MODE_LEGACY;
+
 public class MeteogrammaFragment extends Fragment implements Observer {
-//public class MeteogrammaFragment extends Fragment {
 
     public final static String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet arcu ultricies, porttitor libero in, fringilla erat. Proin sollicitudin in lacus eu pharetra. Duis ultricies justo gravida ligula lacinia. ";
     public static final String PAGE_NUMBER = "page_number";
     public static final String PAGES = "pages";
-//    public final static int REQUEST_CODE = 0;
     protected @BindView(R.id.image_daySky) NetworkImageView imgDaySky;
     protected @BindView(R.id.text_sky) TextView tvDaySky;
     protected @BindView(R.id.text_temperature1) TextView tvTemperature1;
@@ -102,7 +102,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         mImageLoader = volleyApp.getImageLoader();
     }
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -124,23 +123,21 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Timber.d("onRefresh called from SwipeRefreshLayout");
-                loadData();
+                downloadData();
                 activityCallBack.keepFragments(pageNumber);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
 
-        loadData();
+        downloadData();
 
         return v;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.menu_refresh) {
-            Timber.d("refresh in fragment");
-            loadData();
+        if (item.getItemId() == R.id.menu_refresh) {
+            downloadData();
             activityCallBack.keepFragments(pageNumber);
             return true;
         } else {
@@ -157,37 +154,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         }
     }
 
-    private void loadData() {
-
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        if (currentLocation.isDefined()) {
-            BulletinRequest meteogrammaRequest = new BulletinRequest(Previsione.getUrl(appLanguage), new MeteogrammaResponseListener(), new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Timber.e(error);
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                }
-            }, Integer.toString(pageNumber));
-            volleyApp.addToRequestQueue(meteogrammaRequest);
-        }
-
-        if (appLanguage != Previsione.Language.IT) {
-            BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT), new BollettinoResponseListener(), new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Timber.e(error);
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                }
-            }, Integer.toString(pageNumber));
-            volleyApp.addToRequestQueue(BollettinoRequest);
-        }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     @Override
@@ -201,89 +171,29 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unbinder.unbind();
-    }
-
-    @Override
     public void update(java.util.Observable o, Object arg) {
-        loadData();
+        downloadData();
     }
 
-    private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
-
-        @Override
-        public void onResponse(Previsione response) {
-
-            loadMeteogrammaData(response);
-            setTitleSlides();
-            setMeteogrammaViews();
-            setDayImageView();
-
-            setViewVisibility(tvTemperature1, imgTemperature1);
-            setViewVisibility(tvTemperature2, imgTemperature2);
-            setViewVisibility(tvRain, imgRain);
-            setViewVisibility(tvSnow, imgSnow);
-            setViewVisibility(tvWind, imgWind);
-            setViewVisibility(tvReliability);
-            setViewVisibility(tvDate);
-
-            if (appLanguage == Previsione.Language.IT) {
-                loadBollettinoData(response);
-                setBollettinoViews();
-            }
-        }
-
-        protected final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
-            @Override
-            public void apply(@NonNull View view, int index) {
-                view.setVisibility(View.GONE);
-            }
-        };
-
-        protected final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-            @Override
-            public void apply(@NonNull View view, int index) {
-                view.setVisibility(View.VISIBLE);
-            }
-        };
-
-        protected void setViewVisibility(TextView text, View image) {
-            String caption = (String) text.getText();
-            if (caption == null || caption.equals("")) {
-                ButterKnife.apply(image, GONE);
-                ButterKnife.apply(text, GONE);
-            } else {
-                ButterKnife.apply(image, VISIBLE);
-                ButterKnife.apply(text, VISIBLE);
-            }
-        }
-
-        protected void setViewVisibility(TextView text) {
-            String caption = (String) text.getText();
-            if (caption == null || caption.equals("")) {
-                ButterKnife.apply(text, GONE);
-            } else {
-                ButterKnife.apply(text, VISIBLE);
-            }
-        }
+    private void setTitleSlides() {
+        activityCallBack.setTitle(scadenzaDate, pageNumber);
     }
 
-    private class BollettinoResponseListener extends MeteogrammaResponseListener {
-
-        @Override
-        public void onResponse(Previsione response) {
-            loadBollettinoData(response);
-            setBollettinoViews();
+    private void downloadData() {
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
         }
-    }
 
-    private int getMeteogrammaIndex() {
-        if (pageNumber > 0 && pageNumber < pages) {
-            return pageNumber - 1;
-        } else {
-            return -1;
+        if (currentLocation.isDefined()) {
+            BulletinRequest meteogrammaRequest = new BulletinRequest(Previsione.getUrl(appLanguage),
+                    new MeteogrammaResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
+            volleyApp.addToRequestQueue(meteogrammaRequest);
+        }
+
+        if (appLanguage != Previsione.Language.IT) {
+            BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
+                    new BollettinoResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
+            volleyApp.addToRequestQueue(BollettinoRequest);
         }
     }
 
@@ -291,12 +201,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         Town town = currentLocation.getTown();
         int zoneIdx = town.getZone() - 1;
 
-        Meteogramma[] meteogrammi = null;
-        Meteogramma.Scadenza[] scadenze = null;
-
-        meteogrammi = response.getMeteogramma();
+        Meteogramma[] meteogrammi = response.getMeteogramma();
         Meteogramma meteogramma = meteogrammi[zoneIdx];
-        scadenze = meteogramma.getScadenza();
+        Meteogramma.Scadenza[] scadenze = meteogramma.getScadenza();
+        ;
 
         daySky = scadenze[meteogrammaIndex].getCielo();
         String[] temperatures = new String[4];
@@ -337,11 +245,8 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     private void loadBollettinoData(Previsione response) {
-        Bollettino bollettino = null;
-        Bollettino.Giorno[] giorni = null;
-
-        bollettino = response.getMeteoVeneto();
-        giorni = bollettino.getGiorni();
+        Bollettino bollettino = response.getMeteoVeneto();
+        Bollettino.Giorno[] giorni = bollettino.getGiorni();
 
         if (response.getLanguage() == Previsione.Language.IT) {
             int dayIdx = 0;
@@ -370,10 +275,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         }
     }
 
-    private void setTitleSlides() {
-        activityCallBack.setTitle(scadenzaDate, pageNumber);
-    }
-
     private void setDayImageView() {
         mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
             @Override
@@ -399,29 +300,134 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     private void setMeteogrammaViews() {
-        try {
-            tvDaySky.setText(daySky);
-            tvTemperature1.setText(temperature1);
-            tvTemperature2.setText(temperature2);
-            tvRain.setText(rain + " (" + probability + ")");
-            tvSnow.setText(snow);
-            tvWind.setText(wind);
-            if (reliability.length() > 0)
-                tvReliability.setText(AttendibilitaLabel + ": " + reliability);
-            else
-                tvReliability.setText(reliability);
-            tvDate.setText(AggiornatoLabel + ": " + date);
-        } catch (NullPointerException e) {
-            Timber.e(e.toString());
-        }
+        setViewText(tvDaySky, daySky);
+        setViewText(tvTemperature1, temperature1);
+        setViewText(tvTemperature2, temperature2);
+        if (probability.length() > 0)
+            setViewText(tvRain, rain + " (" + probability + ")");
+        else
+            setViewText(tvRain, rain + "");
+        setViewText(tvSnow, snow);
+        setViewText(tvWind, wind);
+        if (reliability.length() > 0)
+            setViewText(tvReliability, AttendibilitaLabel + ": " + reliability);
+        else
+            setViewText(tvReliability, "");
+        if (tvDate.length() > 0)
+            setViewText(tvDate, AggiornatoLabel + ": " + date);
+        else
+            setViewText(tvDate, "");
+
+        setViewVisibility(tvTemperature1, imgTemperature1);
+        setViewVisibility(tvTemperature2, imgTemperature2);
+        setViewVisibility(tvRain, imgRain);
+        setViewVisibility(tvSnow, imgSnow);
+        setViewVisibility(tvWind, imgWind);
+        setViewVisibility(tvReliability);
+        setViewVisibility(tvDate);
     }
 
     private void setBollettinoViews() {
-        if (description != null && description.length() > 0) {
-            tvDescription.setText(Html.fromHtml(description));
-            tvDescription.setMovementMethod(LinkMovementMethod.getInstance());
-            tvDescription.setLinksClickable(true);
-            tvDescription.setVisibility(View.VISIBLE);
+        setViewText(tvDescription, description);
+        tvDescription.setVisibility(View.VISIBLE);
+    }
+
+    private int getMeteogrammaIndex() {
+        if (pageNumber > 0 && pageNumber < pages) {
+            return pageNumber - 1;
+        } else {
+            return -1;
+        }
+    }
+
+    private void setViewText(TextView view, String text) {
+        if (text != null && text.length() > 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                view.setText(Html.fromHtml(text, FROM_HTML_MODE_LEGACY));
+            } else {
+                view.setText(Html.fromHtml(text));
+            }
+        } else {
+            view.setText("");
+        }
+    }
+
+    private void setViewVisibility(TextView view, View image) {
+        String caption = view.getText().toString();
+        if (caption == null || caption.equals("")) {
+            ButterKnife.apply(image, GONE);
+            ButterKnife.apply(view, GONE);
+        } else {
+            ButterKnife.apply(image, VISIBLE);
+            ButterKnife.apply(view, VISIBLE);
+        }
+    }
+
+    private void setViewVisibility(TextView view) {
+        String caption = view.getText().toString();
+        if (caption == null || caption.equals("")) {
+            ButterKnife.apply(view, GONE);
+        } else {
+            ButterKnife.apply(view, VISIBLE);
+        }
+    }
+
+    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.GONE);
+        }
+    };
+    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.VISIBLE);
+        }
+    };
+
+    private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
+
+        @Override
+        public void onResponse(Previsione response) {
+
+            loadMeteogrammaData(response);
+            setTitleSlides();
+            setMeteogrammaViews();
+            setDayImageView();
+
+//            setViewVisibility(tvTemperature1, imgTemperature1);
+//            setViewVisibility(tvTemperature2, imgTemperature2);
+//            setViewVisibility(tvRain, imgRain);
+//            setViewVisibility(tvSnow, imgSnow);
+//            setViewVisibility(tvWind, imgWind);
+//            setViewVisibility(tvReliability);
+//            setViewVisibility(tvDate);
+
+            if (appLanguage == Previsione.Language.IT) {
+                loadBollettinoData(response);
+                setBollettinoViews();
+            }
+        }
+
+    }
+
+    private class BollettinoResponseListener extends MeteogrammaResponseListener {
+
+        @Override
+        public void onResponse(Previsione response) {
+            loadBollettinoData(response);
+            setBollettinoViews();
+        }
+    }
+
+    private class ErrorResponseListener implements Response.ErrorListener {
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Timber.e(error);
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
         }
     }
 }

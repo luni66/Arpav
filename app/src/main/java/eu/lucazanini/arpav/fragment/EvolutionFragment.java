@@ -2,15 +2,14 @@ package eu.lucazanini.arpav.fragment;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.Html;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.activity.ActivityCallBack;
-import eu.lucazanini.arpav.activity.SearchableActivity;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.Bollettino;
@@ -42,7 +40,9 @@ import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
 
-public class PreviewFragment extends Fragment implements Observer {
+import static android.text.Html.FROM_HTML_MODE_LEGACY;
+
+public class EvolutionFragment extends Fragment implements Observer {
 
     public static final String PAGE_NUMBER = "page_number";
     public static final String PAGES = "pages";
@@ -89,7 +89,6 @@ public class PreviewFragment extends Fragment implements Observer {
         Bundle args = getArguments();
         pageNumber = args.getInt(PAGE_NUMBER);
         pages = args.getInt(PAGES);
-//        meteogrammaIndex = getMeteogrammaIndex();
 
         currentLocation = CurrentLocation.getInstance(context);
         currentLocation.addObserver(this);
@@ -106,14 +105,11 @@ public class PreviewFragment extends Fragment implements Observer {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-//        return super.onCreateView(inflater, container, savedInstanceState);
         super.onCreateView(inflater, container, savedInstanceState);
 
         View v = inflater.inflate(R.layout.fragment_preview, container, false);
 
         unbinder = ButterKnife.bind(this, v);
-
-//        currentLocation.addObserver(this);
 
         daySkyUrl = new String[imgDays.length];
         dates = new String[tvDates.length];
@@ -130,23 +126,21 @@ public class PreviewFragment extends Fragment implements Observer {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Timber.d("onRefresh called from SwipeRefreshLayout");
-                loadData();
+                downloadData();
                 activityCallBack.keepFragments(pageNumber);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
 
-        loadData();
+        downloadData();
 
         return v;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.menu_refresh) {
-            Timber.d("refresh in fragment");
-            loadData();
+        if (item.getItemId() == R.id.menu_refresh) {
+            downloadData();
             activityCallBack.keepFragments(pageNumber);
             return true;
         } else {
@@ -181,38 +175,23 @@ public class PreviewFragment extends Fragment implements Observer {
 
     @Override
     public void update(java.util.Observable o, Object arg) {
-        loadData();
+        downloadData();
     }
 
-    private void loadData() {
-
+    private void downloadData() {
         if (progressBar != null) {
             progressBar.setVisibility(View.VISIBLE);
         }
 
         if (currentLocation.isDefined()) {
-            BulletinRequest meteogrammaRequest = new BulletinRequest(Previsione.getUrl(appLanguage), new MeteogrammaResponseListener(), new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Timber.e(error);
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                }
-            }, Integer.toString(pageNumber));
+            BulletinRequest meteogrammaRequest = new BulletinRequest(Previsione.getUrl(appLanguage),
+                    new MeteogrammaResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
             volleyApp.addToRequestQueue(meteogrammaRequest);
         }
 
         if (appLanguage != Previsione.Language.IT) {
-            BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT), new BollettinoResponseListener(), new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Timber.e(error);
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                }
-            }, Integer.toString(pageNumber));
+            BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
+                    new BollettinoResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
             volleyApp.addToRequestQueue(BollettinoRequest);
         }
     }
@@ -221,25 +200,66 @@ public class PreviewFragment extends Fragment implements Observer {
         Town town = currentLocation.getTown();
         int zoneIdx = town.getZone() - 1;
 
-        Meteogramma[] meteogrammi = null;
-        Meteogramma.Scadenza[] scadenze = null;
-
-        meteogrammi = response.getMeteogramma();
+        Meteogramma[] meteogrammi = response.getMeteogramma();
         Meteogramma meteogramma = meteogrammi[zoneIdx];
-        scadenze = meteogramma.getScadenza();
+        Meteogramma.Scadenza[] scadenze = meteogramma.getScadenza();
 
         date = response.getData();
 
-//        try {
-            for (int i = 0; i < imgDays.length; i++) {
-                daySkyUrl[i] = scadenze[i].getSimbolo();
+        for (int i = 0; i < imgDays.length; i++) {
+            daySkyUrl[i] = scadenze[i].getSimbolo();
+        }
+        for (int i = 0; i < tvDates.length; i++) {
+            dates[i] = scadenze[toDateIndex(i)].getShortDate();
+        }
+    }
+
+    private void loadBollettinoData(Previsione response) {
+        Bollettino bollettino = response.getMeteoVeneto();
+
+        avviso = bollettino.getAvviso();
+        fenomeni = bollettino.getFenomeniParticolari();
+        evoluzione = bollettino.getEvoluzioneGenerale();
+    }
+
+    private void setDayImageView(String daySkyUrl, NetworkImageView imgDay) {
+        mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                imgDay.setImageUrl(daySkyUrl, mImageLoader);
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
             }
-            for (int i = 0; i < tvDates.length; i++) {
-                dates[i] = scadenze[toDateIndex(i)].getShortDate();
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Timber.e("Image Load Error: %s", error.getMessage());
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
             }
-//        } catch (NullPointerException e) {
-//            Timber.e(e.toString());
-//        }
+        });
+    }
+
+    private void setMeteogrammaViews() {
+        for (int i = 0; i < tvDates.length; i++) {
+            tvDates[i].setText(dates[i]);
+        }
+
+        for (int i = 0; i < imgDays.length; i++) {
+            setDayImageView(daySkyUrl[i], imgDays[i]);
+        }
+    }
+
+    private void setBollettinoViews() {
+        setViewText(tvAvviso, avviso);
+        setViewText(tvFenomeni, fenomeni);
+        setViewText(tvEvolution, evoluzione);
+
+        setViewVisibility(tvAvviso);
+        setViewVisibility(tvFenomeni);
+        setViewVisibility(tvEvolution);
     }
 
     private int toDateIndex(int meteogrammaIndex) {
@@ -259,67 +279,50 @@ public class PreviewFragment extends Fragment implements Observer {
         }
     }
 
-    private void loadBollettinoData(Previsione response) {
-        Bollettino bollettino = null;
-//        Bollettino.Giorno[] giorni = null;
-
-        bollettino = response.getMeteoVeneto();
-//        giorni = bollettino.getGiorni();
-
-        avviso = bollettino.getAvviso();
-        fenomeni = bollettino.getFenomeniParticolari();
-        evoluzione = bollettino.getEvoluzioneGenerale();
-    }
-
-    private void setMeteogrammaViews() {
-//        try {
-            for (int i = 0; i < tvDates.length; i++) {
-                tvDates[i].setText(dates[i]);
+    private void setViewText(TextView view, String text) {
+        if (text != null && text.length() > 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                view.setText(Html.fromHtml(text, FROM_HTML_MODE_LEGACY));
+            } else {
+                view.setText(Html.fromHtml(text));
             }
-
-//        } catch (NullPointerException e) {
-//            Timber.e(e.toString());
-//        }
+        } else {
+            view.setText("");
+        }
     }
 
-    private void setDayImageView(String daySkyUrl, NetworkImageView imgDay) {
-        mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-//                try {
-                    imgDay.setImageUrl(daySkyUrl, mImageLoader);
-//                } catch (NullPointerException e) {
-//                    Timber.e(e.toString());
-//                }
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Timber.e("Image Load Error: %s", error.getMessage());
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
-            }
-        });
+    private void setViewVisibility(TextView view, View image) {
+        String caption = view.getText().toString();
+        if (caption == null || caption.equals("")) {
+            ButterKnife.apply(image, GONE);
+            ButterKnife.apply(view, GONE);
+        } else {
+            ButterKnife.apply(image, VISIBLE);
+            ButterKnife.apply(view, VISIBLE);
+        }
     }
 
-    private void setBollettinoViews() {
-        tvAvviso.setText(avviso);
-        tvFenomeni.setText(fenomeni);
-        tvEvolution.setText(evoluzione);
+    private void setViewVisibility(TextView view) {
+        String caption = view.getText().toString();
+        if (caption == null || caption.equals("")) {
+            ButterKnife.apply(view, GONE);
+        } else {
+            ButterKnife.apply(view, VISIBLE);
+        }
     }
 
-//    private int getMeteogrammaIndex() {
-//        if (pageNumber > 0 && pageNumber < pages) {
-//            return pageNumber - 1;
-//        } else {
-//            return -1;
-//        }
-//    }
-
+    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.GONE);
+        }
+    };
+    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.VISIBLE);
+        }
+    };
 
     private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
 
@@ -327,59 +330,15 @@ public class PreviewFragment extends Fragment implements Observer {
         public void onResponse(Previsione response) {
 
             loadMeteogrammaData(response);
-//            setTitleSlides();
             setMeteogrammaViews();
-            try {
-                for (int i = 0; i < imgDays.length; i++) {
-                    setDayImageView(daySkyUrl[i], imgDays[i]);
-                }
-            } catch (NullPointerException e) {
-                Timber.e(e.toString());
-            }
 
             if (appLanguage == Previsione.Language.IT) {
                 loadBollettinoData(response);
-                setBollettinoViews();
-
-                setViewVisibility(tvAvviso);
-                setViewVisibility(tvFenomeni);
-                setViewVisibility(tvEvolution);
+                setBollettinoViews();;
             }
         }
 
-        protected final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
-            @Override
-            public void apply(@NonNull View view, int index) {
-                view.setVisibility(View.GONE);
-            }
-        };
 
-        protected final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-            @Override
-            public void apply(@NonNull View view, int index) {
-                view.setVisibility(View.VISIBLE);
-            }
-        };
-
-        protected void setViewVisibility(TextView text, View image) {
-            String caption = (String) text.getText();
-            if (caption == null || caption.equals("")) {
-                ButterKnife.apply(image, GONE);
-                ButterKnife.apply(text, GONE);
-            } else {
-                ButterKnife.apply(image, VISIBLE);
-                ButterKnife.apply(text, VISIBLE);
-            }
-        }
-
-        protected void setViewVisibility(TextView text) {
-            String caption = (String) text.getText();
-            if (caption == null || caption.equals("")) {
-                ButterKnife.apply(text, GONE);
-            } else {
-                ButterKnife.apply(text, VISIBLE);
-            }
-        }
     }
 
     private class BollettinoResponseListener extends MeteogrammaResponseListener {
@@ -392,6 +351,17 @@ public class PreviewFragment extends Fragment implements Observer {
             setViewVisibility(tvAvviso);
             setViewVisibility(tvFenomeni);
             setViewVisibility(tvEvolution);
+        }
+    }
+
+    private class ErrorResponseListener implements Response.ErrorListener {
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Timber.e(error);
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
         }
     }
 

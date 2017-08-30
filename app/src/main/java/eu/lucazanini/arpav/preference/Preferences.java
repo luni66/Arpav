@@ -9,11 +9,13 @@ public interface Preferences {
 
     Previsione.Language getLanguage();
 
+    String getLanguageCode();
+
+    boolean isDefaultLanguage();
+
     Town getLocation();
 
     void saveLocation(Town town);
-
-    boolean isDefaultLanguageSelected();
 
     boolean isAlertActivated();
 
