@@ -80,6 +80,7 @@
     <string name="report_file">report_file.json</string>
     <string name="report_date">date</string>
     <string name="report_alert">alert</string>
+    <string name="report_phenomena">alert</string>
 
     <string name="alert_title">Weather warning</string>
 

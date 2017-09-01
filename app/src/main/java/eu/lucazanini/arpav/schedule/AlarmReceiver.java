@@ -8,6 +8,7 @@ import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
 import eu.lucazanini.arpav.service.NotificationService;
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 
 public class AlarmReceiver extends BroadcastReceiver {
@@ -23,6 +24,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             AlarmHandler alarmHandler = new AlarmHandler(context);
             alarmHandler.setNextAlarm();
         } else if (action.startsWith(AlarmHandler.RECEIVER_ACTION)) {
+            Timber.d("STARTING NOTFICATION SERVICE");
             context.startService(NotificationService.getIntent(context));
         }
     }

@@ -31,7 +31,7 @@ public class AlarmHandler {
     public void setNextAlarm() {
         Calendar alarmTime = getNextAlarmTime();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmIntent);
+            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, alarmIntent);
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), alarmIntent);
         }
@@ -74,6 +74,7 @@ public class AlarmHandler {
                     nextTime.set(Calendar.MINUTE, getFrac(updateHour[i]));
                     nextTime.set(Calendar.SECOND, 0);
                     nextTime.set(Calendar.MILLISECOND, 0);
+                    break;
                 }
             }
         }

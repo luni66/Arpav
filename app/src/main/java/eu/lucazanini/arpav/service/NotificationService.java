@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ import timber.log.Timber;
 public class NotificationService extends IntentService {
 
     private final static String TAG = "Notification Service";
-    private String reportFile, reportDate, reportAlert, alertTitle;
+    private String reportFile, reportDate, reportAlert, reportPhenomena, alertTitle;
 
     public NotificationService() {
         super(TAG);
@@ -56,6 +57,7 @@ public class NotificationService extends IntentService {
         reportFile = resources.getString(R.string.report_file);
         reportDate = resources.getString(R.string.report_date);
         reportAlert = resources.getString(R.string.report_alert);
+        reportPhenomena = resources.getString(R.string.report_phenomena);
         alertTitle = resources.getString(R.string.alert_title);
 
         VolleySingleton volleyApp = VolleySingleton.getInstance(this);
@@ -75,58 +77,93 @@ public class NotificationService extends IntentService {
     }
 
     private boolean isNewNotification(Map<String, String> currentData, Map<String, String> lastData) {
-        String currentAlert, lastAlert;
+        String currentAlert, lastAlert, currentPhenomena, lastPhenomena;
         if (lastData == null) {
+            Timber.d("LAST DATA IS NULL");
             return true;
         }
-        if (currentData.get(reportAlert) != null) {
-            currentAlert = currentData.get(reportAlert);
-        } else {
-            currentAlert = "";
+
+        if (currentData == null || !currentData.containsKey(reportAlert) || !currentData.containsKey(reportAlert)) {
+            Timber.d("CURRENT DATA NOT CORRECT");
+            return false;
         }
+
         if (lastData.get(reportAlert) != null) {
             lastAlert = lastData.get(reportAlert);
         } else {
             lastAlert = "";
         }
-
-        if (currentAlert.equals("")) {
-            return false;
+        if (lastData.get(reportPhenomena) != null) {
+            lastPhenomena = lastData.get(reportPhenomena);
         } else {
-            if (currentAlert.equals(lastAlert)) {
-                return false;
-            } else {
-                return true;
-            }
+            lastPhenomena = "";
         }
+
+        if (currentData.get(reportAlert) != null) {
+            currentAlert = currentData.get(reportAlert);
+        } else {
+            currentAlert = "";
+        }
+        if (currentData.get(reportPhenomena) != null) {
+            currentPhenomena = currentData.get(reportPhenomena);
+        } else {
+            currentPhenomena = "";
+        }
+
+        if (!currentAlert.equals("") && !currentAlert.equals(lastAlert)) {
+            return true;
+        }
+        if (!currentPhenomena.equals("") && !currentPhenomena.equals(lastPhenomena)) {
+            return true;
+        }
+
+        return false;
     }
 
     private Map<String, String> getLast() {
         Map<String, String> lastData = new HashMap<>();
+        boolean found = false;
         try {
-            InputStream in = openFileInput(reportFile);
-            JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-            reader.beginArray();
-            reader.beginObject();
-            while (reader.hasNext()) {
-                String name = reader.nextName();
-                String value = reader.nextString();
-                lastData.put(name, value);
+            String[] files = fileList();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].equals(reportFile)) {
+                    found = true;
+                    break;
+                }
             }
-            reader.endObject();
-            reader.endArray();
+            if (found) {
+                Timber.d("FOUND FILE");
+                InputStream in = openFileInput(reportFile);
+                JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
+                reader.beginArray();
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    String name = reader.nextName();
+                    Timber.d("NAME %s", name);
+                    String value = reader.nextString();
+                    Timber.d("VALUE %s", value);
+                    if (name != null && value != null) {
+                        lastData.put(name, value);
+                    }
+                }
+                reader.endObject();
+                reader.endArray();
+                reader.close();
+            } else {
+                return null;
+            }
         } catch (FileNotFoundException e) {
             Timber.e(e.toString());
         } catch (UnsupportedEncodingException e) {
             Timber.e(e.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            Timber.e(e.toString());
         }
 
         return lastData;
     }
 
-    private void setLast(Map<String, String> lastData) {
+    private synchronized void setLast(Map<String, String> lastData) {
         try {
             OutputStream out = openFileOutput(reportFile, Context.MODE_PRIVATE);
             JsonWriter writer = new JsonWriter(new OutputStreamWriter(out, "UTF-8"));
@@ -135,6 +172,7 @@ public class NotificationService extends IntentService {
             writer.beginObject();
             for (String name : lastData.keySet()) {
                 String value = lastData.get(name);
+                Timber.d("NAME %s VALUE %s", name, value);
                 writer.name(name).value(value);
             }
             writer.endObject();
@@ -143,7 +181,7 @@ public class NotificationService extends IntentService {
         } catch (FileNotFoundException e) {
             Timber.e(e.toString());
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Timber.e(e.toString());
         } catch (IOException e) {
             Timber.e(e.toString());
         }
@@ -209,25 +247,47 @@ public class NotificationService extends IntentService {
     private class ServiceResponseListener implements Response.Listener<Previsione> {
         @Override
         public void onResponse(Previsione response) {
-            // read the file containg tha last alert
-            Map<String, String> lastData = getLast();
-
-            // download the current alert
-            Map<String, String> currentData = new HashMap<>();
-            currentData.put(reportDate, response.getUpdateDate().toString());
-            currentData.put(reportAlert, response.getMeteoVeneto().getAvviso());
-
-            if (isNewNotification(currentData, lastData)) {
-                createNotification(currentData);
-            } else {
-                createTestNotification("Test notification " + response.getUpdateDate().getTime());
-            }
-
-            // save the current alert in the file
-            setLast(currentData);
-
+            Timber.d("DATA DOWNLOADED");
             AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
             alarmHandler.setNextAlarm();
+
+            try {
+                // read the file containg tha last alert
+                Timber.d("GETTING LAST DATA");
+                Map<String, String> lastData = getLast();
+
+                // download the current alert
+                Map<String, String> currentData = new HashMap<>();
+                SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+                String date = df.format(response.getUpdateDate().getTime());
+                Timber.d("GETTING REPORTDATE %s", date);
+                currentData.put(reportDate, date);
+                Timber.d("GETTING REPORTALERT");
+                String reportAlertValue = response.getMeteoVeneto().getAvviso();
+                if (!reportAlertValue.equals("")) {
+                    currentData.put(reportAlert, response.getMeteoVeneto().getAvviso());
+                }
+                Timber.d("GETTING REPORTPHENOMENA");
+                String reportPhenomenaValue = response.getMeteoVeneto().getFenomeniParticolari();
+                if (!reportPhenomenaValue.equals("")) {
+                    currentData.put(reportPhenomena, response.getMeteoVeneto().getFenomeniParticolari());
+                }
+
+                Timber.d("STARTING NOTIFICATION");
+                if (isNewNotification(currentData, lastData)) {
+                    Timber.d("CREATING NOTIFICATION");
+                    createNotification(currentData);
+                } else {
+                    Timber.d("TEST NOTIFICATION");
+                    createTestNotification("Test notification " + date);
+                }
+
+                // save the current alert in the file
+                setLast(currentData);
+            } catch (Throwable t) {
+                Timber.d("SOMETHING IS WRONG");
+                deleteFile(reportFile);
+            }
         }
     }
 }

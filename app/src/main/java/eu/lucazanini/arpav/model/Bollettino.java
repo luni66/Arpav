@@ -107,7 +107,7 @@ public class Bollettino implements Parcelable {
 
     public String getFenomeniParticolari() {
         if (fenomeniParticolari == null) {
-            return null;
+            return "";
         } else {
             return fenomeniParticolari;
         }
