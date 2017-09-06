@@ -405,6 +405,15 @@ public class Previsione implements Parcelable {
         }
     }
 
+    public boolean isCoherent(){
+//        return false;
+        if(dataEmissione!=null && !dataEmissione.equals("")){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     /**
      * Checks if the bulletin is update
      *

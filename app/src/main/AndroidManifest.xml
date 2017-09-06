@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <!-- <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <!-- per cache di volley ??? -->
@@ -12,8 +11,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
-    <!-- android:theme="@style/AppTheme" -->
-    <!-- android:theme="@style/Theme.AppCompat.Light.NoActionBar" -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application
         android:name=".ArpavApplication"
         android:allowBackup="true"
@@ -21,25 +20,21 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".SearchableActivity"/>
-
-            <!--
-                <meta-data android:name="android.app.searchable"
-                       android:resource="@xml/searchable" />
-            -->
         </activity>
+
         <activity
             android:name=".activity.SearchableActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:parentActivityName=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
@@ -52,11 +47,24 @@
                 android:resource="@xml/searchable"/>
         </activity>
 
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:parentActivityName=".activity.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.MainActivity"/>
+        </activity>
+
+        <activity
+            android:name=".activity.CreditsActivity"
+            android:parentActivityName=".activity.MainActivity">
+        </activity>
+
         <receiver
             android:name=".schedule.AlarmReceiver"
             android:enabled="true"
             android:exported="true">
-
             <!--
                 //TODO remove comment below and see
             https://developer.android.com/training/scheduling/alarms.html#boot
@@ -64,7 +72,7 @@
             <!-- android:enabled="false"> -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
                 <action android:name="eu.lucazanini.arpav.UPDATE_TIME"/>
             </intent-filter>
         </receiver>
@@ -72,16 +80,6 @@
         <service
             android:name=".service.NotificationService"
             android:exported="false"/>
-
-        <activity android:name=".activity.SettingsActivity"
-                  android:parentActivityName=".activity.MainActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.MainActivity" />
-        </activity>
-        <activity android:name=".activity.CreditsActivity">
-        </activity>
     </application>
 
 </manifest>

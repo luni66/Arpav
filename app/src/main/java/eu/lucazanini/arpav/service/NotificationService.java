@@ -6,10 +6,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.text.Html;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -31,12 +34,16 @@ import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.schedule.AlarmHandler;
+import eu.lucazanini.arpav.schedule.AlarmReceiver;
 import timber.log.Timber;
+
+import static android.text.Html.FROM_HTML_MODE_LEGACY;
 
 public class NotificationService extends IntentService {
 
     private final static String TAG = "Notification Service";
     private String reportFile, reportDate, reportAlert, reportPhenomena, alertTitle;
+    private Intent alarmIntent;
 
     public NotificationService() {
         super(TAG);
@@ -53,6 +60,7 @@ public class NotificationService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        alarmIntent = intent;
         Resources resources = getResources();
         reportFile = resources.getString(R.string.report_file);
         reportDate = resources.getString(R.string.report_date);
@@ -60,31 +68,26 @@ public class NotificationService extends IntentService {
         reportPhenomena = resources.getString(R.string.report_phenomena);
         alertTitle = resources.getString(R.string.alert_title);
 
+        setAlarm();
+
         VolleySingleton volleyApp = VolleySingleton.getInstance(this);
 
-        BulletinRequest serviceRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT), new ServiceResponseListener(), new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Timber.e(error);
-
-                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-                alarmHandler.setNextAlarm();
-
-                createTestNotification("error notification");
-            }
-        }, TAG);
+        BulletinRequest serviceRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
+                new ServiceResponseListener(), new ErrorListener(), TAG);
         volleyApp.addToRequestQueue(serviceRequest);
+    }
+
+    private void releaseWakeLock() {
+        AlarmReceiver.completeWakefulIntent(alarmIntent);
     }
 
     private boolean isNewNotification(Map<String, String> currentData, Map<String, String> lastData) {
         String currentAlert, lastAlert, currentPhenomena, lastPhenomena;
         if (lastData == null) {
-            Timber.d("LAST DATA IS NULL");
             return true;
         }
 
         if (currentData == null || !currentData.containsKey(reportAlert) || !currentData.containsKey(reportAlert)) {
-            Timber.d("CURRENT DATA NOT CORRECT");
             return false;
         }
 
@@ -132,16 +135,13 @@ public class NotificationService extends IntentService {
                 }
             }
             if (found) {
-                Timber.d("FOUND FILE");
                 InputStream in = openFileInput(reportFile);
                 JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
                 reader.beginArray();
                 reader.beginObject();
                 while (reader.hasNext()) {
                     String name = reader.nextName();
-                    Timber.d("NAME %s", name);
                     String value = reader.nextString();
-                    Timber.d("VALUE %s", value);
                     if (name != null && value != null) {
                         lastData.put(name, value);
                     }
@@ -172,7 +172,6 @@ public class NotificationService extends IntentService {
             writer.beginObject();
             for (String name : lastData.keySet()) {
                 String value = lastData.get(name);
-                Timber.d("NAME %s VALUE %s", name, value);
                 writer.name(name).value(value);
             }
             writer.endObject();
@@ -188,10 +187,13 @@ public class NotificationService extends IntentService {
     }
 
     private void createNotification(Map<String, String> data) {
+        String message = decodeHtml(data.get(reportAlert));
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(alertTitle)
-                .setContentText(data.get(reportAlert));
+                .setContentText(message)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(message));
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
@@ -199,6 +201,7 @@ public class NotificationService extends IntentService {
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);
+        mBuilder.setAutoCancel(true);
 
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -206,11 +209,28 @@ public class NotificationService extends IntentService {
         mNotificationManager.notify(mNotificationId, mBuilder.build());
     }
 
+    private String decodeHtml(String text) {
+        if (text != null && text.length() > 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+               return Html.fromHtml(text, FROM_HTML_MODE_LEGACY).toString();
+            } else {
+                return Html.fromHtml(text).toString();
+            }
+        } else {
+            return "";
+        }
+    }
+
     private void createTestNotification(String message) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(alertTitle)
-                .setContentText(message);
+                .setTicker("TEST")
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(decodeHtml(message)))
+                .setContentText(decodeHtml(message));
+
+//                .setContentText(decodeHtml(message));
 
         Intent resultIntent = new Intent(this, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
@@ -218,6 +238,7 @@ public class NotificationService extends IntentService {
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);
+        mBuilder.setAutoCancel(true);
 
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -237,6 +258,7 @@ public class NotificationService extends IntentService {
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);
+        mBuilder.setAutoCancel(true);
 
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -244,49 +266,60 @@ public class NotificationService extends IntentService {
         mNotificationManager.notify(mNotificationId, mBuilder.build());
     }
 
+    private void setAlarm(){
+        AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
+        alarmHandler.setNextAlarm();
+    }
+
     private class ServiceResponseListener implements Response.Listener<Previsione> {
         @Override
         public void onResponse(Previsione response) {
-            Timber.d("DATA DOWNLOADED");
-            AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-            alarmHandler.setNextAlarm();
-
             try {
+//                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
+//                alarmHandler.setNextAlarm();
+
                 // read the file containg tha last alert
-                Timber.d("GETTING LAST DATA");
                 Map<String, String> lastData = getLast();
 
                 // download the current alert
                 Map<String, String> currentData = new HashMap<>();
                 SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm");
                 String date = df.format(response.getUpdateDate().getTime());
-                Timber.d("GETTING REPORTDATE %s", date);
                 currentData.put(reportDate, date);
-                Timber.d("GETTING REPORTALERT");
                 String reportAlertValue = response.getMeteoVeneto().getAvviso();
                 if (!reportAlertValue.equals("")) {
                     currentData.put(reportAlert, response.getMeteoVeneto().getAvviso());
                 }
-                Timber.d("GETTING REPORTPHENOMENA");
                 String reportPhenomenaValue = response.getMeteoVeneto().getFenomeniParticolari();
                 if (!reportPhenomenaValue.equals("")) {
                     currentData.put(reportPhenomena, response.getMeteoVeneto().getFenomeniParticolari());
                 }
 
-                Timber.d("STARTING NOTIFICATION");
                 if (isNewNotification(currentData, lastData)) {
-                    Timber.d("CREATING NOTIFICATION");
                     createNotification(currentData);
                 } else {
-                    Timber.d("TEST NOTIFICATION");
-                    createTestNotification("Test notification " + date);
+                    createTestNotification("test notificaton");
                 }
 
                 // save the current alert in the file
                 setLast(currentData);
             } catch (Throwable t) {
-                Timber.d("SOMETHING IS WRONG");
                 deleteFile(reportFile);
+            } finally {
+                releaseWakeLock();
+            }
+        }
+    }
+
+    private class ErrorListener implements Response.ErrorListener {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Timber.e(error);
+            try {
+//                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
+//                alarmHandler.setNextAlarm();
+            } finally {
+                createTestNotification("error notification");
             }
         }
     }

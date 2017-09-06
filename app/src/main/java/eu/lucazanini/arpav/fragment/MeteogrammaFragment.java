@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -61,7 +62,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     protected @BindView(R.id.image_rain) ImageView imgRain;
     protected @BindView(R.id.image_snow) ImageView imgSnow;
     protected @BindView(R.id.image_wind) ImageView imgWind;
-    protected @BindView(R.id.downloadProgressBar) ProgressBar progressBar;
+//    protected @BindView(R.id.downloadProgressBar) ProgressBar progressBar;
     protected @BindView(R.id.text_date) TextView tvDate;
     protected @BindString(R.string.attendibilita) String AttendibilitaLabel;
     protected @BindString(R.string.aggiornato) String AggiornatoLabel;
@@ -137,8 +138,14 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            downloadData();
-            activityCallBack.keepFragments(pageNumber);
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    downloadData();
+                    activityCallBack.keepFragments(pageNumber);
+                }
+            });
             return true;
         } else {
             return false;
@@ -180,9 +187,9 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     private void downloadData() {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
+//        if (progressBar != null) {
+//            progressBar.setVisibility(View.VISIBLE);
+//        }
 
         if (currentLocation.isDefined()) {
             BulletinRequest meteogrammaRequest = new BulletinRequest(Previsione.getUrl(appLanguage),
@@ -190,11 +197,22 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             volleyApp.addToRequestQueue(meteogrammaRequest);
         }
 
-        if (appLanguage != Previsione.Language.IT) {
+        Preferences preferences = new UserPreferences(context);
+        if (appLanguage != Previsione.Language.IT && preferences.isBulletinDisplayed()) {
             BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
                     new BollettinoResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
             volleyApp.addToRequestQueue(BollettinoRequest);
         }
+    }
+
+    private void hideRefreshWidget() {
+        if (mSwipeRefreshLayout.isRefreshing())
+            mSwipeRefreshLayout.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+            }, 1000);
     }
 
     private void loadMeteogrammaData(Previsione response) {
@@ -284,17 +302,17 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                 } catch (NullPointerException e) {
                     Timber.e(e.toString());
                 }
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
+//                if (progressBar != null) {
+//                    progressBar.setVisibility(View.GONE);
+//                }
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
                 Timber.e("Image Load Error: %s", error.getMessage());
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
+//                if (progressBar != null) {
+//                    progressBar.setVisibility(View.GONE);
+//                }
             }
         });
     }
@@ -385,15 +403,15 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         }
     };
 
-    private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
+private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
 
-        @Override
-        public void onResponse(Previsione response) {
+    @Override
+    public void onResponse(Previsione response) {
 
-            loadMeteogrammaData(response);
-            setTitleSlides();
-            setMeteogrammaViews();
-            setDayImageView();
+        loadMeteogrammaData(response);
+        setTitleSlides();
+        setMeteogrammaViews();
+        setDayImageView();
 
 //            setViewVisibility(tvTemperature1, imgTemperature1);
 //            setViewVisibility(tvTemperature2, imgTemperature2);
@@ -403,31 +421,38 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 //            setViewVisibility(tvReliability);
 //            setViewVisibility(tvDate);
 
-            if (appLanguage == Previsione.Language.IT) {
-                loadBollettinoData(response);
-                setBollettinoViews();
-            }
-        }
-
-    }
-
-    private class BollettinoResponseListener extends MeteogrammaResponseListener {
-
-        @Override
-        public void onResponse(Previsione response) {
+        Preferences preferences = new UserPreferences(context);
+        if (appLanguage == Previsione.Language.IT && preferences.isBulletinDisplayed()) {
             loadBollettinoData(response);
             setBollettinoViews();
         }
-    }
 
-    private class ErrorResponseListener implements Response.ErrorListener {
-
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            Timber.e(error);
-            if (progressBar != null) {
-                progressBar.setVisibility(View.GONE);
-            }
-        }
+        hideRefreshWidget();
     }
+}
+
+private class BollettinoResponseListener extends MeteogrammaResponseListener {
+
+    @Override
+    public void onResponse(Previsione response) {
+        loadBollettinoData(response);
+        setBollettinoViews();
+
+        hideRefreshWidget();
+    }
+}
+
+private class ErrorResponseListener implements Response.ErrorListener {
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        hideRefreshWidget();
+
+        Toast.makeText(getActivity(), error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+
+//        if (progressBar != null) {
+//            progressBar.setVisibility(View.GONE);
+//        }
+    }
+}
 }

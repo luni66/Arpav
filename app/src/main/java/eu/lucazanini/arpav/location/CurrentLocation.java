@@ -23,8 +23,6 @@ public class CurrentLocation extends Observable {
         Town town = preferences.getLocation();
         if (town != null) {
             this.town = town;
-        } else {
-            Timber.d("LOCATION CREATED BUT NOT DEFINED");
         }
     }
 

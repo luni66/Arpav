@@ -35,8 +35,13 @@ public class UserPreferences implements Preferences {
     }
 
     @Override
-    public boolean isAlertActivated() {
-        return sharedPreferences.getBoolean(resources.getString(R.string.pref_notifications_key), false);
+    public boolean isAlertActive() {
+        return sharedPreferences.getBoolean(resources.getString(R.string.pref_alert_key), false);
+    }
+
+    @Override
+    public boolean isBulletinDisplayed() {
+        return sharedPreferences.getBoolean(resources.getString(R.string.pref_bulletin_key), true);
     }
 
     @Override

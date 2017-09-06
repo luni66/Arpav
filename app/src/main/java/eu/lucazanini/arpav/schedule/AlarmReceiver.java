@@ -1,17 +1,17 @@
 package eu.lucazanini.arpav.schedule;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.WakefulBroadcastReceiver;
 
 import eu.lucazanini.arpav.preference.Preferences;
 import eu.lucazanini.arpav.preference.UserPreferences;
 import eu.lucazanini.arpav.service.NotificationService;
 import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 
-public class AlarmReceiver extends BroadcastReceiver {
+public class AlarmReceiver extends WakefulBroadcastReceiver {
+//public class AlarmReceiver extends BroadcastReceiver {
 
     @DebugLog
     @Override
@@ -20,12 +20,12 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         Preferences preferences = new UserPreferences(context);
 
-        if (preferences.isAlertActivated() && action.equals("android.intent.action.BOOT_COMPLETED")) {
+        if (preferences.isAlertActive() && action.equals("android.intent.action.BOOT_COMPLETED")) {
             AlarmHandler alarmHandler = new AlarmHandler(context);
             alarmHandler.setNextAlarm();
         } else if (action.startsWith(AlarmHandler.RECEIVER_ACTION)) {
-            Timber.d("STARTING NOTFICATION SERVICE");
-            context.startService(NotificationService.getIntent(context));
+//            context.startService(NotificationService.getIntent(context));
+            startWakefulService(context, NotificationService.getIntent(context));
         }
     }
 }

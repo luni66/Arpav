@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="search_hint">Inserisci il comune</string>
-    <string name="search_title">Inserisci il comune</string>
+    <string name="search_hint">Inserisci la località</string>
 
     <string name="cielo">Cielo</string>
     <string name="temperatura">Temperatura</string>
@@ -17,21 +16,27 @@
 
     <string name="evoluzione">Evoluzione generale</string>
 
-    <string name="save_location">Salva località</string>
-    <string name="find_location">Trova la località</string>
+    <string name="save_location">Salva la località</string>
+    <string name="search_location">Cerca</string>
+    <string name="gps">gps</string>
     <string name="home">Località preferita</string>
     <string name="settings">Preferenze</string>
     <string name="credits">Crediti</string>
     <string name="refresh">Aggiorna</string>
 
-    <string name="pref_town_title">Località preferita</string>
+    <string name="pref_display_title">Visualizzazione</string>
     <string name="pref_language_title">Lingua</string>
+    <string name="pref_bulletin_title">Bollettino</string>
+    <string name="pref_bulletin_on_summary">mostra il bollettino</string>
+    <string name="pref_bulletin_off_summary">nascondi il bollettino</string>
+    <string name="pref_location_title">Località</string>
+    <string name="pref_town_title">Località preferita</string>
+    <string name="pref_gps_title">Usa GPS se possibile</string>
     <string name="pref_notifications_title">Notifiche</string>
     <string name="pref_alert_title">Avviso</string>
 
     <string name="developer_title">Sviluppatore</string>
     <string name="developer_body">Meteo Veneto è sviluppata da Luca Zanini</string>
-    <!--<string name="developer_body">Meteo Veneto è sviluppata da <a href="http://www.lucazanini.eu">Luca Zanini</a></string>-->
 
     <string name="alert_title">Avviso meteo</string>
 

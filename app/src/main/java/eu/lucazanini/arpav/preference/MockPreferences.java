@@ -53,12 +53,17 @@ public class MockPreferences implements Preferences {
     }
 
     @Override
-    public boolean isAlertActivated() {
+    public boolean isAlertActive() {
         return false;
     }
 
     @Override
     public boolean useGps() {
+        return false;
+    }
+
+    @Override
+    public boolean isBulletinDisplayed() {
         return false;
     }
 }

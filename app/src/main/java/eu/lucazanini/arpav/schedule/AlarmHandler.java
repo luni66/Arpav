@@ -30,8 +30,10 @@ public class AlarmHandler {
 
     public void setNextAlarm() {
         Calendar alarmTime = getNextAlarmTime();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, alarmIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), alarmIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmIntent);
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), alarmIntent);
         }
@@ -43,8 +45,8 @@ public class AlarmHandler {
 
     @DebugLog
     private Calendar getNextAlarmTime() {
-        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
-        Calendar nextTime = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
+        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"), Locale.ITALY);
+        Calendar nextTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"), Locale.ITALY);
 
         double currentHour = currentTime.get(Calendar.HOUR_OF_DAY) + currentTime.get(Calendar.MINUTE) / 60D;
 

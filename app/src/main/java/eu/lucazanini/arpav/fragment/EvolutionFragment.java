@@ -13,8 +13,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -46,6 +46,18 @@ public class EvolutionFragment extends Fragment implements Observer {
 
     public static final String PAGE_NUMBER = "page_number";
     public static final String PAGES = "pages";
+    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.GONE);
+        }
+    };
+    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.VISIBLE);
+        }
+    };
     protected @BindView(R.id.text_avviso) TextView tvAvviso;
     protected @BindView(R.id.text_fenomeni) TextView tvFenomeni;
     /**
@@ -57,7 +69,8 @@ public class EvolutionFragment extends Fragment implements Observer {
      */
     protected @BindViews({R.id.text_date1, R.id.text_date2, R.id.text_date3, R.id.text_date4, R.id.text_date5}) TextView[] tvDates;
     protected @BindView((R.id.text_evolution)) TextView tvEvolution;
-    protected @BindView(R.id.evolutionProgressBar) ProgressBar progressBar;
+    protected @BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefreshLayout;
+    //    protected @BindView(R.id.evolutionProgressBar) ProgressBar progressBar;
     private Unbinder unbinder;
     private CurrentLocation currentLocation;
     private Context context;
@@ -76,8 +89,6 @@ public class EvolutionFragment extends Fragment implements Observer {
     private ImageLoader mImageLoader;
     private Previsione.Language appLanguage;
     private ActivityCallBack activityCallBack;
-
-    protected @BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,13 +112,12 @@ public class EvolutionFragment extends Fragment implements Observer {
         mImageLoader = volleyApp.getImageLoader();
     }
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        View v = inflater.inflate(R.layout.fragment_preview, container, false);
+        View v = inflater.inflate(R.layout.fragment_evolution, container, false);
 
         unbinder = ButterKnife.bind(this, v);
 
@@ -140,8 +150,14 @@ public class EvolutionFragment extends Fragment implements Observer {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            downloadData();
-            activityCallBack.keepFragments(pageNumber);
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    downloadData();
+                    activityCallBack.keepFragments(pageNumber);
+                }
+            });
             return true;
         } else {
             return false;
@@ -179,9 +195,9 @@ public class EvolutionFragment extends Fragment implements Observer {
     }
 
     private void downloadData() {
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
+//        if (progressBar != null) {
+//            progressBar.setVisibility(View.VISIBLE);
+//        }
 
         if (currentLocation.isDefined()) {
             BulletinRequest meteogrammaRequest = new BulletinRequest(Previsione.getUrl(appLanguage),
@@ -189,7 +205,8 @@ public class EvolutionFragment extends Fragment implements Observer {
             volleyApp.addToRequestQueue(meteogrammaRequest);
         }
 
-        if (appLanguage != Previsione.Language.IT) {
+        Preferences preferences = new UserPreferences(context);
+        if (appLanguage != Previsione.Language.IT && preferences.isBulletinDisplayed()) {
             BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
                     new BollettinoResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
             volleyApp.addToRequestQueue(BollettinoRequest);
@@ -227,17 +244,17 @@ public class EvolutionFragment extends Fragment implements Observer {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                 imgDay.setImageUrl(daySkyUrl, mImageLoader);
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
+//                if (progressBar != null) {
+//                    progressBar.setVisibility(View.GONE);
+//                }
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
                 Timber.e("Image Load Error: %s", error.getMessage());
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
+//                if (progressBar != null) {
+//                    progressBar.setVisibility(View.GONE);
+//                }
             }
         });
     }
@@ -311,33 +328,32 @@ public class EvolutionFragment extends Fragment implements Observer {
         }
     }
 
-    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
-        @Override
-        public void apply(@NonNull View view, int index) {
-            view.setVisibility(View.GONE);
-        }
-    };
-    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-        @Override
-        public void apply(@NonNull View view, int index) {
-            view.setVisibility(View.VISIBLE);
-        }
-    };
+    private void hideRefreshWidget() {
+        if (mSwipeRefreshLayout.isRefreshing())
+            mSwipeRefreshLayout.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+            }, 1000);
+    }
 
     private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
 
         @Override
         public void onResponse(Previsione response) {
-
             loadMeteogrammaData(response);
             setMeteogrammaViews();
 
-            if (appLanguage == Previsione.Language.IT) {
+            Preferences preferences = new UserPreferences(context);
+            if (appLanguage == Previsione.Language.IT && preferences.isBulletinDisplayed()) {
                 loadBollettinoData(response);
-                setBollettinoViews();;
+                setBollettinoViews();
             }
-        }
 
+            hideRefreshWidget();
+
+        }
 
     }
 
@@ -351,6 +367,8 @@ public class EvolutionFragment extends Fragment implements Observer {
             setViewVisibility(tvAvviso);
             setViewVisibility(tvFenomeni);
             setViewVisibility(tvEvolution);
+
+            hideRefreshWidget();
         }
     }
 
@@ -358,10 +376,13 @@ public class EvolutionFragment extends Fragment implements Observer {
 
         @Override
         public void onErrorResponse(VolleyError error) {
-            Timber.e(error);
-            if (progressBar != null) {
-                progressBar.setVisibility(View.GONE);
-            }
+            hideRefreshWidget();
+
+            Toast.makeText(getActivity(), error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+
+//            if (progressBar != null) {
+//                progressBar.setVisibility(View.GONE);
+//            }
         }
     }
 

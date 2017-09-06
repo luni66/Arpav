@@ -4,6 +4,7 @@ import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 
 import java.io.UnsupportedEncodingException;
@@ -18,12 +19,14 @@ import timber.log.Timber;
 public class BulletinRequest extends Request<Previsione> {
     private final Response.Listener<Previsione> mListener;
     private String url;
+    private final Response.ErrorListener mLErroristener;
 
     public BulletinRequest(int method, String url, Response.Listener<Previsione> listener,
                            Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         mListener = listener;
         this.url = url;
+        mLErroristener = errorListener;
     }
 
     public BulletinRequest(String url, Response.Listener<Previsione> listener, Response.ErrorListener errorListener) {
@@ -45,6 +48,10 @@ public class BulletinRequest extends Request<Previsione> {
         } catch (UnsupportedEncodingException e) {
             parsed = new String(response.data);
         }
+
+//        if(parsed==null || parsed.equals("")){
+//            return Response.error(null);
+//        }
 
         previsione = new Previsione(url, parsed);
 
@@ -77,11 +84,30 @@ public class BulletinRequest extends Request<Previsione> {
         entry.serverDate = serverDate;
         entry.responseHeaders = headers;
 
-        return Response.success(previsione, entry);
+        if(previsione.isCoherent()) {
+            return Response.success(previsione, entry);
+        } else {
+            return Response.error(new VolleyError("error downloading data from ARPAV site or data not correct"));
+        }
     }
 
     @Override
     protected void deliverResponse(Previsione response) {
         mListener.onResponse(response);
     }
+
+    @Override
+    public void deliverError(VolleyError error) {
+       mLErroristener.onErrorResponse(error);
+    }
+
+    // TODO https://stackoverflow.com/questions/21867929/android-how-handle-message-error-from-the-server-using-volley
+//    @Override
+//    protected VolleyError parseNetworkError(VolleyError volleyError){
+//        if(volleyError.networkResponse != null && volleyError.networkResponse.data != null){
+//            VolleyError error = new VolleyError(new String(volleyError.networkResponse.data));
+//            volleyError = error;
+//        }
+//        return volleyError;
+//    }
 }

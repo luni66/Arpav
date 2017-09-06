@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
                 Intent intent = SearchableActivity.getIntent(this);
                 startActivityForResult(intent, REQUEST_CODE);
                 return true;
-            case R.id.action_find_location:
+            case R.id.action_gps:
                 if (isGpsAvailable() && locationPermissionGranted) {
 //                    googleLocator.requestUpdates();
                     startLocationUpdates();

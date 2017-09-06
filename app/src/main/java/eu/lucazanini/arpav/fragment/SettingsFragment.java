@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.TwoStatePreference;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +30,7 @@ import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private String languageKey, alertKey, townKey;
+    private String languageKey, alertKey, townKey, bulletinKey;
     private String savedLocation;
     private String defaultLanguage;
     private SharedPreferences sharedPref;
@@ -54,6 +55,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         languageEntries = resources.getStringArray(R.array.pref_language_entries);
         languageValues = resources.getStringArray(R.array.pref_language_values);
         alertKey = resources.getString(R.string.pref_alert_key);
+        bulletinKey = resources.getString(R.string.pref_bulletin_key);
         reportFile = resources.getString(R.string.report_file);
         townKey = resources.getString(R.string.pref_town_key);
         savedLocation = resources.getString(R.string.current_location);
@@ -77,15 +79,29 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             Preference languagePref = findPreference(key);
             String languageValue = sharedPreferences.getString(key, defaultLanguage);
             languagePref.setSummary(getEntry(languageEntries, languageValues, languageValue));
+        } else if (key.equals(bulletinKey)) {
+            boolean isBulletinDisplayed = sharedPreferences.getBoolean(bulletinKey, false);
+
+            if(isBulletinDisplayed) {
+                Timber.d("BULLETIN ON");
+
+            }else{
+                Timber.d("BULLETIN OFF");
+                TwoStatePreference alert = (TwoStatePreference)findPreference(alertKey);
+                alert.setChecked(false);
+            }
+
         } else if (key.equals(alertKey)) {
-            boolean isAlertActivated = sharedPreferences.getBoolean(alertKey, false);
-            Timber.d("Alarm is %s", isAlertActivated);
+            boolean isAlertActive = sharedPreferences.getBoolean(alertKey, false);
+
             AlarmHandler alarmHandler = new AlarmHandler(getActivity().getApplicationContext());
-            if (isAlertActivated) {
+
+            if (isAlertActive) {
+                Timber.d("ALERT ON");
                 boolean success = getActivity().deleteFile(reportFile);
-                Timber.d("deletion file %s is %s", reportFile, success);
                 alarmHandler.setNextAlarm();
             } else {
+                Timber.d("ALERT OFF");
                 alarmHandler.removeAlarm();
             }
         }

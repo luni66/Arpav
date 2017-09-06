@@ -1,15 +1,8 @@
 <resources>
-    <string name="app_name">Arpav</string>
+    <string name="app_name">Meteo Veneto</string>
     <string name="action_title">Veneto</string>
-    <string name="connection_error">Unable to load content. Check your network connection.</string>
-    <string name="xml_error">Error parsing XML.</string>
-    <string name="release_time">13:00</string>
-    <string name="first_update_time">16:00</string>
-    <string name="second_update_time">09:00</string>
 
-    <string name="search_hint">Insert the town</string>
-    <string name="search_title">Insert the town</string>
-    <!--    <string name="clear_search">Cancella il comune</string>-->
+    <string name="search_hint">Insert the location</string>
 
     <string name="notFound">not found</string>
 
@@ -27,15 +20,25 @@
     <string name="evoluzione">General evolution</string>
 
     <string name="current_location">current_location</string>
+
     <string name="save_location">Save the location</string>
-    <string name="find_location">Find location</string>
+    <string name="search_location">Search</string>
+    <string name="gps">gps</string>
     <string name="home">Favorite location</string>
     <string name="settings">Preferences</string>
     <string name="credits">Credits</string>
     <string name="refresh">Refresh</string>
 
+    <string name="pref_display_key">display_key</string>
+    <string name="pref_display_title">Display</string>
+
     <string name="pref_language_key">language_key</string>
     <string name="pref_language_title">Language</string>
+
+    <string name="pref_bulletin_key">bulletin_key</string>
+    <string name="pref_bulletin_title">Bulletin</string>
+    <string name="pref_bulletin_on_summary">display the bulletin (only in italian)</string>
+    <string name="pref_bulletin_off_summary">hide the bulletin</string>
 
     <string name="pref_location_key">location_key</string>
     <string name="pref_location_title">Location</string>
@@ -83,13 +86,5 @@
     <string name="report_phenomena">alert</string>
 
     <string name="alert_title">Weather warning</string>
-
-    <!--<string name="developer_body">Meteo Veneto is developed by <a href="http://www.lucazanini.eu">Luca Zanini</a></string>-->
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <!--<string name="hello_blank_fragment">Hello blank fragment</string>-->
-
-
-    <!--<integer name="pages">6</integer>-->
 
 </resources>

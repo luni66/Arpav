@@ -17,8 +17,10 @@ public interface Preferences {
 
     void saveLocation(Town town);
 
-    boolean isAlertActivated();
+    boolean isAlertActive();
 
     boolean useGps();
+
+    boolean isBulletinDisplayed();
 
 }
