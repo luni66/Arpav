@@ -3,19 +3,10 @@ package eu.lucazanini.arpav.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import hugo.weaving.DebugLog;
 
 /**
  * Contains scadenza that it is the forecast for the 18 zones of Veneto
@@ -131,7 +122,6 @@ public class Meteogramma implements Parcelable {
         };
         private String data, simbolo, cielo, temperatura2000, temperatura3000, precipitazioni,
                 probabilitaPrecipitazione, quotaNeve, attendibilita;
-        ;
         private Map<String, String> properties = new HashMap<>();
 
         public Scadenza() {
@@ -194,14 +184,8 @@ public class Meteogramma implements Parcelable {
             }
         }*/
 
-        public String getShortDate() {
-            Pattern p = Pattern.compile("\\d+[ ]\\w+");
-            Matcher m = p.matcher(data);
-            if (m.find()) {
-                return m.group();
-            } else {
-                return data;
-            }
+        public void setData(String data) {
+            this.data = data;
         }
 
 /*        public String getLongDate() {
@@ -215,8 +199,14 @@ public class Meteogramma implements Parcelable {
             }
         }*/
 
-        public void setData(String data) {
-            this.data = data;
+        public String getShortDate() {
+            Pattern p = Pattern.compile("\\d+[ ]\\w+");
+            Matcher m = p.matcher(data);
+            if (m.find()) {
+                return m.group();
+            } else {
+                return data;
+            }
         }
 
         public String getSimbolo() {

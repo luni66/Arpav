@@ -13,7 +13,6 @@ import java.util.List;
 
 /**
  * List of all towns in Veneto
- *
  */
 public class TownList {
 
@@ -60,7 +59,7 @@ public class TownList {
 
         String[] paths = new String[]{"belluno.json", "padova.json", "rovigo.json", "treviso.json", "venezia.json", "verona.json", "vicenza.json"};
 
-        String json = null;
+        String json;
         try {
 
             for (String path : paths

@@ -75,6 +75,24 @@
 
     <string name="pref_language_default">default</string>
 
+    <string name="data_title">Forecast</string>
+    <string name="data_body">The forecasts are kindly provided by ARPAV with license CC BY 3.0</string>
+    <string name="arpav_name">ARPAV</string>
+    <string name="arpav_site">http://www.arpa.veneto.it</string>
+    <string name="arpav_license_name">CC BY 3.0</string>
+    <string name="arpav_license_site">https://creativecommons.org/licenses/by/3.0/deed.en</string>
+
+    <string name="icons_title">Icons</string>
+    <string name="icons_body">This app uses icons of Nick Roach distribuited with license GPL and of emilie.rollandin with license CC0 1.0 Universal (CC0 1.0)</string>
+    <string name="nick_name">Nick Roach</string>
+    <string name="nick_site">https://www.iconfinder.com/icons/1054936/cloud_cloudy_sun_weather_icon#size=128</string>
+    <string name="nick_license_name">GPL</string>
+    <string name="nick_license_site">http://www.gnu.org/copyleft/gpl.html</string>
+    <string name="emilie_name">emilie.rollandin</string>
+    <string name="emilie_site">https://openclipart.org/user-cliparts/emilie.rollandin</string>
+    <string name="emilie_license_name">CC0 1.0 Universal (CC0 1.0)</string>
+    <string name="emilie_license_site">https://creativecommons.org/publicdomain/zero/1.0/</string>
+
     <string name="developer_title">Developer</string>
     <string name="developer_body">Meteo Veneto is developed by Luca Zanini</string>
     <string name="developer_name">Luca Zanini</string>

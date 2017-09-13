@@ -23,7 +23,7 @@ import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.adapter.TownAdapter;
 import eu.lucazanini.arpav.database.TownDataSource;
-import eu.lucazanini.arpav.preference.LocaleHelper;
+import eu.lucazanini.arpav.helper.LocaleHelper;
 
 /**
  * It shows the list of towns in Veneto
@@ -37,8 +37,8 @@ public class SearchableActivity extends AppCompatActivity {
     private TownAdapter townAdapter;
 
     public static Intent getIntent(Context context) {
-        Intent intent = new Intent(context, SearchableActivity.class);
-        return intent;
+        return new Intent(context, SearchableActivity.class);
+//        return intent;
     }
 
     @Override

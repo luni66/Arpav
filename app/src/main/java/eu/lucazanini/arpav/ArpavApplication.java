@@ -3,7 +3,7 @@ package eu.lucazanini.arpav;
 import android.app.Application;
 import android.content.Context;
 
-import eu.lucazanini.arpav.preference.LocaleHelper;
+import eu.lucazanini.arpav.helper.LocaleHelper;
 import timber.log.Timber;
 
 public class ArpavApplication extends Application {

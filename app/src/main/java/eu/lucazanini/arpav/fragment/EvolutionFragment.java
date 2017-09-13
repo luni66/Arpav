@@ -29,6 +29,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.activity.ActivityCallBack;
+import eu.lucazanini.arpav.helper.PreferenceHelper;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.Bollettino;
@@ -36,11 +37,7 @@ import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import eu.lucazanini.arpav.preference.Preferences;
-import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
-
-import static android.text.Html.FROM_HTML_MODE_LEGACY;
 
 public class EvolutionFragment extends Fragment implements Observer {
 
@@ -82,9 +79,9 @@ public class EvolutionFragment extends Fragment implements Observer {
      * The five dates
      */
     private String[] dates;
-    private String avviso, fenomeni, date, evoluzione;
-    private int pageNumber, pages;
-    private Preferences preferences;
+    private String avviso, fenomeni, evoluzione; // date
+    private int pageNumber; // pages
+    private PreferenceHelper preferences;
     private VolleySingleton volleyApp;
     private ImageLoader mImageLoader;
     private Previsione.Language appLanguage;
@@ -99,12 +96,12 @@ public class EvolutionFragment extends Fragment implements Observer {
 
         Bundle args = getArguments();
         pageNumber = args.getInt(PAGE_NUMBER);
-        pages = args.getInt(PAGES);
+//        pages = args.getInt(PAGES);
 
         currentLocation = CurrentLocation.getInstance(context);
         currentLocation.addObserver(this);
 
-        preferences = new UserPreferences(context);
+        preferences = new PreferenceHelper(context);
 
         appLanguage = preferences.getLanguage();
 
@@ -205,7 +202,7 @@ public class EvolutionFragment extends Fragment implements Observer {
             volleyApp.addToRequestQueue(meteogrammaRequest);
         }
 
-        Preferences preferences = new UserPreferences(context);
+        PreferenceHelper preferences = new PreferenceHelper(context);
         if (appLanguage != Previsione.Language.IT && preferences.isBulletinDisplayed()) {
             BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
                     new BollettinoResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
@@ -221,7 +218,7 @@ public class EvolutionFragment extends Fragment implements Observer {
         Meteogramma meteogramma = meteogrammi[zoneIdx];
         Meteogramma.Scadenza[] scadenze = meteogramma.getScadenza();
 
-        date = response.getData();
+//        date = response.getData();
 
         for (int i = 0; i < imgDays.length; i++) {
             daySkyUrl[i] = scadenze[i].getSimbolo();
@@ -251,7 +248,7 @@ public class EvolutionFragment extends Fragment implements Observer {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Timber.e("Image Load Error: %s", error.getMessage());
+                Timber.e(error.getMessage());
 //                if (progressBar != null) {
 //                    progressBar.setVisibility(View.GONE);
 //                }
@@ -299,7 +296,7 @@ public class EvolutionFragment extends Fragment implements Observer {
     private void setViewText(TextView view, String text) {
         if (text != null && text.length() > 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                view.setText(Html.fromHtml(text, FROM_HTML_MODE_LEGACY));
+                view.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
             } else {
                 view.setText(Html.fromHtml(text));
             }
@@ -310,7 +307,7 @@ public class EvolutionFragment extends Fragment implements Observer {
 
     private void setViewVisibility(TextView view, View image) {
         String caption = view.getText().toString();
-        if (caption == null || caption.equals("")) {
+        if (caption.equals("")) {
             ButterKnife.apply(image, GONE);
             ButterKnife.apply(view, GONE);
         } else {
@@ -321,7 +318,7 @@ public class EvolutionFragment extends Fragment implements Observer {
 
     private void setViewVisibility(TextView view) {
         String caption = view.getText().toString();
-        if (caption == null || caption.equals("")) {
+        if (caption.equals("")) {
             ButterKnife.apply(view, GONE);
         } else {
             ButterKnife.apply(view, VISIBLE);
@@ -345,7 +342,7 @@ public class EvolutionFragment extends Fragment implements Observer {
             loadMeteogrammaData(response);
             setMeteogrammaViews();
 
-            Preferences preferences = new UserPreferences(context);
+            PreferenceHelper preferences = new PreferenceHelper(context);
             if (appLanguage == Previsione.Language.IT && preferences.isBulletinDisplayed()) {
                 loadBollettinoData(response);
                 setBollettinoViews();
@@ -378,7 +375,13 @@ public class EvolutionFragment extends Fragment implements Observer {
         public void onErrorResponse(VolleyError error) {
             hideRefreshWidget();
 
-            Toast.makeText(getActivity(), error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            String defaultError = "Volley generic error";
+            String errorMessage = error.getLocalizedMessage();
+            if (errorMessage != null && !errorMessage.equals("")) {
+                Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getActivity(), defaultError, Toast.LENGTH_SHORT).show();
+            }
 
 //            if (progressBar != null) {
 //                progressBar.setVisibility(View.GONE);

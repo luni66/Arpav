@@ -1,16 +1,12 @@
-package eu.lucazanini.arpav.preference;
+package eu.lucazanini.arpav.helper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
-import android.preference.PreferenceManager;
 
 import java.util.Locale;
-
-import eu.lucazanini.arpav.model.Previsione;
 
 /**
  * This class is used to change your application locale and persist this change for the next time
@@ -24,10 +20,10 @@ public class LocaleHelper {
 //    private static final String SELECTED_LANGUAGE = "Locale.Helper.Selected.Language";
 
     public static Context onAttach(Context context) {
-        Preferences preferences = new UserPreferences(context);
-        if(preferences.isDefaultLanguage()) {
+        PreferenceHelper preferences = new PreferenceHelper(context);
+        if (preferences.isDefaultLanguage()) {
             return context;
-        }else {
+        } else {
             return setLocale(context, preferences.getLanguageCode());
         }
     }
@@ -61,8 +57,8 @@ public class LocaleHelper {
 //    private static String getPersistedData(Context context, String defaultLanguage) {
 //        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 //        return preferences.getString(SELECTED_LANGUAGE, defaultLanguage);
-        Preferences preferences = new UserPreferences(context);
-        return  preferences.getLanguageCode();
+        PreferenceHelper preferences = new PreferenceHelper(context);
+        return preferences.getLanguageCode();
     }
 
 //    private static void persist(Context context, String language) {

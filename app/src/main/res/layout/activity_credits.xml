@@ -5,6 +5,8 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+    <!--android:background="?attr/colorPrimary"-->
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -14,25 +16,11 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-    <LinearLayout
+
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_below="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
-
-        <TextView
-            android:id="@+id/developerTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/developerBody"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-    </LinearLayout>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

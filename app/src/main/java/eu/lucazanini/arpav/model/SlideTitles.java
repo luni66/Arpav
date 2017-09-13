@@ -20,7 +20,7 @@ public class SlideTitles extends Observable {
         titles = new String[pages];
 
         Resources resources = context.getResources();
-        titles[0]= resources.getString(R.string.evoluzione);
+        titles[0] = resources.getString(R.string.evoluzione);
 
         for (int i = 1; i < pages; i++) {
             titles[i] = Integer.toString(i);
@@ -60,7 +60,7 @@ public class SlideTitles extends Observable {
 
     public void setSlideTitle(String title, int index) {
         if (index > -1 && index < pages) {
-            if(!titles[index].equals(title)) {
+            if (!titles[index].equals(title)) {
                 titles[index] = title;
                 update();
             }

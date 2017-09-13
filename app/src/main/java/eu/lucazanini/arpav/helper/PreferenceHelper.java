@@ -1,4 +1,4 @@
-package eu.lucazanini.arpav.preference;
+package eu.lucazanini.arpav.helper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,13 +12,13 @@ import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.Previsione;
 
-public class UserPreferences implements Preferences {
+public class PreferenceHelper {
 
     private Context context;
     private Resources resources;
     private SharedPreferences sharedPreferences;
 
-    public UserPreferences(Context context) {
+    public PreferenceHelper(Context context) {
         this.context = context;
         this.resources = context.getResources();
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -27,24 +27,17 @@ public class UserPreferences implements Preferences {
     public boolean isDefaultLanguage() {
         String defaultLanguage = resources.getString(R.string.pref_language_default);
         String languageValue = sharedPreferences.getString(resources.getString(R.string.pref_language_key), defaultLanguage);
-        if (languageValue.equals(defaultLanguage)) {
-            return true;
-        } else {
-            return false;
-        }
+        return languageValue.equals(defaultLanguage);
     }
 
-    @Override
     public boolean isAlertActive() {
         return sharedPreferences.getBoolean(resources.getString(R.string.pref_alert_key), false);
     }
 
-    @Override
     public boolean isBulletinDisplayed() {
         return sharedPreferences.getBoolean(resources.getString(R.string.pref_bulletin_key), true);
     }
 
-    @Override
     public boolean useGps() {
         return sharedPreferences.getBoolean(resources.getString(R.string.pref_gps_key), true);
     }
@@ -83,7 +76,7 @@ public class UserPreferences implements Preferences {
         }
     }
 
-    public String getLanguageCode(){
+    public String getLanguageCode() {
         String defaultLanguage = resources.getString(R.string.pref_language_default);
         String languageValue = sharedPreferences.getString(resources.getString(R.string.pref_language_key), defaultLanguage);
         switch (languageValue) {
@@ -100,14 +93,14 @@ public class UserPreferences implements Preferences {
 
     public Town getLocation() {
         String townName = sharedPreferences.getString(resources.getString(R.string.current_location), "");
-        Town town = TownList.getInstance(context).getTown(townName);
-        return town;
+        return TownList.getInstance(context).getTown(townName);
+//        return town;
     }
 
-    @Override
     public void saveLocation(Town town) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(resources.getString(R.string.current_location), town.getName());
-        editor.commit();
+//        editor.commit();
+        editor.apply();
     }
 }

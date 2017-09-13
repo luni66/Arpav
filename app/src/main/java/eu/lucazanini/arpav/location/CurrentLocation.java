@@ -5,9 +5,7 @@ import android.content.Context;
 
 import java.util.Observable;
 
-import eu.lucazanini.arpav.preference.Preferences;
-import eu.lucazanini.arpav.preference.UserPreferences;
-import timber.log.Timber;
+import eu.lucazanini.arpav.helper.PreferenceHelper;
 
 /**
  * Contains the current location
@@ -18,7 +16,7 @@ public class CurrentLocation extends Observable {
     private Town town;
 
     private CurrentLocation(Context context) {
-        Preferences preferences = new UserPreferences(context);
+        PreferenceHelper preferences = new PreferenceHelper(context);
 
         Town town = preferences.getLocation();
         if (town != null) {
@@ -55,7 +53,7 @@ public class CurrentLocation extends Observable {
     }
 
     public boolean isDefined() {
-        return town == null ? false : true;
+        return town != null;
     }
 
 }

@@ -119,17 +119,13 @@ public class BulletinRequestTest {
                                 mImageLoader.get(imgUrl, new ImageLoader.ImageListener() {
                                     @Override
                                     public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                                        Timber.d("Image URL: " + response.getRequestUrl());
                                         assertThat(response, is(notNullValue()));
-//                                Bitmap bitmap = response.getBitmap();
-//                                assertThat(bitmap, is(notNullValue()));
-                                        Timber.d("Image Load completed: "+ response.getRequestUrl());
                                         latch.countDown();
                                     }
 
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-                                        Timber.e("Image Load Error: " + error.getMessage());
+                                        Timber.e("Image Load Error: %s", error.getLocalizedMessage());
                                     }
                                 });
                             }

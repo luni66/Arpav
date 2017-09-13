@@ -214,8 +214,8 @@ public class Bollettino implements Parcelable {
         }
 
         public String getImageFile(int index) {
-            String fileName = sorgente[index].substring(sorgente[index].lastIndexOf('/') + 1, sorgente[index].length());
-            return fileName;
+            return sorgente[index].substring(sorgente[index].lastIndexOf('/') + 1, sorgente[index].length());
+//            return fileName;
         }
 
         public String[] getSorgente() {

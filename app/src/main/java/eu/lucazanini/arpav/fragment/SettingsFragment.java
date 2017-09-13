@@ -18,11 +18,10 @@ import android.view.ViewGroup;
 
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.activity.SearchableActivity;
+import eu.lucazanini.arpav.helper.PreferenceHelper;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
-import eu.lucazanini.arpav.preference.Preferences;
-import eu.lucazanini.arpav.preference.UserPreferences;
 import eu.lucazanini.arpav.schedule.AlarmHandler;
 import timber.log.Timber;
 
@@ -82,12 +81,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         } else if (key.equals(bulletinKey)) {
             boolean isBulletinDisplayed = sharedPreferences.getBoolean(bulletinKey, false);
 
-            if(isBulletinDisplayed) {
+            if (isBulletinDisplayed) {
                 Timber.d("BULLETIN ON");
 
-            }else{
+            } else {
                 Timber.d("BULLETIN OFF");
-                TwoStatePreference alert = (TwoStatePreference)findPreference(alertKey);
+                TwoStatePreference alert = (TwoStatePreference) findPreference(alertKey);
                 alert.setChecked(false);
             }
 
@@ -165,7 +164,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
                 Town town = TownList.getInstance(getActivity()).getTown(townName);
 
-                Preferences preferences = new UserPreferences(getActivity());
+                PreferenceHelper preferences = new PreferenceHelper(getActivity());
                 preferences.saveLocation(town);
 
                 Preference townPref = findPreference(townKey);

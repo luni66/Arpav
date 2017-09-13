@@ -4,8 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-import eu.lucazanini.arpav.preference.Preferences;
-import eu.lucazanini.arpav.preference.UserPreferences;
+import eu.lucazanini.arpav.helper.PreferenceHelper;
 import eu.lucazanini.arpav.service.NotificationService;
 import hugo.weaving.DebugLog;
 
@@ -18,7 +17,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
 
-        Preferences preferences = new UserPreferences(context);
+        PreferenceHelper preferences = new PreferenceHelper(context);
 
         if (preferences.isAlertActive() && action.equals("android.intent.action.BOOT_COMPLETED")) {
             AlarmHandler alarmHandler = new AlarmHandler(context);

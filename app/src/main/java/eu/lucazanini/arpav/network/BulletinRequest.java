@@ -11,15 +11,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import eu.lucazanini.arpav.model.Previsione;
-import timber.log.Timber;
 
 /**
  * Volley request for Bulettin
  */
 public class BulletinRequest extends Request<Previsione> {
     private final Response.Listener<Previsione> mListener;
-    private String url;
     private final Response.ErrorListener mLErroristener;
+    private String url;
 
     public BulletinRequest(int method, String url, Response.Listener<Previsione> listener,
                            Response.ErrorListener errorListener) {
@@ -59,7 +58,7 @@ public class BulletinRequest extends Request<Previsione> {
 
         Map<String, String> headers = response.headers;
         long serverDate = 0;
-        String serverEtag = null;
+        String serverEtag;
         String headerValue;
 
         headerValue = headers.get("Date");
@@ -84,7 +83,7 @@ public class BulletinRequest extends Request<Previsione> {
         entry.serverDate = serverDate;
         entry.responseHeaders = headers;
 
-        if(previsione.isCoherent()) {
+        if (previsione.isCoherent()) {
             return Response.success(previsione, entry);
         } else {
             return Response.error(new VolleyError("error downloading data from ARPAV site or data not correct"));
@@ -98,7 +97,7 @@ public class BulletinRequest extends Request<Previsione> {
 
     @Override
     public void deliverError(VolleyError error) {
-       mLErroristener.onErrorResponse(error);
+        mLErroristener.onErrorResponse(error);
     }
 
     // TODO https://stackoverflow.com/questions/21867929/android-how-handle-message-error-from-the-server-using-volley

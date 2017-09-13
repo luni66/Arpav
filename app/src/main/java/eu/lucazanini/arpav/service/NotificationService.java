@@ -12,7 +12,6 @@ import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
 import android.util.JsonReader;
 import android.util.JsonWriter;
-import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -37,29 +36,37 @@ import eu.lucazanini.arpav.schedule.AlarmHandler;
 import eu.lucazanini.arpav.schedule.AlarmReceiver;
 import timber.log.Timber;
 
-import static android.text.Html.FROM_HTML_MODE_LEGACY;
-
 public class NotificationService extends IntentService {
 
     private final static String TAG = "Notification Service";
     private String reportFile, reportDate, reportAlert, reportPhenomena, alertTitle;
     private Intent alarmIntent;
 
-    public NotificationService() {
-        super(TAG);
-    }
-
+    /**
+     * Creates an IntentService.  Invoked by your subclass's constructor.
+     *
+     * @param name Used to name the worker thread, important only for debugging.
+     */
     public NotificationService(String name) {
         super(name);
     }
 
+//    public NotificationService() {
+//        super(TAG);
+//    }
+//
+//    public NotificationService(String name) {
+//        super(name);
+//    }
+
     public static Intent getIntent(Context context) {
-        Intent intent = new Intent(context, NotificationService.class);
-        return intent;
+        return new Intent(context, NotificationService.class);
+//        return intent;
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Timber.d("***** TEST *****");
         alarmIntent = intent;
         Resources resources = getResources();
         reportFile = resources.getString(R.string.report_file);
@@ -87,7 +94,7 @@ public class NotificationService extends IntentService {
             return true;
         }
 
-        if (currentData == null || !currentData.containsKey(reportAlert) || !currentData.containsKey(reportAlert)) {
+        if (currentData == null) {
             return false;
         }
 
@@ -96,6 +103,7 @@ public class NotificationService extends IntentService {
         } else {
             lastAlert = "";
         }
+
         if (lastData.get(reportPhenomena) != null) {
             lastPhenomena = lastData.get(reportPhenomena);
         } else {
@@ -107,6 +115,7 @@ public class NotificationService extends IntentService {
         } else {
             currentAlert = "";
         }
+
         if (currentData.get(reportPhenomena) != null) {
             currentPhenomena = currentData.get(reportPhenomena);
         } else {
@@ -116,11 +125,8 @@ public class NotificationService extends IntentService {
         if (!currentAlert.equals("") && !currentAlert.equals(lastAlert)) {
             return true;
         }
-        if (!currentPhenomena.equals("") && !currentPhenomena.equals(lastPhenomena)) {
-            return true;
-        }
+        return !currentPhenomena.equals("") && !currentPhenomena.equals(lastPhenomena);
 
-        return false;
     }
 
     private Map<String, String> getLast() {
@@ -153,11 +159,11 @@ public class NotificationService extends IntentService {
                 return null;
             }
         } catch (FileNotFoundException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
         } catch (UnsupportedEncodingException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
         } catch (IOException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
         }
 
         return lastData;
@@ -178,11 +184,11 @@ public class NotificationService extends IntentService {
             writer.endArray();
             writer.close();
         } catch (FileNotFoundException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
         } catch (UnsupportedEncodingException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
         } catch (IOException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
         }
     }
 
@@ -212,7 +218,7 @@ public class NotificationService extends IntentService {
     private String decodeHtml(String text) {
         if (text != null && text.length() > 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-               return Html.fromHtml(text, FROM_HTML_MODE_LEGACY).toString();
+                return Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY).toString();
             } else {
                 return Html.fromHtml(text).toString();
             }
@@ -266,7 +272,7 @@ public class NotificationService extends IntentService {
         mNotificationManager.notify(mNotificationId, mBuilder.build());
     }
 
-    private void setAlarm(){
+    private void setAlarm() {
         AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
         alarmHandler.setNextAlarm();
     }
@@ -288,11 +294,11 @@ public class NotificationService extends IntentService {
                 currentData.put(reportDate, date);
                 String reportAlertValue = response.getMeteoVeneto().getAvviso();
                 if (!reportAlertValue.equals("")) {
-                    currentData.put(reportAlert, response.getMeteoVeneto().getAvviso());
+                    currentData.put(reportAlert, reportAlertValue);
                 }
                 String reportPhenomenaValue = response.getMeteoVeneto().getFenomeniParticolari();
                 if (!reportPhenomenaValue.equals("")) {
-                    currentData.put(reportPhenomena, response.getMeteoVeneto().getFenomeniParticolari());
+                    currentData.put(reportPhenomena, reportPhenomenaValue);
                 }
 
                 if (isNewNotification(currentData, lastData)) {
@@ -315,12 +321,12 @@ public class NotificationService extends IntentService {
         @Override
         public void onErrorResponse(VolleyError error) {
             Timber.e(error);
-            try {
+//            try {
 //                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
 //                alarmHandler.setNextAlarm();
-            } finally {
+//            } finally {
                 createTestNotification("error notification");
-            }
+//            }
         }
     }
 }

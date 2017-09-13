@@ -30,24 +30,29 @@ public class TownDbHelper extends SQLiteOpenHelper {
                     TownEntry.COL_LATITUDE + " REAL)";
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TownEntry.TABLE_NAME;
-    private volatile static TownDbHelper townDbHelper;
-    private final ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+//    private volatile static TownDbHelper townDbHelper;
+    private final static ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
     private final Lock readLock = rwl.readLock();
     private final Lock writeLock = rwl.writeLock();
     private Context context;
     private volatile SQLiteDatabase db;
 
-    private TownDbHelper(Context context) {
+    public TownDbHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
     }
 
-    public synchronized static TownDbHelper getInstance(Context context) {
-        if (townDbHelper == null) {
-            townDbHelper = new TownDbHelper(context);
-        }
-        return townDbHelper;
-    }
+//    private TownDbHelper(Context context) {
+//        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+//        this.context = context;
+//    }
+//
+//    public synchronized static TownDbHelper getInstance(Context context) {
+//        if (townDbHelper == null) {
+//            townDbHelper = new TownDbHelper(context);
+//        }
+//        return townDbHelper;
+//    }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -84,7 +89,7 @@ public class TownDbHelper extends SQLiteOpenHelper {
     }
 
     public void close() {
-        if (db != null || db.isOpen()) {
+        if (db != null && db.isOpen()) {
             writeLock.lock();
             try {
                 db.close();

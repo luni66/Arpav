@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.activity.ActivityCallBack;
+import eu.lucazanini.arpav.helper.PreferenceHelper;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.model.Bollettino;
@@ -38,17 +38,25 @@ import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import eu.lucazanini.arpav.preference.Preferences;
-import eu.lucazanini.arpav.preference.UserPreferences;
 import timber.log.Timber;
-
-import static android.text.Html.FROM_HTML_MODE_LEGACY;
 
 public class MeteogrammaFragment extends Fragment implements Observer {
 
     public final static String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet arcu ultricies, porttitor libero in, fringilla erat. Proin sollicitudin in lacus eu pharetra. Duis ultricies justo gravida ligula lacinia. ";
     public static final String PAGE_NUMBER = "page_number";
     public static final String PAGES = "pages";
+    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.GONE);
+        }
+    };
+    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
+        @Override
+        public void apply(@NonNull View view, int index) {
+            view.setVisibility(View.VISIBLE);
+        }
+    };
     protected @BindView(R.id.image_daySky) NetworkImageView imgDaySky;
     protected @BindView(R.id.text_sky) TextView tvDaySky;
     protected @BindView(R.id.text_temperature1) TextView tvTemperature1;
@@ -62,7 +70,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     protected @BindView(R.id.image_rain) ImageView imgRain;
     protected @BindView(R.id.image_snow) ImageView imgSnow;
     protected @BindView(R.id.image_wind) ImageView imgWind;
-//    protected @BindView(R.id.downloadProgressBar) ProgressBar progressBar;
+    //    protected @BindView(R.id.downloadProgressBar) ProgressBar progressBar;
     protected @BindView(R.id.text_date) TextView tvDate;
     protected @BindString(R.string.attendibilita) String AttendibilitaLabel;
     protected @BindString(R.string.aggiornato) String AggiornatoLabel;
@@ -75,7 +83,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private int pageNumber, pages, meteogrammaIndex;
     private CurrentLocation currentLocation;
     private ActivityCallBack activityCallBack;
-    private Preferences preferences;
+    private PreferenceHelper preferences;
     private VolleySingleton volleyApp;
     private ImageLoader mImageLoader;
     private Previsione.Language appLanguage;
@@ -95,7 +103,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         currentLocation = CurrentLocation.getInstance(context);
         currentLocation.addObserver(this);
 
-        preferences = new UserPreferences(context);
+        preferences = new PreferenceHelper(context);
 
         appLanguage = preferences.getLanguage();
 
@@ -197,7 +205,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             volleyApp.addToRequestQueue(meteogrammaRequest);
         }
 
-        Preferences preferences = new UserPreferences(context);
+        PreferenceHelper preferences = new PreferenceHelper(context);
         if (appLanguage != Previsione.Language.IT && preferences.isBulletinDisplayed()) {
             BulletinRequest BollettinoRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
                     new BollettinoResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
@@ -222,7 +230,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         Meteogramma[] meteogrammi = response.getMeteogramma();
         Meteogramma meteogramma = meteogrammi[zoneIdx];
         Meteogramma.Scadenza[] scadenze = meteogramma.getScadenza();
-        ;
 
         daySky = scadenze[meteogrammaIndex].getCielo();
         String[] temperatures = new String[4];
@@ -300,7 +307,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                 try {
                     imgDaySky.setImageUrl(daySkyUrl, mImageLoader);
                 } catch (NullPointerException e) {
-                    Timber.e(e.toString());
+                    Timber.e(e.getLocalizedMessage());
                 }
 //                if (progressBar != null) {
 //                    progressBar.setVisibility(View.GONE);
@@ -309,7 +316,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Timber.e("Image Load Error: %s", error.getMessage());
+                Timber.e(error.getMessage());
 //                if (progressBar != null) {
 //                    progressBar.setVisibility(View.GONE);
 //                }
@@ -361,7 +368,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private void setViewText(TextView view, String text) {
         if (text != null && text.length() > 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                view.setText(Html.fromHtml(text, FROM_HTML_MODE_LEGACY));
+                view.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
             } else {
                 view.setText(Html.fromHtml(text));
             }
@@ -372,7 +379,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
     private void setViewVisibility(TextView view, View image) {
         String caption = view.getText().toString();
-        if (caption == null || caption.equals("")) {
+        if (caption.equals("")) {
             ButterKnife.apply(image, GONE);
             ButterKnife.apply(view, GONE);
         } else {
@@ -383,35 +390,22 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
     private void setViewVisibility(TextView view) {
         String caption = view.getText().toString();
-        if (caption == null || caption.equals("")) {
+        if (caption.equals("")) {
             ButterKnife.apply(view, GONE);
         } else {
             ButterKnife.apply(view, VISIBLE);
         }
     }
 
-    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
+    private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
+
         @Override
-        public void apply(@NonNull View view, int index) {
-            view.setVisibility(View.GONE);
-        }
-    };
-    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-        @Override
-        public void apply(@NonNull View view, int index) {
-            view.setVisibility(View.VISIBLE);
-        }
-    };
+        public void onResponse(Previsione response) {
 
-private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
-
-    @Override
-    public void onResponse(Previsione response) {
-
-        loadMeteogrammaData(response);
-        setTitleSlides();
-        setMeteogrammaViews();
-        setDayImageView();
+            loadMeteogrammaData(response);
+            setTitleSlides();
+            setMeteogrammaViews();
+            setDayImageView();
 
 //            setViewVisibility(tvTemperature1, imgTemperature1);
 //            setViewVisibility(tvTemperature2, imgTemperature2);
@@ -421,38 +415,44 @@ private class MeteogrammaResponseListener implements Response.Listener<Prevision
 //            setViewVisibility(tvReliability);
 //            setViewVisibility(tvDate);
 
-        Preferences preferences = new UserPreferences(context);
-        if (appLanguage == Previsione.Language.IT && preferences.isBulletinDisplayed()) {
+            PreferenceHelper preferences = new PreferenceHelper(context);
+            if (appLanguage == Previsione.Language.IT && preferences.isBulletinDisplayed()) {
+                loadBollettinoData(response);
+                setBollettinoViews();
+            }
+
+            hideRefreshWidget();
+        }
+    }
+
+    private class BollettinoResponseListener extends MeteogrammaResponseListener {
+
+        @Override
+        public void onResponse(Previsione response) {
             loadBollettinoData(response);
             setBollettinoViews();
+
+            hideRefreshWidget();
         }
-
-        hideRefreshWidget();
     }
-}
 
-private class BollettinoResponseListener extends MeteogrammaResponseListener {
+    private class ErrorResponseListener implements Response.ErrorListener {
 
-    @Override
-    public void onResponse(Previsione response) {
-        loadBollettinoData(response);
-        setBollettinoViews();
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            hideRefreshWidget();
 
-        hideRefreshWidget();
-    }
-}
-
-private class ErrorResponseListener implements Response.ErrorListener {
-
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        hideRefreshWidget();
-
-        Toast.makeText(getActivity(), error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            String defaultError = "Volley generic error";
+            String errorMessage = error.getLocalizedMessage();
+            if (errorMessage != null && !errorMessage.equals("")) {
+                Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getActivity(), defaultError, Toast.LENGTH_SHORT).show();
+            }
 
 //        if (progressBar != null) {
 //            progressBar.setVisibility(View.GONE);
 //        }
+        }
     }
-}
 }

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -19,7 +18,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -34,7 +32,6 @@ import com.google.android.gms.location.SettingsClient;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -44,14 +41,13 @@ import butterknife.ButterKnife;
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.fragment.EvolutionFragment;
 import eu.lucazanini.arpav.fragment.MeteogrammaFragment;
+import eu.lucazanini.arpav.helper.LocaleHelper;
+import eu.lucazanini.arpav.helper.PreferenceHelper;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.model.SlideTitles;
-import eu.lucazanini.arpav.preference.LocaleHelper;
-import eu.lucazanini.arpav.preference.Preferences;
-import eu.lucazanini.arpav.preference.UserPreferences;
 
 import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
 
@@ -75,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
     private CollectionPagerAdapter collectionPagerAdapter;
     private ActionBar actionBar;
     private Town town = null;
-    private Preferences preferences;
+    private PreferenceHelper preferences;
     private CurrentLocation currentLocation;
     private LocationRequest locationRequest;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -97,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         setSupportActionBar(mainToolbar);
         actionBar = getSupportActionBar();
 
-        preferences = new UserPreferences(this);
+        preferences = new PreferenceHelper(this);
 
         currentLocation = CurrentLocation.getInstance(this);
         currentLocation.addObserver(this);
@@ -113,9 +109,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         checkGps();
         startLocationUpdates();
 
-        if(preferences.getLanguage().equals(Previsione.Language.IT)){
-            Context context = LocaleHelper.setLocale(this, "it");
-        }
+//        if (preferences.getLanguage().equals(Previsione.Language.IT)) {
+//            Context context = LocaleHelper.setLocale(this, "it");
+//        }
     }
 
     @Override
@@ -153,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Town town = null;
+        Town town;
         switch (item.getItemId()) {
             case R.id.action_search:
                 Intent intent = SearchableActivity.getIntent(this);
@@ -196,21 +192,14 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         switch (requestCode) {
             case LOCATION_REQUEST: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    locationPermissionGranted = true;
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    locationPermissionGranted = false;
-                }
+                // permission was granted, yay! Do the
+// contacts-related task you need to do.
+// permission denied, boo! Disable the
+// functionality that depends on this permission.
+                locationPermissionGranted = grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 //TODO return eliminabile?
-                return;
+//                return;
             }
 
             // other 'case' lines to check for other
@@ -364,15 +353,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         }
     }
 
-    private void changeLocale(String languageCode){
-        Resources res = this.getResources();
-        // Change locale settings in the app.
-        DisplayMetrics dm = res.getDisplayMetrics();
-        android.content.res.Configuration conf = res.getConfiguration();
-        conf.setLocale(new Locale(languageCode.toLowerCase())); // API 17+ only.
-        // Use conf.locale = new Locale(...) if targeting lower versions
-        res.updateConfiguration(conf, dm);
-    }
+//    private void changeLocale(String languageCode) {
+//        Resources res = this.getResources();
+//        // Change locale settings in the app.
+//        DisplayMetrics dm = res.getDisplayMetrics();
+//        android.content.res.Configuration conf = res.getConfiguration();
+//        conf.setLocale(new Locale(languageCode.toLowerCase())); // API 17+ only.
+//        // Use conf.locale = new Locale(...) if targeting lower versions
+//        res.updateConfiguration(conf, dm);
+//    }
 
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter implements Observer {
 

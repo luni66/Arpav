@@ -4,7 +4,6 @@ import java.util.Comparator;
 
 /**
  * Contains data for towns in Veneto
- *
  */
 public class Town implements TownLocation {
 

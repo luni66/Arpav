@@ -17,8 +17,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import eu.lucazanini.arpav.preference.Preferences;
-import hugo.weaving.DebugLog;
+import eu.lucazanini.arpav.helper.PreferenceHelper;
 import timber.log.Timber;
 
 /**
@@ -43,7 +42,7 @@ public class Previsione implements Parcelable {
     public final static String TAG_METEOGRAMMA = "meteogramma";
     public final static String ATTR_DATA = "date";
 
-    public final static int UPDATE_TIME_COUNT=3;
+    public final static int UPDATE_TIME_COUNT = 3;
     public final static UpdateTime[] UPDATE_TIMES;
     public final static String RELEASE_TIME = "13:00";
     public final static String FIRST_UPDATE_TIME = "16:00";
@@ -70,7 +69,6 @@ public class Previsione implements Parcelable {
 
     private final String url;
     private final String uri;
-    private final boolean isTest;
     private String dataEmissione, dataAggiornamento;
     private Bollettino meteoVeneto;
     private Calendar releaseDate, updateDate;
@@ -97,7 +95,6 @@ public class Previsione implements Parcelable {
                 uri = URI_IT;
                 url = URL_IT;
         }
-        isTest = false;
         parse(text);
     }
 
@@ -121,7 +118,6 @@ public class Previsione implements Parcelable {
                 uri = URI_IT;
                 language = Language.IT;
         }
-        isTest = false;
         parse(text);
     }
 
@@ -151,8 +147,6 @@ public class Previsione implements Parcelable {
         setUpdateDate(dataAggiornamento);
 
         meteoVeneto = in.readParcelable(Bollettino.class.getClassLoader());
-
-        isTest = in.readByte() != 0;
     }
 
     @Deprecated
@@ -160,15 +154,13 @@ public class Previsione implements Parcelable {
         this.language = Language.IT;
         uri = URI_IT;
         url = URL_IT;
-        isTest = false;
     }
 
     @Deprecated
-    public Previsione(Preferences preferences) {
+    public Previsione(PreferenceHelper preferences) {
         this.language = preferences.getLanguage();
         uri = URI_IT;
         url = URL_IT;
-        isTest = false;
     }
 
     @Deprecated
@@ -192,7 +184,6 @@ public class Previsione implements Parcelable {
                 uri = URI_IT;
                 url = URL_IT;
         }
-        isTest = false;
     }
 
     public static String getUrl(Language language) {
@@ -221,8 +212,6 @@ public class Previsione implements Parcelable {
         parcel.writeString(dataAggiornamento);
 
         parcel.writeParcelable(meteoVeneto, 0);
-
-        parcel.writeByte((byte) (isTest ? 1 : 0));
     }
 
     public String getUri() {
@@ -233,10 +222,6 @@ public class Previsione implements Parcelable {
         return url;
     }
 
-    public boolean isTest() {
-        return isTest;
-    }
-
     public void parse(String text) {
         String tagName = null;
         Bollettino meteoVeneto = null;
@@ -245,8 +230,8 @@ public class Previsione implements Parcelable {
         Meteogramma meteogramma = null;
         boolean insideMeteoVeneto = false;
         boolean insideGiorno = false;
-        String bollettinoId = null;
-        String zoneId = null;
+        String bollettinoId;
+        String zoneId;
         String lastData = null;
 
         try {
@@ -399,19 +384,15 @@ public class Previsione implements Parcelable {
                 eventType = parser.next();
             }
         } catch (XmlPullParserException e) {
-            Timber.e("error parsing xml %s", e.toString());
+            Timber.e("error parsing xml %s", e.getLocalizedMessage());
         } catch (IOException e) {
-            Timber.e("error parsing xml %s", e.toString());
+            Timber.e("error parsing xml %s", e.getLocalizedMessage());
         }
     }
 
-    public boolean isCoherent(){
+    public boolean isCoherent() {
 //        return false;
-        if(dataEmissione!=null && !dataEmissione.equals("")){
-            return true;
-        }else{
-            return false;
-        }
+        return dataEmissione != null && !dataEmissione.equals("");
     }
 
     /**
@@ -479,7 +460,7 @@ public class Previsione implements Parcelable {
             releaseDate.setTime(date);
             releaseDate.getTimeInMillis();
         } catch (ParseException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
             releaseDate = null;
         }
     }
@@ -505,7 +486,7 @@ public class Previsione implements Parcelable {
             }
             updateDate.getTimeInMillis();
         } catch (ParseException e) {
-            Timber.e(e.toString());
+            Timber.e(e.getLocalizedMessage());
             updateDate = null;
         }
     }
