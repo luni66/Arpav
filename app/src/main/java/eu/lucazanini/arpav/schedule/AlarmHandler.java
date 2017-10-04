@@ -5,20 +5,24 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.SystemClock;
 
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TimeZone;
 
 import eu.lucazanini.arpav.model.Previsione;
-import hugo.weaving.DebugLog;
 
 public class AlarmHandler {
 
     public final static String RECEIVER_ACTION = "eu.lucazanini.arpav.UPDATE_TIME";
+    public final static int MINUTE_INTERVAL = 30;
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
+    private Calendar startingTime;
+    private Calendar nextAlarmTime;
 
     public AlarmHandler(Context context) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -28,14 +32,19 @@ public class AlarmHandler {
         alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 
+    public AlarmHandler(Context context, Calendar startingTime) {
+        this(context);
+        this.startingTime = startingTime;
+    }
+
     public void setNextAlarm() {
-        Calendar alarmTime = getNextAlarmTime();
+        setNextAlarmTime();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), alarmIntent);
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmIntent);
+           alarmManager.setWindow(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
         } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), alarmIntent);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         }
     }
 
@@ -43,12 +52,21 @@ public class AlarmHandler {
         alarmManager.cancel(alarmIntent);
     }
 
-    @DebugLog
-    private Calendar getNextAlarmTime() {
-        Calendar currentTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"), Locale.ITALY);
-        Calendar nextTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"), Locale.ITALY);
+    public Calendar getNextAlarmTime() {
+        return nextAlarmTime;
+    }
 
-        double currentHour = currentTime.get(Calendar.HOUR_OF_DAY) + currentTime.get(Calendar.MINUTE) / 60D;
+    public void setNextAlarmTime(Calendar nextAlarmTime) {
+        this.nextAlarmTime = nextAlarmTime;
+    }
+
+    private void setNextAlarmTime() {
+        if (startingTime == null) {
+            startingTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"), Locale.ITALY);
+        }
+        nextAlarmTime = Calendar.getInstance(TimeZone.getTimeZone("Europe/Rome"), Locale.ITALY);
+
+        double currentHour = startingTime.get(Calendar.HOUR_OF_DAY) + startingTime.get(Calendar.MINUTE) / 60D;
 
         final double startDay = 0D;
         final double endDay = 24D;
@@ -58,30 +76,38 @@ public class AlarmHandler {
         }
         Arrays.sort(updateHour);
 
+        int delay = getRandomDelay(MINUTE_INTERVAL);
+
         if (currentHour >= startDay && currentHour < updateHour[0]) {
-            nextTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[0]));
-            nextTime.set(Calendar.MINUTE, getFrac(updateHour[0]));
-            nextTime.set(Calendar.SECOND, 0);
-            nextTime.set(Calendar.MILLISECOND, 0);
+            nextAlarmTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[0]));
+            nextAlarmTime.set(Calendar.MINUTE, getFrac(updateHour[0]));
+            nextAlarmTime.add(Calendar.MINUTE, delay);
+            nextAlarmTime.set(Calendar.SECOND, 0);
+            nextAlarmTime.set(Calendar.MILLISECOND, 0);
         } else if (currentHour >= updateHour[updateHour.length - 1] && currentHour < endDay) {
-            nextTime.add(Calendar.DAY_OF_YEAR, 1);
-            nextTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[0]));
-            nextTime.set(Calendar.MINUTE, getFrac(updateHour[0]));
-            nextTime.set(Calendar.SECOND, 0);
-            nextTime.set(Calendar.MILLISECOND, 0);
+            nextAlarmTime.add(Calendar.DAY_OF_YEAR, 1);
+            nextAlarmTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[0]));
+            nextAlarmTime.set(Calendar.MINUTE, getFrac(updateHour[0]));
+            nextAlarmTime.add(Calendar.MINUTE, delay);
+            nextAlarmTime.set(Calendar.SECOND, 0);
+            nextAlarmTime.set(Calendar.MILLISECOND, 0);
         } else {
             for (int i = 1; i < updateHour.length; i++) {
                 if (currentHour >= updateHour[i - 1] && currentHour < updateHour[i]) {
-                    nextTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[i]));
-                    nextTime.set(Calendar.MINUTE, getFrac(updateHour[i]));
-                    nextTime.set(Calendar.SECOND, 0);
-                    nextTime.set(Calendar.MILLISECOND, 0);
+                    nextAlarmTime.set(Calendar.HOUR_OF_DAY, getInt(updateHour[i]));
+                    nextAlarmTime.set(Calendar.MINUTE, getFrac(updateHour[i]));
+                    nextAlarmTime.add(Calendar.MINUTE, delay);
+                    nextAlarmTime.set(Calendar.SECOND, 0);
+                    nextAlarmTime.set(Calendar.MILLISECOND, 0);
                     break;
                 }
             }
         }
+    }
 
-        return nextTime;
+    private int getRandomDelay(int interval){
+        Random random = new Random(SystemClock.uptimeMillis());
+        return random.nextInt(interval+1);
     }
 
     private int getInt(double d) {

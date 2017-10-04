@@ -46,8 +46,8 @@ import eu.lucazanini.arpav.helper.PreferenceHelper;
 import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
-import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.model.SlideTitles;
+import timber.log.Timber;
 
 import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
 
@@ -106,8 +106,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         }
 
         checkPermission();
-        checkGps();
-        startLocationUpdates();
+        if (checkGps()) {
+            startLocationUpdates();
+        }
 
 //        if (preferences.getLanguage().equals(Previsione.Language.IT)) {
 //            Context context = LocaleHelper.setLocale(this, "it");
@@ -159,6 +160,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
                 if (isGpsAvailable() && locationPermissionGranted) {
 //                    googleLocator.requestUpdates();
                     startLocationUpdates();
+                } else {
+                    Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             case R.id.action_save_location:
@@ -300,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             return true;
         } else {
-            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
             return false;
         }
     }

@@ -83,7 +83,7 @@
     <string name="arpav_license_site">https://creativecommons.org/licenses/by/3.0/deed.en</string>
 
     <string name="icons_title">Icons</string>
-    <string name="icons_body">This app uses icons of Nick Roach distribuited with license GPL and of emilie.rollandin with license CC0 1.0 Universal (CC0 1.0)</string>
+    <string name="icons_body">This app uses icons of Nick Roach distribuited with license GPL and emilie.rollandin with license CC0 1.0 Universal (CC0 1.0)</string>
     <string name="nick_name">Nick Roach</string>
     <string name="nick_site">https://www.iconfinder.com/icons/1054936/cloud_cloudy_sun_weather_icon#size=128</string>
     <string name="nick_license_name">GPL</string>
@@ -94,9 +94,15 @@
     <string name="emilie_license_site">https://creativecommons.org/publicdomain/zero/1.0/</string>
 
     <string name="developer_title">Developer</string>
-    <string name="developer_body">Meteo Veneto is developed by Luca Zanini</string>
+    <string name="developer_body">Meteo Veneto is developed by Luca Zanini with license GPL\n
+        It is free and with no ads\n
+        The source code is available at the GIT repository\n</string>
     <string name="developer_name">Luca Zanini</string>
     <string name="developer_site">http://www.lucazanini.eu</string>
+    <string name="app_license_name">GPL</string>
+    <string name="app_license_site">http://www.gnu.org/copyleft/gpl.html</string>
+    <string name="repository_name">GIT repository</string>
+    <string name="repository_site">https://github.com/luni66/Arpav</string>
 
     <string name="report_file">report_file.json</string>
     <string name="report_date">date</string>
@@ -104,5 +110,13 @@
     <string name="report_phenomena">alert</string>
 
     <string name="alert_title">Weather warning</string>
+
+    <string name="crash_toast_text">Ooooops ! I crashed, but a report has been sent to my developer to help fix the issue !</string>
+    <string name="crash_dialog_title">CrashTest has crashed</string>
+    <string name="crash_dialog_text">An unexpected error occurred forcing the
+    application to stop. Please help us fix this by sending us error data,
+    all you have to do is click OK.</string>
+    <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
+    <string name="crash_dialog_ok_toast">Thank you !</string>
 
 </resources>

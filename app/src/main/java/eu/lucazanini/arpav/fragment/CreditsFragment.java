@@ -47,6 +47,10 @@ public class CreditsFragment extends Fragment {
     protected @BindString(R.string.developer_body) String developerBody;
     protected @BindString(R.string.developer_site) String developerSite;
     protected @BindString(R.string.developer_name) String developerName;
+    protected @BindString(R.string.app_license_site) String appLicenseSite;
+    protected @BindString(R.string.app_license_name) String appLicenseName;
+    protected @BindString(R.string.repository_site) String repositorySite;
+    protected @BindString(R.string.repository_name) String repositoryName;
 
     private Unbinder unbinder;
 
@@ -76,7 +80,10 @@ public class CreditsFragment extends Fragment {
 
         tvDeveloperTitle.setText(developerTitle);
         tvDeveloperBody.setMovementMethod(LinkMovementMethod.getInstance());
-        tvDeveloperBody.setText(getTextWithLink(new SpannableString(developerBody), developerName, developerSite));
+        SpannableString ssDeveloperBody = getTextWithLink(new SpannableString(developerBody), developerName, developerSite);
+        ssDeveloperBody = getTextWithLink(ssDeveloperBody, appLicenseName, appLicenseSite);
+        ssDeveloperBody = getTextWithLink(ssDeveloperBody, repositoryName, repositorySite);
+        tvDeveloperBody.setText(ssDeveloperBody);
 
         return v;
     }

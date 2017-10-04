@@ -80,6 +80,9 @@
         <service
             android:name=".service.NotificationService"
             android:exported="false"/>
+
+        <service android:name=".service.ServiceNotification"
+                 android:exported="false"/>
     </application>
 
 </manifest>

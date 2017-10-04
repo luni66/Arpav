@@ -2,13 +2,10 @@ package eu.lucazanini.arpav.fragment;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,25 +35,27 @@ import eu.lucazanini.arpav.model.Meteogramma;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
+import eu.lucazanini.arpav.utils.UiUtils;
 import timber.log.Timber;
 
 public class MeteogrammaFragment extends Fragment implements Observer {
 
-    public final static String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet arcu ultricies, porttitor libero in, fringilla erat. Proin sollicitudin in lacus eu pharetra. Duis ultricies justo gravida ligula lacinia. ";
     public static final String PAGE_NUMBER = "page_number";
     public static final String PAGES = "pages";
-    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
-        @Override
-        public void apply(@NonNull View view, int index) {
-            view.setVisibility(View.GONE);
-        }
-    };
-    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-        @Override
-        public void apply(@NonNull View view, int index) {
-            view.setVisibility(View.VISIBLE);
-        }
-    };
+//    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
+//        @Override
+//        public void apply(@NonNull View view, int index) {
+//            view.setVisibility(View.GONE);
+//        }
+//    };
+//    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
+//        @Override
+//        public void apply(@NonNull View view, int index) {
+//            view.setVisibility(View.VISIBLE);
+//        }
+//    };
+//    private final ButterKnife.Action<View> GONE = new UiUtils.GoneView();
+//    private final ButterKnife.Action<View> VISIBLE = new UiUtils.VisibleView();
     protected @BindView(R.id.image_daySky) NetworkImageView imgDaySky;
     protected @BindView(R.id.text_sky) TextView tvDaySky;
     protected @BindView(R.id.text_temperature1) TextView tvTemperature1;
@@ -70,12 +69,11 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     protected @BindView(R.id.image_rain) ImageView imgRain;
     protected @BindView(R.id.image_snow) ImageView imgSnow;
     protected @BindView(R.id.image_wind) ImageView imgWind;
-    //    protected @BindView(R.id.downloadProgressBar) ProgressBar progressBar;
     protected @BindView(R.id.text_date) TextView tvDate;
     protected @BindString(R.string.attendibilita) String AttendibilitaLabel;
     protected @BindString(R.string.aggiornato) String AggiornatoLabel;
     protected @BindView(R.id.text_description) TextView tvDescription;
-    protected @BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefreshLayout;
+    protected @BindView(R.id.swipe_container) SwipeRefreshLayout swipeRefreshLayout;
     private Context context;
     private Unbinder unbinder;
     private String daySkyUrl, daySky, temperature1, temperature2, rain, probability, snow, wind, reliability, date, description;
@@ -85,7 +83,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     private ActivityCallBack activityCallBack;
     private PreferenceHelper preferences;
     private VolleySingleton volleyApp;
-    private ImageLoader mImageLoader;
+    private ImageLoader imageLoader;
     private Previsione.Language appLanguage;
 
     @Override
@@ -108,7 +106,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         appLanguage = preferences.getLanguage();
 
         volleyApp = VolleySingleton.getInstance(getContext());
-        mImageLoader = volleyApp.getImageLoader();
+        imageLoader = volleyApp.getImageLoader();
     }
 
     @Nullable
@@ -129,12 +127,12 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             }
         }
 
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 downloadData();
                 activityCallBack.keepFragments(pageNumber);
-                mSwipeRefreshLayout.setRefreshing(false);
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -146,10 +144,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            mSwipeRefreshLayout.post(new Runnable() {
+            swipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
+                    swipeRefreshLayout.setRefreshing(true);
                     downloadData();
                     activityCallBack.keepFragments(pageNumber);
                 }
@@ -195,10 +193,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     private void downloadData() {
-//        if (progressBar != null) {
-//            progressBar.setVisibility(View.VISIBLE);
-//        }
-
         if (currentLocation.isDefined()) {
             BulletinRequest meteogrammaRequest = new BulletinRequest(Previsione.getUrl(appLanguage),
                     new MeteogrammaResponseListener(), new ErrorResponseListener(), Integer.toString(pageNumber));
@@ -214,11 +208,11 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     private void hideRefreshWidget() {
-        if (mSwipeRefreshLayout.isRefreshing())
-            mSwipeRefreshLayout.postDelayed(new Runnable() {
+        if (swipeRefreshLayout.isRefreshing())
+            swipeRefreshLayout.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mSwipeRefreshLayout.setRefreshing(false);
+                    swipeRefreshLayout.setRefreshing(false);
                 }
             }, 1000);
     }
@@ -301,59 +295,76 @@ public class MeteogrammaFragment extends Fragment implements Observer {
     }
 
     private void setDayImageView() {
-        mImageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
+        imageLoader.get(daySkyUrl, new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                 try {
-                    imgDaySky.setImageUrl(daySkyUrl, mImageLoader);
+                    imgDaySky.setImageUrl(daySkyUrl, imageLoader);
                 } catch (NullPointerException e) {
                     Timber.e(e.getLocalizedMessage());
                 }
-//                if (progressBar != null) {
-//                    progressBar.setVisibility(View.GONE);
-//                }
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Timber.e(error.getMessage());
-//                if (progressBar != null) {
-//                    progressBar.setVisibility(View.GONE);
-//                }
+                Timber.e(error.getLocalizedMessage());
             }
         });
     }
 
     private void setMeteogrammaViews() {
-        setViewText(tvDaySky, daySky);
-        setViewText(tvTemperature1, temperature1);
-        setViewText(tvTemperature2, temperature2);
-        if (probability.length() > 0)
-            setViewText(tvRain, rain + " (" + probability + ")");
-        else
-            setViewText(tvRain, rain + "");
-        setViewText(tvSnow, snow);
-        setViewText(tvWind, wind);
-        if (reliability.length() > 0)
-            setViewText(tvReliability, AttendibilitaLabel + ": " + reliability);
-        else
-            setViewText(tvReliability, "");
-        if (tvDate.length() > 0)
-            setViewText(tvDate, AggiornatoLabel + ": " + date);
-        else
-            setViewText(tvDate, "");
+        UiUtils.setViewText(tvDaySky, daySky);
+        UiUtils.setViewText(tvTemperature1, temperature1);
+        UiUtils.setViewText(tvTemperature2, temperature2);
+//        setViewText(tvDaySky, daySky);
+//        setViewText(tvTemperature1, temperature1);
+//        setViewText(tvTemperature2, temperature2);
+        if (probability.length() > 0) {
+            UiUtils.setViewText(tvRain, rain + " (" + probability + ")");
+//            setViewText(tvRain, rain + " (" + probability + ")");
+        }else {
+            UiUtils.setViewText(tvRain, rain + "");
+//            setViewText(tvRain, rain + "");
+        }
+        UiUtils.setViewText(tvSnow, snow);
+        UiUtils.setViewText(tvWind, wind);
+//        setViewText(tvSnow, snow);
+//        setViewText(tvWind, wind);
+        if (reliability.length() > 0) {
+            UiUtils.setViewText(tvReliability, AttendibilitaLabel + ": " + reliability);
+//            setViewText(tvReliability, AttendibilitaLabel + ": " + reliability);
+        }else {
+            UiUtils.setViewText(tvReliability, "");
+//            setViewText(tvReliability, "");
+        }
+        if (tvDate.length() > 0) {
+            UiUtils.setViewText(tvDate, AggiornatoLabel + ": " + date);
+//            setViewText(tvDate, AggiornatoLabel + ": " + date);
+        }else {
+            UiUtils.setViewText(tvDate, "");
+//            setViewText(tvDate, "");
+        }
 
-        setViewVisibility(tvTemperature1, imgTemperature1);
-        setViewVisibility(tvTemperature2, imgTemperature2);
-        setViewVisibility(tvRain, imgRain);
-        setViewVisibility(tvSnow, imgSnow);
-        setViewVisibility(tvWind, imgWind);
-        setViewVisibility(tvReliability);
-        setViewVisibility(tvDate);
+
+        UiUtils.setViewVisibility(tvTemperature1, imgTemperature1);
+        UiUtils.setViewVisibility(tvTemperature2, imgTemperature2);
+        UiUtils.setViewVisibility(tvRain, imgRain);
+        UiUtils.setViewVisibility(tvSnow, imgSnow);
+        UiUtils.setViewVisibility(tvWind, imgWind);
+        UiUtils.setViewVisibility(tvReliability);
+        UiUtils.setViewVisibility(tvDate);
+        //        setViewVisibility(tvTemperature1, imgTemperature1);
+//        setViewVisibility(tvTemperature2, imgTemperature2);
+//        setViewVisibility(tvRain, imgRain);
+//        setViewVisibility(tvSnow, imgSnow);
+//        setViewVisibility(tvWind, imgWind);
+//        setViewVisibility(tvReliability);
+//        setViewVisibility(tvDate);
     }
 
     private void setBollettinoViews() {
-        setViewText(tvDescription, description);
+        UiUtils.setViewText(tvDescription, description);
+//        setViewText(tvDescription, description);
         tvDescription.setVisibility(View.VISIBLE);
     }
 
@@ -365,37 +376,37 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         }
     }
 
-    private void setViewText(TextView view, String text) {
-        if (text != null && text.length() > 0) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                view.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
-            } else {
-                view.setText(Html.fromHtml(text));
-            }
-        } else {
-            view.setText("");
-        }
-    }
-
-    private void setViewVisibility(TextView view, View image) {
-        String caption = view.getText().toString();
-        if (caption.equals("")) {
-            ButterKnife.apply(image, GONE);
-            ButterKnife.apply(view, GONE);
-        } else {
-            ButterKnife.apply(image, VISIBLE);
-            ButterKnife.apply(view, VISIBLE);
-        }
-    }
-
-    private void setViewVisibility(TextView view) {
-        String caption = view.getText().toString();
-        if (caption.equals("")) {
-            ButterKnife.apply(view, GONE);
-        } else {
-            ButterKnife.apply(view, VISIBLE);
-        }
-    }
+//    private void setViewText(TextView view, String text) {
+//        if (text != null && text.length() > 0) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                view.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
+//            } else {
+//                view.setText(Html.fromHtml(text));
+//            }
+//        } else {
+//            view.setText("");
+//        }
+//    }
+//
+//    private void setViewVisibility(TextView view, View image) {
+//        String caption = view.getText().toString();
+//        if (caption.equals("")) {
+//            ButterKnife.apply(image, GONE);
+//            ButterKnife.apply(view, GONE);
+//        } else {
+//            ButterKnife.apply(image, VISIBLE);
+//            ButterKnife.apply(view, VISIBLE);
+//        }
+//    }
+//
+//    private void setViewVisibility(TextView view) {
+//        String caption = view.getText().toString();
+//        if (caption.equals("")) {
+//            ButterKnife.apply(view, GONE);
+//        } else {
+//            ButterKnife.apply(view, VISIBLE);
+//        }
+//    }
 
     private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
 
@@ -406,14 +417,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             setTitleSlides();
             setMeteogrammaViews();
             setDayImageView();
-
-//            setViewVisibility(tvTemperature1, imgTemperature1);
-//            setViewVisibility(tvTemperature2, imgTemperature2);
-//            setViewVisibility(tvRain, imgRain);
-//            setViewVisibility(tvSnow, imgSnow);
-//            setViewVisibility(tvWind, imgWind);
-//            setViewVisibility(tvReliability);
-//            setViewVisibility(tvDate);
 
             PreferenceHelper preferences = new PreferenceHelper(context);
             if (appLanguage == Previsione.Language.IT && preferences.isBulletinDisplayed()) {
@@ -449,10 +452,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             } else {
                 Toast.makeText(getActivity(), defaultError, Toast.LENGTH_SHORT).show();
             }
-
-//        if (progressBar != null) {
-//            progressBar.setVisibility(View.GONE);
-//        }
         }
     }
 }

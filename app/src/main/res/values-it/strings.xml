@@ -43,7 +43,9 @@
     <string name="icons_body">Questa app utilizza icone di Nick Roach distribuita con licenza GPL e di emilie.rollandin con licenza CC0 1.0 Universal (CC0 1.0)</string>
 
     <string name="developer_title">Sviluppatore</string>
-    <string name="developer_body">Meteo Veneto è sviluppata da Luca Zanini</string>
+    <string name="developer_body">Meteo Veneto è sviluppata da Luca Zanini con licenza GPL\n
+    Questa app è gratis e senza pubblicità\n
+    Il codice sorgente è disponibile come GIT repository</string>
 
     <string name="alert_title">Avviso meteo</string>
 

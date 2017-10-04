@@ -145,7 +145,7 @@ public class BulletinRequestTest {
 
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                Timber.e("Image Load Error: " + error.getMessage());
+                                Timber.e("Image Load Error: " + error.getLocalizedMessage());
                             }
                         });*/
 

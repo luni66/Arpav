@@ -1,17 +1,28 @@
 package eu.lucazanini.arpav.service;
 
-import android.app.IntentService;
+
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.support.annotation.IntDef;
+import android.support.annotation.Nullable;
+import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -36,38 +47,115 @@ import eu.lucazanini.arpav.schedule.AlarmHandler;
 import eu.lucazanini.arpav.schedule.AlarmReceiver;
 import timber.log.Timber;
 
-public class NotificationService extends IntentService {
+import static junit.framework.Assert.assertTrue;
+
+public class ServiceNotification extends Service {
+
+    private Looper mServiceLooper;
+    private ServiceHandler mServiceHandler;
+    private final IBinder mBinder = new LocalBinder();
 
     private final static String TAG = NotificationService.class.getName();
     private String reportFile, reportDate, reportAlert, reportPhenomena, alertTitle;
     private Intent alarmIntent;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public NotificationService(String name) {
-        super(name);
+    // Handler that receives messages from the thread
+    private final class ServiceHandler extends Handler {
+        public ServiceHandler(Looper looper) {
+            super(looper);
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            Toast.makeText(ServiceNotification.this, "ServiceHandler", Toast.LENGTH_SHORT).show();
+            Timber.d("***** TEST ******");
+            // Normally we would do some work here, like download a file.
+            // For our sample, we just sleep for 5 seconds.
+//            try {
+//                Thread.sleep(5000);
+
+          doWork();
+
+//                alarmIntent = intent;
+//                Resources resources = getResources();
+//                reportFile = resources.getString(R.string.report_file);
+//                reportDate = resources.getString(R.string.report_date);
+//                reportAlert = resources.getString(R.string.report_alert);
+//                reportPhenomena = resources.getString(R.string.report_phenomena);
+//                alertTitle = resources.getString(R.string.alert_title);
+//
+//                setAlarm();
+//
+//                VolleySingleton volleyApp = VolleySingleton.getInstance(getApplicationContext());
+//
+//                BulletinRequest serviceRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
+//                        new ServiceNotification.ServiceResponseListener(), new ServiceNotification.ErrorListener(), TAG);
+//                volleyApp.addToRequestQueue(serviceRequest);
+
+                assertTrue("just another test", true);
+//            } catch (InterruptedException e) {
+//                // Restore interrupt status.
+//                Thread.currentThread().interrupt();
+//            }
+            // Stop the service using the startId, so that we don't stop
+            // the service in the middle of handling another job
+            stopSelf(msg.arg1);
+        }
     }
 
-    public NotificationService() {
-        super(TAG);
-    }
 
-//    public NotificationService(String name) {
-//        super(name);
-//    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
 
-    public static Intent getIntent(Context context) {
-        return new Intent(context, NotificationService.class);
-//        return intent;
+        alarmIntent = intent;
+
+        // For each start request, send a message to start a job and deliver the
+        // start ID so we know which request we're stopping when we finish the job
+        Message msg = mServiceHandler.obtainMessage();
+        msg.arg1 = startId;
+        mServiceHandler.sendMessage(msg);
+
+        // If we get killed, after returning from here, restart
+        return START_STICKY;
+
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        Timber.d("***** TEST *****");
-        alarmIntent = intent;
+    public void onCreate() {
+        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
+        // Start up the thread running the service.  Note that we create a
+        // separate thread because the service normally runs in the process's
+        // main thread, which we don't want to block.  We also make it
+        // background priority so CPU-intensive work will not disrupt our UI.
+        HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+
+        // Get the HandlerThread's Looper and use it for our Handler
+        mServiceLooper = thread.getLooper();
+        mServiceHandler = new ServiceHandler(mServiceLooper);
+
+    }
+
+    @Override
+    public void onDestroy() {
+        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
+    public class LocalBinder extends Binder {
+
+        public ServiceNotification getService() {
+            // Return this instance of LocalService so clients can call public methods.
+            return ServiceNotification.this;
+        }
+    }
+
+    private void doWork(){
         Resources resources = getResources();
         reportFile = resources.getString(R.string.report_file);
         reportDate = resources.getString(R.string.report_date);
@@ -77,10 +165,10 @@ public class NotificationService extends IntentService {
 
         setAlarm();
 
-        VolleySingleton volleyApp = VolleySingleton.getInstance(this);
+        VolleySingleton volleyApp = VolleySingleton.getInstance(getApplicationContext());
 
         BulletinRequest serviceRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
-                new ServiceResponseListener(), new ErrorListener(), TAG);
+                new ServiceNotification.ServiceResponseListener(), new ServiceNotification.ErrorListener(), TAG);
         volleyApp.addToRequestQueue(serviceRequest);
     }
 
@@ -327,7 +415,7 @@ public class NotificationService extends IntentService {
 //                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
 //                alarmHandler.setNextAlarm();
 //            } finally {
-                createTestNotification("error notification");
+            createTestNotification("error notification");
 //            }
         }
     }

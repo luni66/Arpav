@@ -40,7 +40,7 @@ public class TownAdapter extends RecyclerView.Adapter<TownAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        String townName = townNames.get(position);
+        final String townName = townNames.get(position);
         viewHolder.getTextView().setText(townName);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
