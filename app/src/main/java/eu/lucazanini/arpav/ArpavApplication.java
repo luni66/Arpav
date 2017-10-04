@@ -35,7 +35,6 @@ public class ArpavApplication extends Application {
         super.attachBaseContext(LocaleHelper.onAttach(newBase));
 
         if (BuildConfig.DEBUG) {
-
             Res res = new Res();
 
             try {
