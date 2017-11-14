@@ -10,6 +10,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
+import eu.lucazanini.arpav.BuildConfig;
 import eu.lucazanini.arpav.model.Previsione;
 
 /**
@@ -68,8 +69,9 @@ public class BulletinRequest extends Request<Previsione> {
 
         serverEtag = headers.get("ETag");
 
-        final long cacheHitButRefreshed = 60 * 60 * 1000; // in 60 minutes cache will be hit, but also refreshed on background
-        final long cacheExpired = 4 * 60 * 60 * 1000; // in 4 hours this cache entry expires completely
+            final long cacheHitButRefreshed = 60 * 60 * 1000; // in 60 minutes cache will be hit, but also refreshed on background
+            final long cacheExpired = 4 * 60 * 60 * 1000; // in 4 hours this cache entry expires completely
+
 //        final long cacheHitButRefreshed = 0;
 //        final long cacheExpired = 0;
         final long softExpire = now + cacheHitButRefreshed;

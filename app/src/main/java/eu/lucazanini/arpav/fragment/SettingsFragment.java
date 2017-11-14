@@ -25,7 +25,7 @@ import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.schedule.AlarmHandler;
 import timber.log.Timber;
 
-import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
+import static eu.lucazanini.arpav.activity.SearchableActivity.FAVOURITE_TOWN_CODE;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -143,7 +143,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 Intent intent = SearchableActivity.getIntent(getActivity());
-                startActivityForResult(intent, REQUEST_CODE);
+                startActivityForResult(intent, FAVOURITE_TOWN_CODE);
                 return true;
             }
         });
@@ -156,7 +156,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE) {
+        if (requestCode == FAVOURITE_TOWN_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 String townName = data.getStringExtra(SearchableActivity.TOWN_NAME);
                 CurrentLocation currentLocation = CurrentLocation.getInstance();

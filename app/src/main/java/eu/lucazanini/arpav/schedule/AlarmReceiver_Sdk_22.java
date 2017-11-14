@@ -1,6 +1,5 @@
 package eu.lucazanini.arpav.schedule;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -12,13 +11,13 @@ import eu.lucazanini.arpav.service.NotificationService;
 import hugo.weaving.DebugLog;
 
 
-public class AlarmReceiver extends BroadcastReceiver {
+public class AlarmReceiver_Sdk_22 extends WakefulBroadcastReceiver {
 //public class AlarmReceiver_Sdk_22 extends BroadcastReceiver {
 
     @DebugLog
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             String action = intent.getAction();
 
             PreferenceHelper preferences = new PreferenceHelper(context);
@@ -27,10 +26,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                 AlarmHandler alarmHandler = new AlarmHandler(context);
                 alarmHandler.setNextAlarm();
             } else if (action.startsWith(AlarmHandler.RECEIVER_ACTION)) {
-                AcraResources.sendLog("AlarmReceiver has received RECEIVER_ACTION", null);
+                AcraResources.sendLog("AlarmReceiver_Sdk_22 has received RECEIVER_ACTION", null);
                 AlarmHandler alarmHandler = new AlarmHandler(context);
                 alarmHandler.setNextAlarm();
-                    context.startService(NotificationService.getIntent(context));
+                    startWakefulService(context, NotificationService.getIntent(context));
             }
         }
     }

@@ -28,12 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.lucazanini.arpav.R;
+import eu.lucazanini.arpav.AcraResources;
 import eu.lucazanini.arpav.activity.MainActivity;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.schedule.AlarmHandler;
-import eu.lucazanini.arpav.schedule.AlarmReceiver;
+import eu.lucazanini.arpav.schedule.AlarmReceiver_Sdk_22;
 import timber.log.Timber;
 
 public class NotificationService extends IntentService {
@@ -66,7 +67,7 @@ public class NotificationService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Timber.d("***** TEST *****");
+        AcraResources.sendLog("Notification service is started", null);
         alarmIntent = intent;
         Resources resources = getResources();
         reportFile = resources.getString(R.string.report_file);
@@ -75,7 +76,7 @@ public class NotificationService extends IntentService {
         reportPhenomena = resources.getString(R.string.report_phenomena);
         alertTitle = resources.getString(R.string.alert_title);
 
-        setAlarm();
+//        setAlarm();
 
         VolleySingleton volleyApp = VolleySingleton.getInstance(this);
 
@@ -85,7 +86,7 @@ public class NotificationService extends IntentService {
     }
 
     private void releaseWakeLock() {
-        AlarmReceiver.completeWakefulIntent(alarmIntent);
+        AlarmReceiver_Sdk_22.completeWakefulIntent(alarmIntent);
     }
 
     private boolean isNewNotification(Map<String, String> currentData, Map<String, String> lastData) {

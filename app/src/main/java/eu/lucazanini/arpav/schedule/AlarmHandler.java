@@ -9,10 +9,12 @@ import android.os.SystemClock;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 
+import eu.lucazanini.arpav.AcraResources;
 import eu.lucazanini.arpav.model.Previsione;
 
 public class AlarmHandler {
@@ -27,7 +29,13 @@ public class AlarmHandler {
     public AlarmHandler(Context context) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
-        Intent intent = new Intent(context, AlarmReceiver.class);
+        Intent intent;
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP_MR1){
+            intent = new Intent(context, AlarmReceiver_Sdk_22.class);
+        } else {
+            intent = new Intent(context, AlarmReceiver.class);
+        }
+//        Intent intent = new Intent(context, AlarmReceiver_Sdk_22.class);
         intent.setAction(RECEIVER_ACTION);
         alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
     }
@@ -39,10 +47,12 @@ public class AlarmHandler {
 
     public void setNextAlarm() {
         setNextAlarmTime();
+        AcraResources.sendLog("Setting next alarm time", new HashMap<String, String>(){{put("next alarm time", nextAlarmTime.toString());}});
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-           alarmManager.setWindow(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
+//           alarmManager.setWindow(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         }
@@ -103,6 +113,9 @@ public class AlarmHandler {
                 }
             }
         }
+
+        // only in order to sync time with fields
+        nextAlarmTime.getTime();
     }
 
     private int getRandomDelay(int interval){

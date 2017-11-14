@@ -30,7 +30,8 @@ import eu.lucazanini.arpav.helper.LocaleHelper;
  */
 public class SearchableActivity extends AppCompatActivity {
 
-    public final static int REQUEST_CODE = 0;
+    public final static int FAVOURITE_TOWN_CODE = 0;
+    public final static int TEMPORARY_TOWN_CODE = 1;
     public final static String TOWN_NAME = "town_name";
     protected @BindView(R.id.searchableToolbar) Toolbar searchableToolbar;
     protected @BindView(R.id.search_list) RecyclerView recyclerView;

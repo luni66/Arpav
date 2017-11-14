@@ -5,7 +5,6 @@ import android.content.Context;
 
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
 import org.acra.config.ACRAConfiguration;
 import org.acra.config.ACRAConfigurationException;
 import org.acra.config.ConfigurationBuilder;
@@ -35,14 +34,14 @@ public class ArpavApplication extends Application {
         super.attachBaseContext(LocaleHelper.onAttach(newBase));
 
         if (BuildConfig.DEBUG) {
-            Res res = new Res();
+            AcraResources acraResources = new AcraResources();
 
             try {
                 final ACRAConfiguration config = new ConfigurationBuilder(this)
                         .setReportingInteractionMode(ReportingInteractionMode.SILENT)
-                        .setFormUri(new String(res.getR1()))
-                        .setFormUriBasicAuthLogin(new String(res.getR2()))
-                        .setFormUriBasicAuthPassword(new String(res.getR3()))
+                        .setFormUri(new String(acraResources.getR1()))
+                        .setFormUriBasicAuthLogin(new String(acraResources.getR2()))
+                        .setFormUriBasicAuthPassword(new String(acraResources.getR3()))
                         .setReportType(HttpSender.Type.JSON)
                         .setHttpMethod(HttpSender.Method.PUT)
                         .build();

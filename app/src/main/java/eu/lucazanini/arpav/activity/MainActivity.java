@@ -1,6 +1,7 @@
 package eu.lucazanini.arpav.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -49,7 +51,8 @@ import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
 import timber.log.Timber;
 
-import static eu.lucazanini.arpav.activity.SearchableActivity.REQUEST_CODE;
+import static eu.lucazanini.arpav.activity.SearchableActivity.FAVOURITE_TOWN_CODE;
+import static eu.lucazanini.arpav.activity.SearchableActivity.TEMPORARY_TOWN_CODE;
 
 /**
  * The main activity containing the fragments with data populated from xml files downloaded from Arpav site
@@ -103,12 +106,18 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
             actionBar.setTitle(currentLocation.getTown().getName());
         } else {
             actionBar.setTitle(defaultTitle);
+            chooseLocation();
         }
 
         checkPermission();
         if (checkGps()) {
+            Timber.d("starting location updates");
             startLocationUpdates();
+        } else {
+            Timber.d("cannot start location updates");
         }
+
+//        AcraResources.sendLog("PROVA", new HashMap<String, String>(){{put("uno", "one"); put("due", "two");}});
 
 //        if (preferences.getLanguage().equals(Previsione.Language.IT)) {
 //            Context context = LocaleHelper.setLocale(this, "it");
@@ -134,10 +143,24 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE) {
+        if (requestCode == TEMPORARY_TOWN_CODE) {
             if (resultCode == RESULT_OK) {
                 String town = data.getStringExtra(SearchableActivity.TOWN_NAME);
                 currentLocation.setTown(town, this);
+            }
+        } else if(requestCode == FAVOURITE_TOWN_CODE){
+            if (resultCode == Activity.RESULT_OK) {
+                String townName = data.getStringExtra(SearchableActivity.TOWN_NAME);
+                CurrentLocation currentLocation = CurrentLocation.getInstance();
+                currentLocation.setTown(townName, this);
+
+                Town town = TownList.getInstance(this).getTown(townName);
+
+                PreferenceHelper preferences = new PreferenceHelper(this);
+                preferences.saveLocation(town);
+
+//                Preference townPref = findPreference(townKey);
+//                townPref.setSummary(townName);
             }
         }
     }
@@ -154,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         switch (item.getItemId()) {
             case R.id.action_search:
                 Intent intent = SearchableActivity.getIntent(this);
-                startActivityForResult(intent, REQUEST_CODE);
+                startActivityForResult(intent, TEMPORARY_TOWN_CODE);
                 return true;
             case R.id.action_gps:
                 if (isGpsAvailable() && locationPermissionGranted) {
@@ -306,6 +329,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
 //            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
             return false;
         }
+    }
+
+    private void chooseLocation(){
+        Intent intent = SearchableActivity.getIntent(this);
+        startActivityForResult(intent, TEMPORARY_TOWN_CODE);
     }
 
     @Override

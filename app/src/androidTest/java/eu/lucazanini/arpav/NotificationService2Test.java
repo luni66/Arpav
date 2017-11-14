@@ -10,24 +10,27 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import eu.lucazanini.arpav.service.ServiceNotification;
+import eu.lucazanini.arpav.service.NotificationService2;
+import timber.log.Timber;
 
 @RunWith(AndroidJUnit4.class)
 @MediumTest
-public class ServiceNotificationTest {
+public class NotificationService2Test {
 
-    @Rule
+//    @Rule
 //    public final ServiceTestRule mServiceRule = ServiceTestRule.withTimeout(60L, TimeUnit.SECONDS);
+@Rule
     public final ServiceTestRule mServiceRule = new ServiceTestRule();
 
     // test for a service which is started with startService
 //    @Test
     @Test(timeout=1000 * 60)
     public void testWithStartedService() throws TimeoutException {
-        mServiceRule.startService(new Intent(InstrumentationRegistry.getTargetContext(), ServiceNotification.class));
+        Timber.d("testWithStartedService");
+//        AcraResources.sendLog("testWithStartedService", null);
+        mServiceRule.startService(new Intent(InstrumentationRegistry.getTargetContext(), NotificationService2.class));
         // test code
     }
 

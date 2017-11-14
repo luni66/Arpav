@@ -20,6 +20,7 @@ import com.android.volley.toolbox.NetworkImageView;
 
 import java.util.Observer;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
@@ -67,7 +68,10 @@ public class EvolutionFragment extends Fragment implements Observer {
      */
     protected @BindViews({R.id.text_date1, R.id.text_date2, R.id.text_date3, R.id.text_date4, R.id.text_date5}) TextView[] tvDates;
     protected @BindView((R.id.text_evolution)) TextView tvEvolution;
+    protected @BindView(R.id.text_date) TextView tvDate;
     protected @BindView(R.id.swipe_container) SwipeRefreshLayout swipeRefreshLayout;
+    protected @BindString(R.string.aggiornato) String AggiornatoLabel;
+    private String date;
     private Unbinder unbinder;
     private Context context;
     /**
@@ -226,6 +230,8 @@ public class EvolutionFragment extends Fragment implements Observer {
         for (int i = 0; i < tvDates.length; i++) {
             dates[i] = scadenze[toDateIndex(i)].getShortDate();
         }
+
+        date = response.getData();
     }
 
     private void loadBollettinoData(Previsione response) {
@@ -258,6 +264,16 @@ public class EvolutionFragment extends Fragment implements Observer {
         for (int i = 0; i < imgDays.length; i++) {
             setDayImageView(daySkyUrl[i], imgDays[i]);
         }
+
+        if (tvDate.length() > 0) {
+            UiUtils.setViewText(tvDate, AggiornatoLabel + ": " + date);
+//            setViewText(tvDate, AggiornatoLabel + ": " + date);
+        }else {
+            UiUtils.setViewText(tvDate, "");
+//            setViewText(tvDate, "");
+        }
+
+        UiUtils.setViewVisibility(tvDate);
     }
 
     private void setBollettinoViews() {
