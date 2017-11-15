@@ -35,7 +35,6 @@ public class AlarmHandler {
         } else {
             intent = new Intent(context, AlarmReceiver.class);
         }
-//        Intent intent = new Intent(context, AlarmReceiver_Sdk_22.class);
         intent.setAction(RECEIVER_ACTION);
         alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
     }
@@ -51,7 +50,6 @@ public class AlarmHandler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//           alarmManager.setWindow(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), AlarmManager.INTERVAL_HALF_HOUR, alarmIntent);
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);

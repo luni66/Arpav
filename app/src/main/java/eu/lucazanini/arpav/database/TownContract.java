@@ -5,7 +5,6 @@ import android.provider.BaseColumns;
 /**
  * SQL schema for town
  */
-
 public final class TownContract {
 
     private TownContract() {

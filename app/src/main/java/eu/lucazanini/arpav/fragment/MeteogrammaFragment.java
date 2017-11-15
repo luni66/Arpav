@@ -42,20 +42,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
     public static final String PAGE_NUMBER = "page_number";
     public static final String PAGES = "pages";
-//    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
-//        @Override
-//        public void apply(@NonNull View view, int index) {
-//            view.setVisibility(View.GONE);
-//        }
-//    };
-//    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-//        @Override
-//        public void apply(@NonNull View view, int index) {
-//            view.setVisibility(View.VISIBLE);
-//        }
-//    };
-//    private final ButterKnife.Action<View> GONE = new UiUtils.GoneView();
-//    private final ButterKnife.Action<View> VISIBLE = new UiUtils.VisibleView();
     protected @BindView(R.id.image_daySky) NetworkImageView imgDaySky;
     protected @BindView(R.id.text_sky) TextView tvDaySky;
     protected @BindView(R.id.text_temperature1) TextView tvTemperature1;
@@ -316,33 +302,25 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         UiUtils.setViewText(tvDaySky, daySky);
         UiUtils.setViewText(tvTemperature1, temperature1);
         UiUtils.setViewText(tvTemperature2, temperature2);
-//        setViewText(tvDaySky, daySky);
-//        setViewText(tvTemperature1, temperature1);
-//        setViewText(tvTemperature2, temperature2);
+
         if (probability.length() > 0) {
             UiUtils.setViewText(tvRain, rain + " (" + probability + ")");
-//            setViewText(tvRain, rain + " (" + probability + ")");
-        }else {
+        } else {
             UiUtils.setViewText(tvRain, rain + "");
-//            setViewText(tvRain, rain + "");
         }
+
         UiUtils.setViewText(tvSnow, snow);
         UiUtils.setViewText(tvWind, wind);
-//        setViewText(tvSnow, snow);
-//        setViewText(tvWind, wind);
+
         if (reliability.length() > 0) {
             UiUtils.setViewText(tvReliability, AttendibilitaLabel + ": " + reliability);
-//            setViewText(tvReliability, AttendibilitaLabel + ": " + reliability);
-        }else {
+        } else {
             UiUtils.setViewText(tvReliability, "");
-//            setViewText(tvReliability, "");
         }
         if (tvDate.length() > 0) {
             UiUtils.setViewText(tvDate, AggiornatoLabel + ": " + date);
-//            setViewText(tvDate, AggiornatoLabel + ": " + date);
-        }else {
+        } else {
             UiUtils.setViewText(tvDate, "");
-//            setViewText(tvDate, "");
         }
 
 
@@ -353,18 +331,10 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         UiUtils.setViewVisibility(tvWind, imgWind);
         UiUtils.setViewVisibility(tvReliability);
         UiUtils.setViewVisibility(tvDate);
-        //        setViewVisibility(tvTemperature1, imgTemperature1);
-//        setViewVisibility(tvTemperature2, imgTemperature2);
-//        setViewVisibility(tvRain, imgRain);
-//        setViewVisibility(tvSnow, imgSnow);
-//        setViewVisibility(tvWind, imgWind);
-//        setViewVisibility(tvReliability);
-//        setViewVisibility(tvDate);
     }
 
     private void setBollettinoViews() {
         UiUtils.setViewText(tvDescription, description);
-//        setViewText(tvDescription, description);
         tvDescription.setVisibility(View.VISIBLE);
     }
 
@@ -375,38 +345,6 @@ public class MeteogrammaFragment extends Fragment implements Observer {
             return -1;
         }
     }
-
-//    private void setViewText(TextView view, String text) {
-//        if (text != null && text.length() > 0) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                view.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
-//            } else {
-//                view.setText(Html.fromHtml(text));
-//            }
-//        } else {
-//            view.setText("");
-//        }
-//    }
-//
-//    private void setViewVisibility(TextView view, View image) {
-//        String caption = view.getText().toString();
-//        if (caption.equals("")) {
-//            ButterKnife.apply(image, GONE);
-//            ButterKnife.apply(view, GONE);
-//        } else {
-//            ButterKnife.apply(image, VISIBLE);
-//            ButterKnife.apply(view, VISIBLE);
-//        }
-//    }
-//
-//    private void setViewVisibility(TextView view) {
-//        String caption = view.getText().toString();
-//        if (caption.equals("")) {
-//            ButterKnife.apply(view, GONE);
-//        } else {
-//            ButterKnife.apply(view, VISIBLE);
-//        }
-//    }
 
     private class MeteogrammaResponseListener implements Response.Listener<Previsione> {
 

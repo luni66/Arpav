@@ -94,7 +94,7 @@ public class CreditsFragment extends Fragment {
         unbinder.unbind();
     }
 
-    private SpannableString getTextWithLink(SpannableString text, String link, String site){
+    private SpannableString getTextWithLink(SpannableString text, String link, String site) {
         int start = text.toString().indexOf(link);
         int end = start + link.length();
         text.setSpan(new URLSpan(site), start, end, 0);

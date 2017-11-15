@@ -49,10 +49,6 @@ public class BulletinRequest extends Request<Previsione> {
             parsed = new String(response.data);
         }
 
-//        if(parsed==null || parsed.equals("")){
-//            return Response.error(null);
-//        }
-
         previsione = new Previsione(url, parsed);
 
         long now = System.currentTimeMillis();

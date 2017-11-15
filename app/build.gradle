@@ -1,9 +1,16 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'android-apt'
 apply plugin: 'com.jakewharton.hugo'
-//apply plugin: 'me.tatarka.retrolambda'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias System.getenv('LUNI_ALIAS')
+            keyPassword System.getenv('LUNI_PASSWORD')
+            storeFile file(System.getenv('LUNI_STORE_FILE'))
+            storePassword System.getenv('LUNI_STORE_PASSWORD')
+        }
+    }
+
     compileSdkVersion 25
     buildToolsVersion '26.0.2'
     defaultConfig {
@@ -13,21 +20,28 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-//        jackOptions {
-//            enabled true
-//        }
     }
 //    compileOptions {
 //        sourceCompatibility JavaVersion.VERSION_1_8
 //        targetCompatibility JavaVersion.VERSION_1_8
 //    }
     buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+//        debug {
+//            debuggable true
+//        }
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            debuggable false
         }
         debug {
             debuggable true
+            minifyEnabled false
         }
     }
 
@@ -43,34 +57,27 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:support-compat:25.3.1'
-    compile 'com.google.android.gms:play-services-location:11.0.4'
-    compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'com.jakewharton.timber:timber:4.3.1'
-    compile 'com.android.support:recyclerview-v7:25.3.1'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.google.code.gson:gson:2.8.0'
-    compile 'com.android.volley:volley:1.0.0'
-    compile 'io.reactivex:rxandroid:0.25.0'
-    compile 'com.jakewharton.rxbinding:rxbinding:1.0.0'
-    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
-    compile 'com.jakewharton:disklrucache:2.0.2'
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2')
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
-//    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+//    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+//        exclude group: 'com.android.support', module: 'support-annotations'
+//    })
+
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.android.support:support-compat:25.4.0'
+    compile 'com.google.android.gms:play-services-location:11.6.0'
+    compile 'com.jakewharton.timber:timber:4.5.1'
+    compile 'com.android.support:recyclerview-v7:25.4.0'
+//    compile 'com.github.bumptech.glide:glide:4.3.1'
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.android.volley:volley:1.0.0'
+//    compile 'io.reactivex:rxandroid:1.2.1'
+//    compile 'com.jakewharton.rxbinding:rxbinding:1.0.0'
+//    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
+    compile 'com.jakewharton:disklrucache:2.0.2'
     compile 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     compile 'ch.acra:acra:4.9.2'
 }
-
-// add annotation processing options to jack
-//android.applicationVariants.all { variant ->
-//    variant.variantData.variantConfiguration.javaCompileOptions.annotationProcessorOptions
-//            .arguments = ['androidManifestFile': variant.outputs[0]?.processResources?.manifestFile?.absolutePath]
-//}

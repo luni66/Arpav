@@ -88,8 +88,4 @@ public class TownList {
         return towns;
     }
 
-    public Town getTown(double latitude, double longitude) {
-        towns.sort(new Town.GpsDistanceComparator(latitude, longitude));
-        return towns.get(0);
-    }
 }

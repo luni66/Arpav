@@ -42,21 +42,6 @@ import timber.log.Timber;
 public class EvolutionFragment extends Fragment implements Observer {
 
     public static final String PAGE_NUMBER = "page_number";
-    //    private final ButterKnife.Action<View> GONE = new ButterKnife.Action<View>() {
-//        @Override
-//        public void apply(@NonNull View view, int index) {
-//            view.setVisibility(View.GONE);
-//        }
-//    };
-    //    private final ButterKnife.Action<View> VISIBLE = new ButterKnife.Action<View>() {
-//        @Override
-//        public void apply(@NonNull View view, int index) {
-//            view.setVisibility(View.VISIBLE);
-//        }
-//    };
-//    private final ButterKnife.Action<View> GONE = new UiUtils.GoneView();
-//    private final ButterKnife.Action<View> VISIBLE = new UiUtils.VisibleView();
-
     protected @BindView(R.id.text_avviso) TextView tvAvviso;
     protected @BindView(R.id.text_fenomeni) TextView tvFenomeni;
     /**
@@ -267,10 +252,8 @@ public class EvolutionFragment extends Fragment implements Observer {
 
         if (tvDate.length() > 0) {
             UiUtils.setViewText(tvDate, AggiornatoLabel + ": " + date);
-//            setViewText(tvDate, AggiornatoLabel + ": " + date);
-        }else {
+        } else {
             UiUtils.setViewText(tvDate, "");
-//            setViewText(tvDate, "");
         }
 
         UiUtils.setViewVisibility(tvDate);
@@ -280,19 +263,10 @@ public class EvolutionFragment extends Fragment implements Observer {
         fragmentHelper.setViewText(tvAvviso, avviso);
         fragmentHelper.setViewText(tvFenomeni, fenomeni);
         fragmentHelper.setViewText(tvEvolution, evoluzione);
-//        UiUtils.setViewText(tvAvviso, avviso);
-//        UiUtils.setViewText(tvFenomeni, fenomeni);
-//        UiUtils.setViewText(tvEvolution, evoluzione);
-//        setViewText(tvAvviso, avviso);
-//        setViewText(tvFenomeni, fenomeni);
-//        setViewText(tvEvolution, evoluzione);
 
         UiUtils.setViewVisibility(tvAvviso);
         UiUtils.setViewVisibility(tvFenomeni);
         UiUtils.setViewVisibility(tvEvolution);
-//        setViewVisibility(tvAvviso);
-//        setViewVisibility(tvFenomeni);
-//        setViewVisibility(tvEvolution);
     }
 
     private int toDateIndex(int meteogrammaIndex) {
@@ -311,38 +285,6 @@ public class EvolutionFragment extends Fragment implements Observer {
                 return -1;
         }
     }
-
-//    private void setViewText(TextView view, String text) {
-//        if (text != null && text.length() > 0) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                view.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
-//            } else {
-//                view.setText(Html.fromHtml(text));
-//            }
-//        } else {
-//            view.setText("");
-//        }
-//    }
-//
-//    private void setViewVisibility(TextView view, View image) {
-//        String caption = view.getText().toString();
-//        if (caption.equals("")) {
-//            ButterKnife.apply(image, GONE);
-//            ButterKnife.apply(view, GONE);
-//        } else {
-//            ButterKnife.apply(image, VISIBLE);
-//            ButterKnife.apply(view, VISIBLE);
-//        }
-//    }
-//
-//    private void setViewVisibility(TextView view) {
-//        String caption = view.getText().toString();
-//        if (caption.equals("")) {
-//            ButterKnife.apply(view, GONE);
-//        } else {
-//            ButterKnife.apply(view, VISIBLE);
-//        }
-//    }
 
     private void hideRefreshWidget() {
         if (swipeRefreshLayout.isRefreshing())
@@ -381,9 +323,6 @@ public class EvolutionFragment extends Fragment implements Observer {
             UiUtils.setViewVisibility(tvAvviso);
             UiUtils.setViewVisibility(tvFenomeni);
             UiUtils.setViewVisibility(tvEvolution);
-//            setViewVisibility(tvAvviso);
-//            setViewVisibility(tvFenomeni);
-//            setViewVisibility(tvEvolution);
 
             hideRefreshWidget();
         }

@@ -9,7 +9,6 @@ public class TownDataSource {
     private TownDbHelper townDbHelper;
 
     public TownDataSource(Context context) {
-//        townDbHelper = TownDbHelper.getInstance(context);
         townDbHelper = new TownDbHelper(context);
     }
 

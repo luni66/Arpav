@@ -12,7 +12,6 @@ import hugo.weaving.DebugLog;
 
 
 public class AlarmReceiver_Sdk_22 extends WakefulBroadcastReceiver {
-//public class AlarmReceiver_Sdk_22 extends BroadcastReceiver {
 
     @DebugLog
     @Override

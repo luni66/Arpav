@@ -10,8 +10,6 @@ import java.util.List;
 
 import eu.lucazanini.arpav.R;
 
-//TODO click in RecyclerView
-
 /**
  * Adapter for towns in SearchableActivity
  */

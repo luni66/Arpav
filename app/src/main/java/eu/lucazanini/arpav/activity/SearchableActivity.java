@@ -39,7 +39,6 @@ public class SearchableActivity extends AppCompatActivity {
 
     public static Intent getIntent(Context context) {
         return new Intent(context, SearchableActivity.class);
-//        return intent;
     }
 
     @Override

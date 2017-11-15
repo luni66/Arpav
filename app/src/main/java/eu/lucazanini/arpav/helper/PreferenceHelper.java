@@ -94,13 +94,11 @@ public class PreferenceHelper {
     public Town getLocation() {
         String townName = sharedPreferences.getString(resources.getString(R.string.current_location), "");
         return TownList.getInstance(context).getTown(townName);
-//        return town;
     }
 
     public void saveLocation(Town town) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(resources.getString(R.string.current_location), town.getName());
-//        editor.commit();
         editor.apply();
     }
 }

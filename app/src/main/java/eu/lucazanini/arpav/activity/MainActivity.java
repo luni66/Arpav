@@ -9,7 +9,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -30,7 +29,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.SettingsClient;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +47,6 @@ import eu.lucazanini.arpav.location.CurrentLocation;
 import eu.lucazanini.arpav.location.Town;
 import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
-import timber.log.Timber;
 
 import static eu.lucazanini.arpav.activity.SearchableActivity.FAVOURITE_TOWN_CODE;
 import static eu.lucazanini.arpav.activity.SearchableActivity.TEMPORARY_TOWN_CODE;
@@ -73,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
     protected @BindString(R.string.action_title) String defaultTitle;
     private CollectionPagerAdapter collectionPagerAdapter;
     private ActionBar actionBar;
-    private Town town = null;
     private PreferenceHelper preferences;
     private CurrentLocation currentLocation;
     private LocationRequest locationRequest;
@@ -111,17 +107,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
 
         checkPermission();
         if (checkGps()) {
-            Timber.d("starting location updates");
             startLocationUpdates();
-        } else {
-            Timber.d("cannot start location updates");
         }
-
-//        AcraResources.sendLog("PROVA", new HashMap<String, String>(){{put("uno", "one"); put("due", "two");}});
-
-//        if (preferences.getLanguage().equals(Previsione.Language.IT)) {
-//            Context context = LocaleHelper.setLocale(this, "it");
-//        }
     }
 
     @Override
@@ -143,12 +130,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == TEMPORARY_TOWN_CODE) {
+        if (requestCode == TEMPORARY_TOWN_CODE) { // searching a town without setting as favourite town
             if (resultCode == RESULT_OK) {
                 String town = data.getStringExtra(SearchableActivity.TOWN_NAME);
+                CurrentLocation currentLocation = CurrentLocation.getInstance();
                 currentLocation.setTown(town, this);
             }
-        } else if(requestCode == FAVOURITE_TOWN_CODE){
+        } else if (requestCode == FAVOURITE_TOWN_CODE) { // searching a town and setting as favourite town
             if (resultCode == Activity.RESULT_OK) {
                 String townName = data.getStringExtra(SearchableActivity.TOWN_NAME);
                 CurrentLocation currentLocation = CurrentLocation.getInstance();
@@ -158,9 +146,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
 
                 PreferenceHelper preferences = new PreferenceHelper(this);
                 preferences.saveLocation(town);
-
-//                Preference townPref = findPreference(townKey);
-//                townPref.setSummary(townName);
             }
         }
     }
@@ -181,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
                 return true;
             case R.id.action_gps:
                 if (isGpsAvailable() && locationPermissionGranted) {
-//                    googleLocator.requestUpdates();
                     startLocationUpdates();
                 } else {
                     Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
@@ -214,20 +198,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case LOCATION_REQUEST: {
                 // If request is cancelled, the result arrays are empty.
                 // permission was granted, yay! Do the
-// contacts-related task you need to do.
-// permission denied, boo! Disable the
-// functionality that depends on this permission.
+                // contacts-related task you need to do.
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
                 locationPermissionGranted = grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                //TODO return eliminabile?
-//                return;
             }
-
             // other 'case' lines to check for other
             // permissions this app might request
         }
@@ -251,8 +231,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         // TODO servono? non c'è bisogno di Task?
         // Check whether location settings are satisfied
         // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
-        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
-        settingsClient.checkLocationSettings(locationSettingsRequest);
+        // https://developer.android.com/training/location/change-location-settings.html
+//        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
+//        settingsClient.checkLocationSettings(locationSettingsRequest);
 
         // new Google API SDK v11 uses getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -326,12 +307,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             return true;
         } else {
-//            Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
             return false;
         }
     }
 
-    private void chooseLocation(){
+    private void chooseLocation() {
         Intent intent = SearchableActivity.getIntent(this);
         startActivityForResult(intent, TEMPORARY_TOWN_CODE);
     }
@@ -383,16 +363,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
             actionBar.setTitle(title);
         }
     }
-
-//    private void changeLocale(String languageCode) {
-//        Resources res = this.getResources();
-//        // Change locale settings in the app.
-//        DisplayMetrics dm = res.getDisplayMetrics();
-//        android.content.res.Configuration conf = res.getConfiguration();
-//        conf.setLocale(new Locale(languageCode.toLowerCase())); // API 17+ only.
-//        // Use conf.locale = new Locale(...) if targeting lower versions
-//        res.updateConfiguration(conf, dm);
-//    }
 
     public static class CollectionPagerAdapter extends FragmentStatePagerAdapter implements Observer {
 

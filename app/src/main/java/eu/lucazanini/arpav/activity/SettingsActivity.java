@@ -21,7 +21,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static Intent getIntent(Context context) {
         return new Intent(context, SettingsActivity.class);
-//        return intent;
     }
 
     @Override

@@ -50,15 +50,4 @@
 
     </PreferenceCategory>
 
-    <!--<PreferenceCategory-->
-        <!--android:title="@string/pref_notifications_title"-->
-        <!--android:key="@string/pref_notifications_key">-->
-
-        <!--<CheckBoxPreference-->
-            <!--android:key="@string/pref_alert_key"-->
-            <!--android:title="@string/pref_alert_title"-->
-            <!--android:defaultValue="false" />-->
-
-    <!--</PreferenceCategory>-->
-
 </PreferenceScreen>
