@@ -25,10 +25,9 @@ public class AlarmReceiver_Sdk_22 extends WakefulBroadcastReceiver {
                 AlarmHandler alarmHandler = new AlarmHandler(context);
                 alarmHandler.setNextAlarm();
             } else if (action.startsWith(AlarmHandler.RECEIVER_ACTION)) {
-                AcraResources.sendLog("AlarmReceiver_Sdk_22 has received RECEIVER_ACTION", null);
                 AlarmHandler alarmHandler = new AlarmHandler(context);
                 alarmHandler.setNextAlarm();
-                    startWakefulService(context, NotificationService.getIntent(context));
+                startWakefulService(context, NotificationService.getIntent(context));
             }
         }
     }

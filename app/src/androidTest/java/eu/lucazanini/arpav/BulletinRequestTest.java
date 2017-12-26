@@ -177,7 +177,7 @@ public class BulletinRequestTest {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Timber.e(error);
+                Timber.e(error.getLocalizedMessage());
             }
         });
 

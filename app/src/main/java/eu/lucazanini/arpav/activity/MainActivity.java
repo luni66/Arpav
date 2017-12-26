@@ -49,6 +49,7 @@ import eu.lucazanini.arpav.location.TownList;
 import eu.lucazanini.arpav.model.SlideTitles;
 
 import static eu.lucazanini.arpav.activity.SearchableActivity.FAVOURITE_TOWN_CODE;
+import static eu.lucazanini.arpav.activity.SearchableActivity.FIRST_RUN_TOWN_CODE;
 import static eu.lucazanini.arpav.activity.SearchableActivity.TEMPORARY_TOWN_CODE;
 
 /**
@@ -130,23 +131,28 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == TEMPORARY_TOWN_CODE) { // searching a town without setting as favourite town
-            if (resultCode == RESULT_OK) {
-                String town = data.getStringExtra(SearchableActivity.TOWN_NAME);
-                CurrentLocation currentLocation = CurrentLocation.getInstance();
-                currentLocation.setTown(town, this);
-            }
-        } else if (requestCode == FAVOURITE_TOWN_CODE) { // searching a town and setting as favourite town
-            if (resultCode == Activity.RESULT_OK) {
-                String townName = data.getStringExtra(SearchableActivity.TOWN_NAME);
-                CurrentLocation currentLocation = CurrentLocation.getInstance();
-                currentLocation.setTown(townName, this);
+        switch (requestCode){
+            case TEMPORARY_TOWN_CODE:
+                if (resultCode == RESULT_OK) {
+                    String town = data.getStringExtra(SearchableActivity.TOWN_NAME);
+                    CurrentLocation currentLocation = CurrentLocation.getInstance();
+                    currentLocation.setTown(town, this);
+                }
+                break;
 
-                Town town = TownList.getInstance(this).getTown(townName);
+            case FAVOURITE_TOWN_CODE:
+            case FIRST_RUN_TOWN_CODE:
+                if (resultCode == Activity.RESULT_OK) {
+                    String townName = data.getStringExtra(SearchableActivity.TOWN_NAME);
+                    CurrentLocation currentLocation = CurrentLocation.getInstance();
+                    currentLocation.setTown(townName, this);
 
-                PreferenceHelper preferences = new PreferenceHelper(this);
-                preferences.saveLocation(town);
-            }
+                    Town town = TownList.getInstance(this).getTown(townName);
+
+                    PreferenceHelper preferences = new PreferenceHelper(this);
+                    preferences.saveLocation(town);
+                }
+                    break;
         }
     }
 
@@ -313,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
 
     private void chooseLocation() {
         Intent intent = SearchableActivity.getIntent(this);
-        startActivityForResult(intent, TEMPORARY_TOWN_CODE);
+        startActivityForResult(intent, FIRST_RUN_TOWN_CODE);
     }
 
     @Override

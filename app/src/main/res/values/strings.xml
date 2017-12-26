@@ -1,4 +1,7 @@
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+
     <string name="app_name">Meteo Veneto</string>
     <string name="action_title">Veneto</string>
 

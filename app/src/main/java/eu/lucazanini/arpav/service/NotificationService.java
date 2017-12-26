@@ -56,27 +56,20 @@ public class NotificationService extends IntentService {
         super(TAG);
     }
 
-//    public NotificationService(String name) {
-//        super(name);
-//    }
-
     public static Intent getIntent(Context context) {
         return new Intent(context, NotificationService.class);
-//        return intent;
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        AcraResources.sendLog("Notification service is started", null);
-        alarmIntent = intent;
         Resources resources = getResources();
+
+        alarmIntent = intent;
         reportFile = resources.getString(R.string.report_file);
         reportDate = resources.getString(R.string.report_date);
         reportAlert = resources.getString(R.string.report_alert);
         reportPhenomena = resources.getString(R.string.report_phenomena);
         alertTitle = resources.getString(R.string.alert_title);
-
-//        setAlarm();
 
         VolleySingleton volleyApp = VolleySingleton.getInstance(this);
 
@@ -228,64 +221,10 @@ public class NotificationService extends IntentService {
         }
     }
 
-    private void createTestNotification(String message) {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(alertTitle)
-                .setTicker("TEST")
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(decodeHtml(message)))
-                .setContentText(decodeHtml(message));
-
-//                .setContentText(decodeHtml(message));
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        mBuilder.setAutoCancel(true);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        int mNotificationId = 0;
-        mNotificationManager.notify(mNotificationId, mBuilder.build());
-    }
-
-    private void createAlarmNotification(String message) {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(alertTitle)
-                .setContentText(message);
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        mBuilder.setAutoCancel(true);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        int mNotificationId = 0;
-        mNotificationManager.notify(mNotificationId, mBuilder.build());
-    }
-
-    private void setAlarm() {
-        AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-        alarmHandler.setNextAlarm();
-    }
-
     private class ServiceResponseListener implements Response.Listener<Previsione> {
         @Override
         public void onResponse(Previsione response) {
             try {
-//                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-//                alarmHandler.setNextAlarm();
-
-                // read the file containg tha last alert
                 Map<String, String> lastData = getLast();
 
                 // download the current alert
@@ -304,8 +243,6 @@ public class NotificationService extends IntentService {
 
                 if (isNewNotification(currentData, lastData)) {
                     createNotification(currentData);
-                } else {
-                    createTestNotification("test notificaton");
                 }
 
                 // save the current alert in the file
@@ -323,13 +260,7 @@ public class NotificationService extends IntentService {
     private class ErrorListener implements Response.ErrorListener {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Timber.e(error);
-//            try {
-//                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-//                alarmHandler.setNextAlarm();
-//            } finally {
-                createTestNotification("error notification");
-//            }
+            Timber.e(error.getLocalizedMessage());
         }
     }
 }

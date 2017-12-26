@@ -62,8 +62,7 @@ public class TownList {
         String json;
         try {
 
-            for (String path : paths
-                    ) {
+            for (String path : paths) {
                 InputStream is = context.getAssets().open(path);
                 int size = is.available();
                 byte[] buffer = new byte[size];

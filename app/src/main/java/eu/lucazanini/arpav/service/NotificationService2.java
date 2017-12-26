@@ -44,66 +44,22 @@ import static junit.framework.Assert.assertTrue;
 
 public class NotificationService2 extends Service {
 
-//    private Looper mServiceLooper;
-//    private ServiceHandler mServiceHandler;
     private final IBinder mBinder = new LocalBinder();
 
     private final static String TAG = NotificationService.class.getName();
     private String reportFile, reportDate, reportAlert, reportPhenomena, alertTitle;
     private Intent alarmIntent;
 
-/*    // Handler that receives messages from the thread
-    private final class ServiceHandler extends Handler {
-        public ServiceHandler(Looper looper) {
-            super(looper);
-        }
-        @Override
-        public void handleMessage(Message msg) {
-*//*            Timber.d("*** HANDLE MESSAGE");
-            Resources resources = getResources();
-            reportFile = resources.getString(R.string.report_file);
-            reportDate = resources.getString(R.string.report_date);
-            reportAlert = resources.getString(R.string.report_alert);
-            reportPhenomena = resources.getString(R.string.report_phenomena);
-            alertTitle = resources.getString(R.string.alert_title);
-
-            setAlarm();
-
-            VolleySingleton volleyApp = VolleySingleton.getInstance(getApplicationContext());
-
-            BulletinRequest serviceRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
-                    new NotificationService2.ServiceResponseListener(msg), new NotificationService2.ErrorListener(msg), TAG);
-            volleyApp.addToRequestQueue(serviceRequest);
-
-            Timber.d("*** HANDLE MESSAGE COMPLETED");*//*
-
-//            stopSelf(msg.arg1);
-        }
-    }*/
-
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
-
-/*        alarmIntent = intent;
-
-        // For each start request, send a message to start a job and deliver the
-        // start ID so we know which request we're stopping when we finish the job
-        Message msg = mServiceHandler.obtainMessage();
-        msg.arg1 = startId;
-        mServiceHandler.sendMessage(msg);*/
+        Resources resources = getResources();
 
         alarmIntent = intent;
-
-        Resources resources = getResources();
         reportFile = resources.getString(R.string.report_file);
         reportDate = resources.getString(R.string.report_date);
         reportAlert = resources.getString(R.string.report_alert);
         reportPhenomena = resources.getString(R.string.report_phenomena);
         alertTitle = resources.getString(R.string.alert_title);
-
-//        setAlarm();
 
         VolleySingleton volleyApp = VolleySingleton.getInstance(getApplicationContext());
 
@@ -114,30 +70,6 @@ public class NotificationService2 extends Service {
         // If we get killed, after returning from here, restart
         return START_STICKY;
 
-    }
-
-    @Override
-    public void onCreate() {
-/*
-        Timber.d("*** SERVICE STARTED");
-//        AcraResources.sendLog("Notification Service 2 started", null);
-//        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
-        // Start up the thread running the service.  Note that we create a
-        // separate thread because the service normally runs in the process's
-        // main thread, which we don't want to block.  We also make it
-        // background priority so CPU-intensive work will not disrupt our UI.
-        HandlerThread thread = new HandlerThread("ServiceStartArguments", Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-
-        // Get the HandlerThread's Looper and use it for our Handler
-        mServiceLooper = thread.getLooper();
-        mServiceHandler = new ServiceHandler(mServiceLooper);
-*/
-    }
-
-    @Override
-    public void onDestroy() {
-//        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
 
     @Nullable
@@ -297,72 +229,12 @@ public class NotificationService2 extends Service {
         }
     }
 
-    private void createTestNotification(String message) {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(alertTitle)
-                .setTicker("TEST")
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(decodeHtml(message)))
-                .setContentText(decodeHtml(message));
-
-//                .setContentText(decodeHtml(message));
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        mBuilder.setAutoCancel(true);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        int mNotificationId = 0;
-        mNotificationManager.notify(mNotificationId, mBuilder.build());
-    }
-
-    private void createAlarmNotification(String message) {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle(alertTitle)
-                .setContentText(message);
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        mBuilder.setAutoCancel(true);
-
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        int mNotificationId = 0;
-        mNotificationManager.notify(mNotificationId, mBuilder.build());
-    }
-
-    private void setAlarm() {
-        AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-        alarmHandler.setNextAlarm();
-    }
-
     private class ServiceResponseListener implements Response.Listener<Previsione> {
-
-/*        private Message msg;
-
-        public ServiceResponseListener(Message msg){
-//            super();
-            this.msg=msg;
-        }*/
 
         @Override
         public void onResponse(Previsione response) {
             Timber.d("*** TEST RESPONSE");
             try {
-//                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-//                alarmHandler.setNextAlarm();
-
                 // read the file containg tha last alert
                 Map<String, String> lastData = getLast();
 
@@ -385,7 +257,6 @@ public class NotificationService2 extends Service {
                     createNotification(currentData);
                 } else {
                     Timber.d("*** CREATING TEST NOTIFICATION");
-                    createTestNotification("test notificaton");
                 }
 
                 // save the current alert in the file
@@ -403,28 +274,14 @@ public class NotificationService2 extends Service {
 
     private class ErrorListener implements Response.ErrorListener {
 
-/*        private Message msg;
-
-        public ErrorListener(Message msg){
-//            super();
-            this.msg=msg;
-        }*/
-
         @Override
         public void onErrorResponse(VolleyError error) {
             Timber.e(error);
-//            try {
-//                AlarmHandler alarmHandler = new AlarmHandler(getApplicationContext());
-//                alarmHandler.setNextAlarm();
-//            } finally {
-            createTestNotification("error notification");
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 releaseWakeLock();
             }
 
             stopSelf();
-//            }
         }
     }
 }

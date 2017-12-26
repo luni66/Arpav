@@ -17,7 +17,6 @@ public class AlarmReceiver extends BroadcastReceiver {
     @DebugLog
     @Override
     public void onReceive(Context context, Intent intent) {
-        AcraResources.sendLog("AlarmReceiver has received a broadcast", null);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
             String action = intent.getAction();
 
@@ -30,7 +29,6 @@ public class AlarmReceiver extends BroadcastReceiver {
                 AlarmHandler alarmHandler = new AlarmHandler(context);
                 alarmHandler.setNextAlarm();
                 context.startService(NotificationService.getIntent(context));
-                AcraResources.sendLog("AlarmReceiver has received RECEIVER_ACTION", null);
             }
         }
     }
