@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.lucazanini.arpav.R;
-import eu.lucazanini.arpav.AcraResources;
+//import eu.lucazanini.arpav.AcraResources;
 import eu.lucazanini.arpav.activity.MainActivity;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;

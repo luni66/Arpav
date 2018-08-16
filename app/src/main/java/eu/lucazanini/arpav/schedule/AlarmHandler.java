@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 
-import eu.lucazanini.arpav.AcraResources;
+//import eu.lucazanini.arpav.AcraResources;
 import eu.lucazanini.arpav.model.Previsione;
 
 public class AlarmHandler {
@@ -46,7 +46,7 @@ public class AlarmHandler {
 
     public void setNextAlarm() {
         setNextAlarmTime();
-        AcraResources.sendLog("Setting next alarm time", new HashMap<String, String>(){{put("next alarm time", nextAlarmTime.toString());}});
+//        AcraResources.sendLog("Setting next alarm time", new HashMap<String, String>(){{put("next alarm time", nextAlarmTime.toString());}});
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

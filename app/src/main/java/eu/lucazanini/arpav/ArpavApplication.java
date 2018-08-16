@@ -33,23 +33,23 @@ public class ArpavApplication extends Application {
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(LocaleHelper.onAttach(newBase));
 
-        if (BuildConfig.DEBUG) {
-            AcraResources acraResources = new AcraResources();
-
-            try {
-                final ACRAConfiguration config = new ConfigurationBuilder(this)
-                        .setReportingInteractionMode(ReportingInteractionMode.SILENT)
-                        .setFormUri(new String(acraResources.getR1()))
-                        .setFormUriBasicAuthLogin(new String(acraResources.getR2()))
-                        .setFormUriBasicAuthPassword(new String(acraResources.getR3()))
-                        .setReportType(HttpSender.Type.JSON)
-                        .setHttpMethod(HttpSender.Method.PUT)
-                        .build();
-
-                ACRA.init(this, config);
-            } catch (ACRAConfigurationException e) {
-                Timber.e(e.getLocalizedMessage());
-            }
-        }
+//        if (BuildConfig.DEBUG) {
+//            AcraResources acraResources = new AcraResources();
+//
+//            try {
+//                final ACRAConfiguration config = new ConfigurationBuilder(this)
+//                        .setReportingInteractionMode(ReportingInteractionMode.SILENT)
+//                        .setFormUri(new String(acraResources.getR1()))
+//                        .setFormUriBasicAuthLogin(new String(acraResources.getR2()))
+//                        .setFormUriBasicAuthPassword(new String(acraResources.getR3()))
+//                        .setReportType(HttpSender.Type.JSON)
+//                        .setHttpMethod(HttpSender.Method.PUT)
+//                        .build();
+//
+//                ACRA.init(this, config);
+//            } catch (ACRAConfigurationException e) {
+//                Timber.e(e.getLocalizedMessage());
+//            }
+//        }
     }
 }

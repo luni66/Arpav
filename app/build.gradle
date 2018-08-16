@@ -4,10 +4,25 @@ apply plugin: 'com.jakewharton.hugo'
 android {
     signingConfigs {
         release {
-            keyAlias System.getenv('LUNI_ALIAS')
-            keyPassword System.getenv('LUNI_PASSWORD')
-            storeFile file(System.getenv('LUNI_STORE_FILE'))
-            storePassword System.getenv('LUNI_STORE_PASSWORD')
+
+            afterEvaluate { project ->
+                def propsFile = rootProject.file('keystore.properties')
+                def configName = 'release'
+
+                if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
+                    def props = new Properties()
+                    props.load(new FileInputStream(propsFile))
+                    android.signingConfigs[configName].storeFile = file(props['storeFile'])
+                    android.signingConfigs[configName].storePassword = props['storePassword']
+                    android.signingConfigs[configName].keyAlias = props['keyAlias']
+                    android.signingConfigs[configName].keyPassword = props['keyPassword']
+                }
+            }
+
+//            keyAlias System.getenv('LUNI_ALIAS')
+//            keyPassword System.getenv('LUNI_PASSWORD')
+//            storeFile file(System.getenv('LUNI_STORE_FILE'))
+//            storePassword System.getenv('LUNI_STORE_PASSWORD')
 //            v2SigningEnabled false
         }
 //        lintOptions {
@@ -15,7 +30,7 @@ android {
 //        }
     }
     compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '26.0.3'
     defaultConfig {
         applicationId "eu.lucazanini.arpav"
         minSdkVersion 17
@@ -25,10 +40,10 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
-//    compileOptions {
-//        sourceCompatibility JavaVersion.VERSION_1_8
-//        targetCompatibility JavaVersion.VERSION_1_8
-//    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     buildTypes {
         release {
             minifyEnabled true
@@ -54,27 +69,27 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:3.0.1'
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:1.10.19'
     //    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
     //        exclude group: 'com.android.support', module: 'support-annotations'
     //    })
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:support-compat:26.1.0'
-    compile 'com.google.android.gms:play-services-location:11.8.0'
-    compile 'com.jakewharton.timber:timber:4.5.1'
-    compile 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.android.support:support-compat:26.1.0'
+    implementation 'com.google.android.gms:play-services-location:11.8.0'
+    implementation 'com.jakewharton.timber:timber:4.5.1'
+    implementation 'com.android.support:recyclerview-v7:26.1.0'
     //    compile 'com.github.bumptech.glide:glide:4.3.1'
-    compile 'com.google.code.gson:gson:2.8.0'
-    compile 'com.android.volley:volley:1.0.0'
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.android.volley:volley:1.0.0'
     //    compile 'io.reactivex:rxandroid:1.2.1'
     //    compile 'com.jakewharton.rxbinding:rxbinding:1.0.0'
     //    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:1.0.0'
-    compile 'com.jakewharton:disklrucache:2.0.2'
-    compile 'com.jakewharton:butterknife:8.8.1'
+    implementation 'com.jakewharton:disklrucache:2.0.2'
+    implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
-    compile 'ch.acra:acra:4.9.2'
+    implementation 'ch.acra:acra:4.9.2'
 }

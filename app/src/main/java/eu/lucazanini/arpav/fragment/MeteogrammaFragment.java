@@ -116,6 +116,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                invalidateCache();
                 downloadData();
                 activityCallBack.keepFragments(pageNumber);
                 swipeRefreshLayout.setRefreshing(false);
@@ -134,6 +135,9 @@ public class MeteogrammaFragment extends Fragment implements Observer {
                 @Override
                 public void run() {
                     swipeRefreshLayout.setRefreshing(true);
+
+                    invalidateCache();
+
                     downloadData();
                     activityCallBack.keepFragments(pageNumber);
                 }
@@ -176,6 +180,17 @@ public class MeteogrammaFragment extends Fragment implements Observer {
 
     private void setTitleSlides() {
         activityCallBack.setTitle(scadenzaDate, pageNumber);
+    }
+
+    private void invalidateCache(){
+        if (currentLocation.isDefined()) {
+            volleyApp.getRequestQueue().getCache().invalidate(Previsione.getUrl(appLanguage), true);
+        }
+
+        PreferenceHelper preferences = new PreferenceHelper(context);
+        if (appLanguage != Previsione.Language.IT && preferences.isBulletinDisplayed()) {
+            volleyApp.getRequestQueue().getCache().invalidate(Previsione.getUrl(Previsione.Language.IT), true);
+        }
     }
 
     private void downloadData() {
