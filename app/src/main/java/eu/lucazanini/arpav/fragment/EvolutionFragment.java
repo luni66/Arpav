@@ -42,20 +42,28 @@ import timber.log.Timber;
 public class EvolutionFragment extends Fragment implements Observer {
 
     public static final String PAGE_NUMBER = "page_number";
-    protected @BindView(R.id.text_avviso) TextView tvAvviso;
-    protected @BindView(R.id.text_fenomeni) TextView tvFenomeni;
+    protected @BindView(R.id.text_avviso)
+    TextView tvAvviso;
+    protected @BindView(R.id.text_fenomeni)
+    TextView tvFenomeni;
     /**
      * The seven day image views
      */
-    protected @BindViews({R.id.image_daySky1, R.id.image_daySky2a, R.id.image_daySky2b, R.id.image_daySky3a, R.id.image_daySky3b, R.id.image_daySky4, R.id.image_daySky5}) NetworkImageView[] imgDays;
+    protected @BindViews({R.id.image_daySky1, R.id.image_daySky2a, R.id.image_daySky2b, R.id.image_daySky3a, R.id.image_daySky3b, R.id.image_daySky4, R.id.image_daySky5})
+    NetworkImageView[] imgDays;
     /**
      * The five date text views (the second and third dates have two images)
      */
-    protected @BindViews({R.id.text_date1, R.id.text_date2, R.id.text_date3, R.id.text_date4, R.id.text_date5}) TextView[] tvDates;
-    protected @BindView((R.id.text_evolution)) TextView tvEvolution;
-    protected @BindView(R.id.text_date) TextView tvDate;
-    protected @BindView(R.id.swipe_container) SwipeRefreshLayout swipeRefreshLayout;
-    protected @BindString(R.string.aggiornato) String AggiornatoLabel;
+    protected @BindViews({R.id.text_date1, R.id.text_date2, R.id.text_date3, R.id.text_date4, R.id.text_date5})
+    TextView[] tvDates;
+    protected @BindView((R.id.text_evolution))
+    TextView tvEvolution;
+    protected @BindView(R.id.text_date)
+    TextView tvDate;
+    protected @BindView(R.id.swipe_container)
+    SwipeRefreshLayout swipeRefreshLayout;
+    protected @BindString(R.string.aggiornato)
+    String AggiornatoLabel;
     private String date;
     private Unbinder unbinder;
     private Context context;
@@ -172,7 +180,6 @@ public class EvolutionFragment extends Fragment implements Observer {
         currentLocation.deleteObserver(this);
 
         String tag = Integer.toString(pageNumber);
-//        final VolleySingleton volleyApp = VolleySingleton.getInstance(getContext());
         volleyApp.getRequestQueue().cancelAll(tag);
     }
 
@@ -190,7 +197,7 @@ public class EvolutionFragment extends Fragment implements Observer {
         downloadData();
     }
 
-    private void invalidateCache(){
+    private void invalidateCache() {
         if (currentLocation.isDefined()) {
             volleyApp.getRequestQueue().getCache().invalidate(Previsione.getUrl(appLanguage), true);
         }

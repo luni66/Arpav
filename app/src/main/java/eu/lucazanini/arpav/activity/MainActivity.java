@@ -30,6 +30,8 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 
+import org.acra.ACRA;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
@@ -110,6 +112,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         if (checkGps()) {
             startLocationUpdates();
         }
+
+//        ACRA.getErrorReporter().handleException(null);
     }
 
     @Override
@@ -131,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
+        switch (requestCode) {
             case TEMPORARY_TOWN_CODE:
                 if (resultCode == RESULT_OK) {
                     String town = data.getStringExtra(SearchableActivity.TOWN_NAME);
@@ -152,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
                     PreferenceHelper preferences = new PreferenceHelper(this);
                     preferences.saveLocation(town);
                 }
-                    break;
+                break;
         }
     }
 
@@ -234,17 +238,10 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
         builder.addLocationRequest(locationRequest);
         LocationSettingsRequest locationSettingsRequest = builder.build();
 
-        // TODO servono? non c'è bisogno di Task?
-        // Check whether location settings are satisfied
-        // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
-        // https://developer.android.com/training/location/change-location-settings.html
-//        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
-//        settingsClient.checkLocationSettings(locationSettingsRequest);
-
         // new Google API SDK v11 uses getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
+            // Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,

@@ -14,7 +14,8 @@ import eu.lucazanini.arpav.helper.LocaleHelper;
 
 public class CreditsActivity extends AppCompatActivity {
 
-    protected @BindView(R.id.toolbar) Toolbar toolbar;
+    protected @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     public static Intent getIntent(Context context) {
         return new Intent(context, CreditsActivity.class);

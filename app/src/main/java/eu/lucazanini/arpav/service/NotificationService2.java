@@ -1,6 +1,5 @@
 package eu.lucazanini.arpav.service;
 
-
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -36,12 +35,12 @@ import eu.lucazanini.arpav.activity.MainActivity;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import eu.lucazanini.arpav.schedule.AlarmHandler;
 import eu.lucazanini.arpav.schedule.AlarmReceiver_Sdk_22;
 import timber.log.Timber;
 
-import static junit.framework.Assert.assertTrue;
-
+/**
+ * under development
+ */
 public class NotificationService2 extends Service {
 
     private final IBinder mBinder = new LocalBinder();

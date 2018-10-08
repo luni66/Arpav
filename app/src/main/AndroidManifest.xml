@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="eu.lucazanini.arpav">
+    package="eu.lucazanini.arpav">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <!-- per cache di volley ??? -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".ArpavApplication"
@@ -23,12 +21,12 @@
 
         <activity android:name=".activity.MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <meta-data
                 android:name="android.app.default_searchable"
-                android:value=".SearchableActivity"/>
+                android:value=".SearchableActivity" />
         </activity>
 
         <activity
@@ -36,15 +34,15 @@
             android:launchMode="singleTop"
             android:parentActivityName=".activity.MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.SEARCH"/>
+                <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
 
             <meta-data
                 android:name="android.app.default_searchable"
-                android:value=".SearchableActivity"/>
+                android:value=".SearchableActivity" />
             <meta-data
                 android:name="android.app.searchable"
-                android:resource="@xml/searchable"/>
+                android:resource="@xml/searchable" />
         </activity>
 
         <activity
@@ -53,27 +51,27 @@
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.MainActivity"/>
+                android:value=".activity.MainActivity" />
         </activity>
 
         <activity
             android:name=".activity.CreditsActivity"
             android:parentActivityName=".activity.MainActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.MainActivity" />
         </activity>
 
         <receiver
             android:name=".schedule.AlarmReceiver_Sdk_22"
             android:enabled="true"
             android:exported="true">
-            <!--
-                //TODO remove comment below and see
-            https://developer.android.com/training/scheduling/alarms.html#boot
-            -->
-            <!-- android:enabled="false"> -->
+
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
-                <action android:name="eu.lucazanini.arpav.UPDATE_TIME"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="eu.lucazanini.arpav.UPDATE_TIME" />
             </intent-filter>
         </receiver>
 
@@ -83,18 +81,19 @@
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
-                <action android:name="eu.lucazanini.arpav.UPDATE_TIME"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="eu.lucazanini.arpav.UPDATE_TIME" />
             </intent-filter>
         </receiver>
 
         <service
             android:name=".service.NotificationService"
-            android:exported="false"/>
+            android:exported="false" />
 
-        <service android:name=".service.NotificationService2"
-                 android:exported="false"/>
+        <service
+            android:name=".service.NotificationService2"
+            android:exported="false" />
     </application>
 
 </manifest>

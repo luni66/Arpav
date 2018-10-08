@@ -50,4 +50,21 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/report_category">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_acra"
+            android:summaryOff="@string/pref_acra_disabled"
+            android:summaryOn="@string/pref_acra_enabled"
+            android:title="@string/pref_enable_acra"/>
+
+        <!--<CheckBoxPreference-->
+            <!--android:defaultValue="false"-->
+            <!--android:dependency="@string/pref_acra"-->
+            <!--android:key="@string/pref_acra_alwaysaccept"-->
+            <!--android:summaryOff="@string/pref_acra_alwaysaccept_disabled"-->
+            <!--android:summaryOn="@string/pref_acra_alwaysaccept_enabled"-->
+            android:title="@string/pref_acra_alwaysaccept"/>
+    </PreferenceCategory>
+
 </PreferenceScreen>

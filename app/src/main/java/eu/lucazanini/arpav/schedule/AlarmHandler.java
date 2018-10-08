@@ -9,12 +9,10 @@ import android.os.SystemClock;
 
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 
-//import eu.lucazanini.arpav.AcraResources;
 import eu.lucazanini.arpav.model.Previsione;
 
 public class AlarmHandler {
@@ -30,7 +28,7 @@ public class AlarmHandler {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         Intent intent;
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP_MR1){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             intent = new Intent(context, AlarmReceiver_Sdk_22.class);
         } else {
             intent = new Intent(context, AlarmReceiver.class);
@@ -46,7 +44,6 @@ public class AlarmHandler {
 
     public void setNextAlarm() {
         setNextAlarmTime();
-//        AcraResources.sendLog("Setting next alarm time", new HashMap<String, String>(){{put("next alarm time", nextAlarmTime.toString());}});
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -116,9 +113,9 @@ public class AlarmHandler {
         nextAlarmTime.getTime();
     }
 
-    private int getRandomDelay(int interval){
+    private int getRandomDelay(int interval) {
         Random random = new Random(SystemClock.uptimeMillis());
-        return random.nextInt(interval+1);
+        return random.nextInt(interval + 1);
     }
 
     private int getInt(double d) {

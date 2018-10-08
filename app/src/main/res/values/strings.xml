@@ -114,6 +114,8 @@
 
     <string name="alert_title">Weather warning</string>
 
+    <string name="report_category">Log Report</string>
+    <string name="pref_acra">enable.acra</string>
     <string name="crash_toast_text">Ooooops ! I crashed, but a report has been sent to my developer to help fix the issue !</string>
     <string name="crash_dialog_title">CrashTest has crashed</string>
     <string name="crash_dialog_text">An unexpected error occurred forcing the
@@ -121,5 +123,20 @@
     all you have to do is click OK.</string>
     <string name="crash_dialog_comment_prompt">You might add your comments about the problem below:</string>
     <string name="crash_dialog_ok_toast">Thank you !</string>
+
+    <string name="pref_enable_acra">Send crash reports to developer?</string>
+    <string name="pref_acra_enabled">Yes</string>
+    <string name="pref_acra_disabled">No</string>
+    <string name="pref_acra_syslog_enabled">Sending system logs is enabled</string>
+    <string name="pref_acra_syslog_disabled">Sending system logs is disabled</string>
+    <string name="pref_acra_syslog">Send system logs (may contain private data)?</string>
+    <string name="pref_acra_deviceid_enabled">Send device id is enabled</string>
+    <string name="pref_acra_deviceid_disabled">Do not send device id</string>
+    <string name="pref_acra_user_email">Add your email address</string>
+    <string name="pref_acra_deviceid">Send device unique id?</string>
+    <string name="pref_acra_user_email_summary">Developers may contact you to solve issues.</string>
+    <string name="pref_acra_alwaysaccept">Always send crash reports?</string>
+    <string name="pref_acra_alwaysaccept_enabled">Reports are sent without asking.</string>
+    <string name="pref_acra_alwaysaccept_disabled">Each report needs your approval.</string>
 
 </resources>

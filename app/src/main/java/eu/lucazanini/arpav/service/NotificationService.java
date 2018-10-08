@@ -28,12 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.lucazanini.arpav.R;
-//import eu.lucazanini.arpav.AcraResources;
 import eu.lucazanini.arpav.activity.MainActivity;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
-import eu.lucazanini.arpav.schedule.AlarmHandler;
 import eu.lucazanini.arpav.schedule.AlarmReceiver_Sdk_22;
 import timber.log.Timber;
 

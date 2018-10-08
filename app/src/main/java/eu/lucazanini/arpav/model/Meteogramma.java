@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 /**
  * Contains scadenza that it is the forecast for the 18 zones of Veneto
  */
@@ -146,12 +148,10 @@ public class Meteogramma implements Parcelable {
             }
         }
 
-        // TODO verificare in caso di assenza
         public String getProperty(String key) {
             return properties.get(key);
         }
 
-        // TODO verificare in caso di sostituzione
         public void setProperty(String key, String value) {
             properties.put(key, value);
         }
@@ -160,47 +160,12 @@ public class Meteogramma implements Parcelable {
             return data;
         }
 
-/*        public Calendar getShortDate() {
-            try {
-            Pattern p = Pattern.compile("\\d+[ ]\\w+");
-            Matcher m = p.matcher(data);
-            if (m.find()) {
-                String match = m.group();
-                DateFormat df = new SimpleDateFormat("dd MMMM");
-
-                Date  date = df.parse(match);
-
-                Calendar scadenzaDate = Calendar.getInstance(TimeZone.getTimeZone("GMT+01"), Locale.ITALY);
-                scadenzaDate.setTime(date);
-
-                return scadenzaDate;
-
-            } else {
-                return null;
-            }
-            } catch (ParseException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }*/
-
         public void setData(String data) {
             this.data = data;
         }
 
-/*        public String getLongDate() {
-            Pattern p = Pattern.compile("(\\d+[ ]\\w+)([ ])(\\w+)");
-            Matcher m = p.matcher(data);
-            if (m.find()) {
-                String eol = System.getProperty("line.separator");
-                return m.group(1)+eol+m.group(3);
-            } else {
-                return data;
-            }
-        }*/
-
         public String getShortDate() {
-            Pattern p = Pattern.compile("\\d+[ ]\\w+");
+            Pattern p = Pattern.compile("\\w+[ ]+\\d+");
             Matcher m = p.matcher(data);
             if (m.find()) {
                 return m.group();

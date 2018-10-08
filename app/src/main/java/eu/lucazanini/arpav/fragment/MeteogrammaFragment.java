@@ -182,7 +182,7 @@ public class MeteogrammaFragment extends Fragment implements Observer {
         activityCallBack.setTitle(scadenzaDate, pageNumber);
     }
 
-    private void invalidateCache(){
+    private void invalidateCache() {
         if (currentLocation.isDefined()) {
             volleyApp.getRequestQueue().getCache().invalidate(Previsione.getUrl(appLanguage), true);
         }

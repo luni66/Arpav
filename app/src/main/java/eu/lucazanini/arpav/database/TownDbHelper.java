@@ -36,7 +36,7 @@ public class TownDbHelper extends SQLiteOpenHelper {
     private Context context;
     private volatile SQLiteDatabase db;
 
-    public TownDbHelper(Context context){
+    public TownDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
     }

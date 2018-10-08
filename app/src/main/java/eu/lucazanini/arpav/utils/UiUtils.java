@@ -11,14 +11,14 @@ import butterknife.ButterKnife;
 
 public class UiUtils {
 
-    public static class GoneView implements ButterKnife.Action<View>{
+    public static class GoneView implements ButterKnife.Action<View> {
         @Override
         public void apply(@NonNull View view, int index) {
             view.setVisibility(View.GONE);
         }
     }
 
-    public static class VisibleView implements ButterKnife.Action<View>{
+    public static class VisibleView implements ButterKnife.Action<View> {
         @Override
         public void apply(@NonNull View view, int index) {
             view.setVisibility(View.VISIBLE);
@@ -59,6 +59,5 @@ public class UiUtils {
             ButterKnife.apply(view, VISIBLE);
         }
     }
-
 }
 
