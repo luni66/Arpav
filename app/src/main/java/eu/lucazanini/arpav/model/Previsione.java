@@ -26,10 +26,10 @@ import timber.log.Timber;
  */
 public class Previsione implements Parcelable {
 
-    public final static String URL_IT = "http://www.arpa.veneto.it/previsioni/it/xml/bollettino_utenti.xml";
-    public final static String URL_EN = "http://www.arpa.veneto.it/previsioni/en/xml/bollettino_utenti.xml";
-    public final static String URL_FR = "http://www.arpa.veneto.it/previsioni/fr/xml/bollettino_utenti.xml";
-    public final static String URL_DE = "http://www.arpa.veneto.it/previsioni/de/xml/bollettino_utenti.xml";
+    public final static String URL_IT = "https://www.arpa.veneto.it/previsioni/it/xml/bollettino_utenti.xml";
+    public final static String URL_EN = "https://www.arpa.veneto.it/previsioni/en/xml/bollettino_utenti.xml";
+    public final static String URL_FR = "https://www.arpa.veneto.it/previsioni/fr/xml/bollettino_utenti.xml";
+    public final static String URL_DE = "https://www.arpa.veneto.it/previsioni/de/xml/bollettino_utenti.xml";
 
     public final static String URI_IT = "previsione_it.xml";
     public final static String URI_EN = "previsione_en.xml";

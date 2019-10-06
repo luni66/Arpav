@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.SystemClock;
 
+import org.acra.ACRA;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
@@ -17,6 +19,7 @@ import eu.lucazanini.arpav.model.Previsione;
 
 public class AlarmHandler {
 
+    private final String TAG = this.getClass().getName();
     public final static String RECEIVER_ACTION = "eu.lucazanini.arpav.UPDATE_TIME";
     public final static int MINUTE_INTERVAL = 30;
     private AlarmManager alarmManager;
@@ -44,6 +47,12 @@ public class AlarmHandler {
 
     public void setNextAlarm() {
         setNextAlarmTime();
+
+//        ACRA.getErrorReporter().clearCustomData();
+//        ACRA.getErrorReporter().putCustomData("TAG", TAG);
+//        ACRA.getErrorReporter().putCustomData("MESSAGE", "setting next alarm " + nextAlarmTime);
+//        ACRA.getErrorReporter().handleException(null);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, nextAlarmTime.getTimeInMillis(), alarmIntent);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

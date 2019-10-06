@@ -1,6 +1,5 @@
 package eu.lucazanini.arpav.service;
 
-import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
@@ -36,31 +37,26 @@ import eu.lucazanini.arpav.network.VolleySingleton;
 import eu.lucazanini.arpav.schedule.AlarmReceiver_Sdk_22;
 import timber.log.Timber;
 
-public class NotificationService extends IntentService {
+public class NotificationService_Oreo extends JobIntentService {
 
-    private final static String TAG = NotificationService.class.getName();
+    private final static String TAG = NotificationService_Oreo.class.getName();
     private String reportFile, reportDate, reportAlert, reportPhenomena, alertTitle;
     private Intent alarmIntent;
+    static final int JOB_ID = 1000; //Unique job ID.
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public NotificationService(String name) {
-        super(name);
-    }
-
-    public NotificationService() {
-        super(TAG);
+    public static void enqueueWork(Context context, Intent work) {
+        Timber.d("called notification service in Oreo %s", TAG);
+        enqueueWork(context, NotificationService_Oreo.class, JOB_ID, work);
     }
 
     public static Intent getIntent(Context context) {
-        return new Intent(context, NotificationService.class);
+        return new Intent(context, NotificationService_Oreo.class);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleWork(@NonNull Intent intent) {
+        Timber.d("started notification service in Oreo %s", TAG);
+
         Resources resources = getResources();
 
         alarmIntent = intent;
@@ -73,13 +69,13 @@ public class NotificationService extends IntentService {
         VolleySingleton volleyApp = VolleySingleton.getInstance(this);
 
         BulletinRequest serviceRequest = new BulletinRequest(Previsione.getUrl(Previsione.Language.IT),
-                new ServiceResponseListener(), new ErrorListener(), TAG);
+                new NotificationService_Oreo.ServiceResponseListener(), new NotificationService_Oreo.ErrorListener(), TAG);
         volleyApp.addToRequestQueue(serviceRequest);
     }
 
-    private void releaseWakeLock() {
-        AlarmReceiver_Sdk_22.completeWakefulIntent(alarmIntent);
-    }
+//    private void releaseWakeLock() {
+//        AlarmReceiver_Sdk_22.completeWakefulIntent(alarmIntent);
+//    }
 
     private boolean isNewNotification(Map<String, String> currentData, Map<String, String> lastData) {
         String currentAlert, lastAlert, currentPhenomena, lastPhenomena;
@@ -186,12 +182,25 @@ public class NotificationService extends IntentService {
     }
 
     private void createNotification(Map<String, String> data) {
+        Timber.d("creating notification in %s", TAG);
+
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         //TODO http://thetechnocafe.com/how-to-use-workmanager-in-android/
         //If on Oreo then notification required a notification channel.
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT);
+//            NotificationChannel channel = new NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT);
+//            mNotificationManager.createNotificationChannel(channel);
+
+            CharSequence name = "channel_name";
+            String description = "channel_description";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("1", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            mNotificationManager = getSystemService(NotificationManager.class);
             mNotificationManager.createNotificationChannel(channel);
+
         }
 
         String message = decodeHtml(data.get(reportAlert));
@@ -214,6 +223,9 @@ public class NotificationService extends IntentService {
 
         int mNotificationId = 0;
         mNotificationManager.notify(mNotificationId, mBuilder.build());
+
+        Timber.d("end notification in %s", TAG);
+
 //        mNotificationManager.notify(1, notification.build());
     }
 
@@ -233,6 +245,8 @@ public class NotificationService extends IntentService {
         @Override
         public void onResponse(Previsione response) {
             try {
+                Timber.d("onResponse in %s", TAG);
+
                 Map<String, String> lastData = getLast();
 
                 // download the current alert
@@ -268,7 +282,7 @@ public class NotificationService extends IntentService {
                 deleteFile(reportFile);
             } finally {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    releaseWakeLock();
+//                    releaseWakeLock();
                 }
             }
         }

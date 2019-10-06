@@ -63,6 +63,7 @@ import static eu.lucazanini.arpav.activity.SearchableActivity.TEMPORARY_TOWN_COD
  */
 public class MainActivity extends AppCompatActivity implements ActivityCallBack, Observer {
 
+    private final String TAG=this.getClass().getName();
     private static final int PAGES = 8;
     private static final int PAGES_LIMIT = 7;
     private final static int LOCATION_REQUEST = 1;
@@ -113,6 +114,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack,
             startLocationUpdates();
         }
 
+//        ACRA.getErrorReporter().clearCustomData();
+//        ACRA.getErrorReporter().putCustomData("TAG", TAG);
 //        ACRA.getErrorReporter().handleException(null);
     }
 

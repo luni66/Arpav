@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="eu.lucazanini.arpav">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -8,8 +9,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!--<uses-permission android:name="android.permission.WAKE_LOCK" tools:node="replace" />-->
 
     <application
         android:name=".ArpavApplication"
@@ -22,6 +23,7 @@
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <meta-data
@@ -87,13 +89,25 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name=".service.NotificationService"
-            android:exported="false" />
+        <receiver android:name=".MyBroadcastReceiver" android:enabled="true" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="eu.lucazanini.arpav.UPDATE_TIME" />
+            </intent-filter>
+        </receiver>
 
         <service
-            android:name=".service.NotificationService2"
-            android:exported="false" />
+            android:name=".service.NotificationService"
+            android:exported="true" />
+
+        <service android:name=".service.NotificationService_Oreo"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true"
+            />
+
+        <!--<service-->
+            <!--android:name=".service.NotificationService2"-->
+            <!--android:exported="false" />-->
     </application>
 
 </manifest>
