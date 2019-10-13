@@ -1,5 +1,7 @@
 package eu.lucazanini.arpav.service;
 
+import android.annotation.TargetApi;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -31,6 +33,7 @@ import java.util.Map;
 
 import eu.lucazanini.arpav.R;
 import eu.lucazanini.arpav.activity.MainActivity;
+import eu.lucazanini.arpav.helper.NotificationHelper;
 import eu.lucazanini.arpav.model.Previsione;
 import eu.lucazanini.arpav.network.BulletinRequest;
 import eu.lucazanini.arpav.network.VolleySingleton;
@@ -43,6 +46,7 @@ public class NotificationService_Oreo extends JobIntentService {
     private String reportFile, reportDate, reportAlert, reportPhenomena, alertTitle;
     private Intent alarmIntent;
     static final int JOB_ID = 1000; //Unique job ID.
+    private NotificationHelper notificationHelper;
 
     public static void enqueueWork(Context context, Intent work) {
         Timber.d("called notification service in Oreo %s", TAG);
@@ -184,22 +188,44 @@ public class NotificationService_Oreo extends JobIntentService {
     private void createNotification(Map<String, String> data) {
         Timber.d("creating notification in %s", TAG);
 
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification.Builder notificationBuilder = null;
+
+        notificationHelper = new NotificationHelper(this);
+
+        notificationBuilder = notificationHelper.getNotification1("titolo",
+                "descrizione");
+
+        if (notificationBuilder != null) {
+            notificationHelper.notify(102, notificationBuilder);
+        }
+
+/*        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         //TODO http://thetechnocafe.com/how-to-use-workmanager-in-android/
         //If on Oreo then notification required a notification channel.
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            NotificationChannel channel = new NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT);
-//            mNotificationManager.createNotificationChannel(channel);
-
-            CharSequence name = "channel_name";
-            String description = "channel_description";
+            CharSequence name = "R.string.channel_name";
+            String description = "R.string.channel_description";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("1", name, importance);
+            String CHANNEL_ID = "2";
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
-            mNotificationManager = getSystemService(NotificationManager.class);
-            mNotificationManager.createNotificationChannel(channel);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+
+//            NotificationChannel channel = new NotificationChannel("default", "Default", NotificationManager.IMPORTANCE_DEFAULT);
+//            mNotificationManager.createNotificationChannel(channel);
+
+//            CharSequence name = "channel_name";
+//            String description = "channel_description";
+//            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+//            NotificationChannel channel = new NotificationChannel("1", name, importance);
+//            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+//            mNotificationManager = getSystemService(NotificationManager.class);
+//            mNotificationManager.createNotificationChannel(channel);
 
         }
 
@@ -224,9 +250,9 @@ public class NotificationService_Oreo extends JobIntentService {
         int mNotificationId = 0;
         mNotificationManager.notify(mNotificationId, mBuilder.build());
 
-        Timber.d("end notification in %s", TAG);
+        Timber.d("end notification in %s: %s", TAG, message);
 
-//        mNotificationManager.notify(1, notification.build());
+//        mNotificationManager.notify(1, notification.build());*/
     }
 
     private String decodeHtml(String text) {
